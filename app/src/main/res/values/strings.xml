@@ -1,3 +1,13 @@
 <resources>
-    <string name="app_name">GeoApp</string>
+    <string name="app_name" translatable="false">GeoApp</string>
+    <string name="theodolit">theodolite</string>
+    <string name="punktnummer">point number</string>
+    <string name="horizontalrichtung">horizontal direction</string>
+    <string name="zenitwinkel">zenith angle</string>
+    <string name="strecke">distance</string>
+    <string name="lage">position</string>
+    <string name="hochwert">northing</string>
+    <string name="rechtswert">easting</string>
+    <string name="hoehe">altitude</string>
+    <string name="speichern">save</string>
 </resources>

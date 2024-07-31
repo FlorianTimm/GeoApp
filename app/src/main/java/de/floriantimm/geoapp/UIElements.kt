@@ -20,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,7 +67,9 @@ fun HeadlineMedium(text: String) {
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.headlineMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxWidth().padding(10.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
     )
 }
 
@@ -79,7 +82,9 @@ fun ComboBox(label: String, liste: List<String>) {
     var selectedText by remember { mutableStateOf("") }
 
     Box(
-        modifier = Modifier .fillMaxWidth().padding(10.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
 
 
     ) {
@@ -95,7 +100,9 @@ fun ComboBox(label: String, liste: List<String>) {
                 onValueChange = { selectedText = it },
                 label = { Text(text = label) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
             )
 
             val filteredOptions =
@@ -123,20 +130,38 @@ fun ComboBox(label: String, liste: List<String>) {
     }
 }
 
+@Composable
+fun Button(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled:  Boolean = true) {
+    androidx.compose.material3.Button(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.medium,
+        content = { Text(text) },
+        enabled = enabled,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(10.dp))
+}
+
 @Preview(showBackground = true)
 @Composable
 fun NumberTextFieldPreview() {
-    NumberTextField("Hochwert") {}
+    NumberTextField(stringResource(R.string.hochwert)) {}
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HeadlineMediumPreview() {
-    HeadlineMedium("Hochwert")
+    HeadlineMedium(stringResource(R.string.theodolit))
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ComboBoxPreview() {
-    ComboBox("Punktnummer", listOf("A100", "B200", "C300"))
+    ComboBox(stringResource(R.string.punktnummer), listOf("A100", "B200", "C300"))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ButtonPreview() {
+    Button(stringResource(R.string.speichern), {})
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theodolit">Theodolit</string>
+    <string name="punktnummer">Punktnummer</string>
+    <string name="horizontalrichtung">Horizontalrichtung</string>
+    <string name="zenitwinkel">Zenitwinkel</string>
+    <string name="strecke">Strecke</string>
+    <string name="lage">Lage</string>
+    <string name="hochwert">Hochwert</string>
+    <string name="rechtswert">Rechtswert</string>
+    <string name="hoehe">Höhe</string>
+    <string name="speichern">Speichern</string>
+</resources>
