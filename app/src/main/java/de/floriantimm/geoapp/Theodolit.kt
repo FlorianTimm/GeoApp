@@ -36,7 +36,7 @@ fun Theodolit(
 
 @Preview(showBackground = true)
 @Composable
-fun theodolitPreview() {
+fun TheodolitPreview() {
     GeoAppTheme {
         Theodolit()
     }
