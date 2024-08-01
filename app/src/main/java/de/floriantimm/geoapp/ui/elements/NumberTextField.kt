@@ -20,7 +20,7 @@ import de.floriantimm.geoapp.R
 
 
 @Composable
-fun NumberTextField(label: String, value: Double? = null, onChanged: (Double?) -> Unit) {
+fun NumberTextField(label: String, value: Double? = null, maxValue: Double? = null, onChanged: (Double?) -> Unit) {
     var inputText by rememberSaveable { mutableStateOf(value?.toString() ?: "") }
     if (value == null) {
         inputText = ""
@@ -36,7 +36,11 @@ fun NumberTextField(label: String, value: Double? = null, onChanged: (Double?) -
                     try {
                         val withoutComma = text.replace(",", ".")
                         val withoutCommaWithZero = "0$withoutComma"
-                        onChanged(withoutCommaWithZero.toDouble())
+                        val newValue = withoutCommaWithZero.toDouble()
+                        if (maxValue != null && newValue > maxValue) {
+                            return@TextField
+                        }
+                        onChanged(newValue)
                         inputText = withoutComma
                     } catch (e: NumberFormatException) {
                         // do nothing

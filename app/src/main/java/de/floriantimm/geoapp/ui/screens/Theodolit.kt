@@ -38,10 +38,10 @@ fun Theodolite(
             ) {
                 pointNumber = it
             }
-            NumberTextField(stringResource(R.string.horizontalrichtung), horizontalAngle) {
+            NumberTextField(stringResource(R.string.horizontalrichtung), horizontalAngle, maxValue = 400.0) {
                 horizontalAngle = it
             }
-            NumberTextField(stringResource(R.string.zenitwinkel), zenithAngle) {
+            NumberTextField(stringResource(R.string.zenitwinkel), zenithAngle, maxValue = 400.0) {
                 zenithAngle = it
             }
             NumberTextField(stringResource(R.string.strecke), distance) {
