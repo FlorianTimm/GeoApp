@@ -10,4 +10,6 @@
     <string name="rechtswert">Rechtswert</string>
     <string name="hoehe">Höhe</string>
     <string name="speichern">Speichern</string>
+    <string name="station">Stationieren</string>
+    <string name="instrumentenhoehe">Instrumentenhöhe</string>
 </resources>

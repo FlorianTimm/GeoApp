@@ -10,4 +10,6 @@
     <string name="rechtswert">easting</string>
     <string name="hoehe">altitude</string>
     <string name="speichern">save</string>
+    <string name="station">station</string>
+    <string name="instrumentenhoehe">instrument height</string>
 </resources>
