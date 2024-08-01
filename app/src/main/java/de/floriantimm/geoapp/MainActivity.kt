@@ -13,7 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import de.floriantimm.geoapp.ui.GeoAppViewModel
 import de.floriantimm.geoapp.ui.Navigation
-import de.floriantimm.geoapp.ui.screens.Startpage
 import de.floriantimm.geoapp.ui.screens.TopBar
 import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
