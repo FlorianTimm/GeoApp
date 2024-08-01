@@ -34,10 +34,10 @@ fun NumberTextField(label: String, value: Double? = null, onChanged: (Double?) -
             onValueChange = { text: String ->
                 if (text.isNotEmpty()) {
                     try {
-                        val ohneKomma = text.replace(",", ".")
-                        val ohneKommaMitNull = "0$ohneKomma"
-                        onChanged(ohneKommaMitNull.toDouble())
-                        inputText = ohneKomma
+                        val withoutComma = text.replace(",", ".")
+                        val withoutCommaWithZero = "0$withoutComma"
+                        onChanged(withoutCommaWithZero.toDouble())
+                        inputText = withoutComma
                     } catch (e: NumberFormatException) {
                         // do nothing
                     }

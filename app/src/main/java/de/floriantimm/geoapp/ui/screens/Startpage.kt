@@ -58,7 +58,7 @@ fun Startpage(viewModel: GeoAppViewModel) {
                     }*/
     ) { innerPadding ->
         Column {
-            Theodolit(
+            Theodolite(
                 modifier = Modifier.padding(innerPadding),
                 viewModel = viewModel
             )

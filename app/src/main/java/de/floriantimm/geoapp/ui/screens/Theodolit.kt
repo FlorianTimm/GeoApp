@@ -19,7 +19,7 @@ import de.floriantimm.geoapp.ui.elements.NumberTextField
 import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 @Composable
-fun Theodolit(
+fun Theodolite(
     modifier: Modifier = Modifier,
     viewModel: GeoAppViewModel,
 ) {
@@ -52,11 +52,14 @@ fun Theodolit(
                 enabled = (pointNumber != null && pointNumber != "" &&
                         (horizontalAngle != null || zenithAngle != null || distance != null))
             ) {
-                viewModel.addMeasure(pointNumber, horizontalAngle, zenithAngle, distance)
-                pointNumber = null
-                horizontalAngle = null
-                zenithAngle = null
-                distance = null
+                if (pointNumber != null && pointNumber != "" &&
+                    (horizontalAngle != null || zenithAngle != null || distance != null)) {
+                    viewModel.addMeasure(pointNumber!!, horizontalAngle, zenithAngle, distance)
+                    pointNumber = null
+                    horizontalAngle = null
+                    zenithAngle = null
+                    distance = null
+                }
             }
         }
     }
@@ -66,6 +69,6 @@ fun Theodolit(
 @Composable
 fun TheodolitPreview() {
     GeoAppTheme {
-        Theodolit(viewModel = GeoAppViewModel())
+        Theodolite(viewModel = GeoAppViewModel())
     }
 }
