@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        var viewModel = GeoAppViewModel()
+        val viewModel = GeoAppViewModel()
         enableEdgeToEdge()
         setContent {
             GeoAppTheme {

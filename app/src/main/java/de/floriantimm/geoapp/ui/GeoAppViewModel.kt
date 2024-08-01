@@ -12,6 +12,7 @@ class GeoAppViewModel {
         if (pointNumber != null && pointNumber != "" && pointNumber !in points) {
             points.add(pointNumber)
         }
+
     }
 
 
