@@ -2,7 +2,7 @@ package de.floriantimm.geoapp.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -13,16 +13,20 @@ import de.floriantimm.geoapp.ui.elements.Button
 import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Startpage(viewModel: GeoAppViewModel, modifier: Modifier = Modifier, onTheodolite: () -> Unit, onStation: () -> Unit) {
+fun Homepage(modifier: Modifier = Modifier, viewModel: GeoAppViewModel, onTheodolite: () -> Unit, onPentagonPrism: () -> Unit) {
     Column(modifier = modifier.fillMaxSize()) {
-        Button(text = stringResource(R.string.theodolit),
-            enabled = viewModel.stationed()) {
+        if (viewModel.stationed()) {
+            Text(text = stringResource(R.string.stationed))
+        }
+        Button(text = stringResource(R.string.theodolit)) {
             onTheodolite()
         }
-        Button(text = stringResource( R.string.station)) {
-            onStation()
+        if (viewModel.measureLineExists()) {
+            Text(text = stringResource(R.string.measurelineexists))
+        }
+        Button(text = stringResource( R.string.pentagonprism)) {
+            onPentagonPrism()
         }
         
     }
@@ -31,8 +35,8 @@ fun Startpage(viewModel: GeoAppViewModel, modifier: Modifier = Modifier, onTheod
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun HomepagePreview() {
     GeoAppTheme {
-        Startpage(GeoAppViewModel(), onTheodolite = {}, onStation = {})
+        Homepage(modifier = Modifier, viewModel = GeoAppViewModel(), onTheodolite = {}, onPentagonPrism = {})
     }
 }

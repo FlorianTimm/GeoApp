@@ -7,6 +7,8 @@ class GeoAppViewModel {
     private val data = DataStorage()
     private var station: Point? = null
     private var instrumentHeight = 1.6
+    private var startPoint: Point? = null
+    private var endPoint: Point? = null
 
     fun getPoints (): List<String> {
         return data.getPoints().map { it.name }
@@ -29,6 +31,25 @@ class GeoAppViewModel {
         this.station = point
         this.instrumentHeight = instrumentHeight
     }
+
+    fun getStation(): String {
+        return station!!.name
+    }
+
+    fun measureLineExists():Boolean {
+        return startPoint != null && endPoint != null
+    }
+
+    fun setMeasureLine (startPoint: String, endPoint: String, distance: Double) {
+        this.startPoint = data.getPoint(startPoint)
+        this.endPoint = data.getPoint(endPoint)
+    }
+
+    fun addPentagonMeasure (pointNumber: String, ordinate: Double, abscissa: Double) {
+        val point: Point = data.getPoint(pointNumber)
+
+    }
+
 
 
 }

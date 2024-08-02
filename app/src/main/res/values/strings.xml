@@ -2,14 +2,22 @@
     <string name="app_name" translatable="false">GeoApp</string>
     <string name="theodolit">theodolite</string>
     <string name="punktnummer">point number</string>
-    <string name="horizontalrichtung">horizontal direction</string>
-    <string name="zenitwinkel">zenith angle</string>
-    <string name="strecke">distance</string>
-    <string name="lage">position</string>
-    <string name="hochwert">northing</string>
-    <string name="rechtswert">easting</string>
-    <string name="hoehe">altitude</string>
-    <string name="speichern">save</string>
+    <string name="horizontaldirection">horizontal direction</string>
+    <string name="zenithangle">zenith angle</string>
+    <string name="distance">distance</string>
+    <string name="position">position</string>
+    <string name="northing">northing</string>
+    <string name="easting">easting</string>
+    <string name="altitude">altitude</string>
+    <string name="save">save</string>
     <string name="station">station</string>
-    <string name="instrumentenhoehe">instrument height</string>
+    <string name="instrumentheight">instrument height</string>
+    <string name="endpoint">end point</string>
+    <string name="startpoint">start point</string>
+    <string name="pentagonprism">pentagon prism</string>
+    <string name="ordinate">ordinate</string>
+    <string name="abscissa">abscissa</string>
+    <string name="targetpoint">target point</string>
+    <string name="measurelineexists">measure line set</string>
+    <string name="stationed">setup done</string>
 </resources>

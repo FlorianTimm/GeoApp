@@ -51,5 +51,5 @@ fun HeadlineMediumPreview() {
 @Preview(showBackground = true)
 @Composable
 fun ButtonPreview() {
-    Button(stringResource(R.string.speichern)) {}
+    Button(stringResource(R.string.save)) {}
 }

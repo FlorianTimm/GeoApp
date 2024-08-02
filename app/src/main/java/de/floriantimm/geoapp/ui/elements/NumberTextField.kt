@@ -62,5 +62,5 @@ fun NumberTextField(label: String, value: Double? = null, maxValue: Double? = nu
 @Preview(showBackground = true)
 @Composable
 fun NumberTextFieldPreview() {
-    NumberTextField(stringResource(R.string.hochwert)) {}
+    NumberTextField(stringResource(R.string.northing)) {}
 }

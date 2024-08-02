@@ -2,14 +2,22 @@
 <resources>
     <string name="theodolit">Theodolit</string>
     <string name="punktnummer">Punktnummer</string>
-    <string name="horizontalrichtung">Horizontalrichtung</string>
-    <string name="zenitwinkel">Zenitwinkel</string>
-    <string name="strecke">Strecke</string>
-    <string name="lage">Lage</string>
-    <string name="hochwert">Hochwert</string>
-    <string name="rechtswert">Rechtswert</string>
-    <string name="hoehe">Höhe</string>
-    <string name="speichern">Speichern</string>
+    <string name="horizontaldirection">Horizontalrichtung</string>
+    <string name="zenithangle">Zenitwinkel</string>
+    <string name="distance">Strecke</string>
+    <string name="position">Lage</string>
+    <string name="northing">Hochwert</string>
+    <string name="easting">Rechtswert</string>
+    <string name="altitude">Höhe</string>
+    <string name="save">Speichern</string>
     <string name="station">Stationieren</string>
-    <string name="instrumentenhoehe">Instrumentenhöhe</string>
+    <string name="instrumentheight">Instrumentenhöhe</string>
+    <string name="endpoint">Endpunkt</string>
+    <string name="startpoint">Startpunkt</string>
+    <string name="pentagonprism">Winkelprisma</string>
+    <string name="ordinate">Ordinate</string>
+    <string name="abscissa">Abzisse</string>
+    <string name="targetpoint">Zielpunkt</string>
+    <string name="measurelineexists">Messungslinie gesetzt</string>
+    <string name="stationed">Stationierung erfolgt</string>
 </resources>

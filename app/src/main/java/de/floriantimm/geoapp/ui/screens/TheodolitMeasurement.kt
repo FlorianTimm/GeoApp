@@ -13,13 +13,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import de.floriantimm.geoapp.R
 import de.floriantimm.geoapp.ui.GeoAppViewModel
 import de.floriantimm.geoapp.ui.elements.Button
-import de.floriantimm.geoapp.ui.elements.ComboBox
 import de.floriantimm.geoapp.ui.elements.HeadlineMedium
 import de.floriantimm.geoapp.ui.elements.NumberTextField
+import de.floriantimm.geoapp.ui.elements.PointComboBox
 import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 @Composable
-fun Theodolite(
+fun TheodoliteMeasurement(
     modifier: Modifier = Modifier,
     viewModel: GeoAppViewModel,
 ) {
@@ -30,29 +30,28 @@ fun Theodolite(
             var zenithAngle by rememberSaveable { mutableStateOf<Double?>(null) }
             var distance by rememberSaveable { mutableStateOf<Double?>(null) }
 
-            HeadlineMedium(stringResource(R.string.lage) + " I")
-            ComboBox(
-                label = stringResource(R.string.punktnummer),
-                liste = viewModel.getPoints(),
-                pointNumber
+            HeadlineMedium(stringResource(R.string.position) + " I")
+            PointComboBox (
+                value = pointNumber,
+                viewModel = viewModel
             ) {
                 pointNumber = it
             }
-            NumberTextField(stringResource(R.string.horizontalrichtung), horizontalAngle, maxValue = 400.0) {
+            NumberTextField(stringResource(R.string.horizontaldirection), horizontalAngle, maxValue = 400.0) {
                 horizontalAngle = it
             }
-            NumberTextField(stringResource(R.string.zenitwinkel), zenithAngle, maxValue = 400.0) {
+            NumberTextField(stringResource(R.string.zenithangle), zenithAngle, maxValue = 400.0) {
                 zenithAngle = it
             }
-            NumberTextField(stringResource(R.string.strecke), distance) {
+            NumberTextField(stringResource(R.string.distance), distance) {
                 distance = it
             }
             Button(
-                stringResource(R.string.speichern),
+                stringResource(R.string.save),
                 enabled = (pointNumber != null && pointNumber != "" &&
                         (horizontalAngle != null || zenithAngle != null || distance != null))
             ) {
-                if (pointNumber != null && pointNumber != "" &&
+                if (pointNumber != null && pointNumber != "" && pointNumber != viewModel.getStation() &&
                     (horizontalAngle != null || zenithAngle != null || distance != null)) {
                     viewModel.addMeasure(pointNumber!!, horizontalAngle, zenithAngle, distance)
                     pointNumber = null
@@ -67,8 +66,8 @@ fun Theodolite(
 
 @Preview(showBackground = true)
 @Composable
-fun TheodolitPreview() {
+fun TheodoliteMeasurementPreview() {
     GeoAppTheme {
-        Theodolite(viewModel = GeoAppViewModel())
+        TheodoliteMeasurement(viewModel = GeoAppViewModel())
     }
 }
