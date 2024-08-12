@@ -1,7 +1,6 @@
 package de.floriantimm.geoapp.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +27,7 @@ import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TheodoliteSetup(modifier: Modifier = Modifier, viewModel: GeoAppViewModel = GeoAppViewModel(), onSave: () -> Unit) {
+fun TheodoliteSetupView(modifier: Modifier = Modifier, viewModel: GeoAppViewModel = GeoAppViewModel(), onSave: () -> Unit) {
     var tabIndex by rememberSaveable { mutableStateOf(0) }
     Column {
         TabRow(modifier = modifier, selectedTabIndex = tabIndex) {
@@ -59,7 +58,7 @@ fun TheodoliteSetup(modifier: Modifier = Modifier, viewModel: GeoAppViewModel = 
             Column (modifier = Modifier.fillMaxWidth().fillMaxHeight()){
                 when (tabIndex) {
                     0 -> TheodoliteSetupSettings(viewModel = viewModel, onSave = onSave)
-                    1 -> TheodoliteMeasurement(viewModel = viewModel)
+                    1 -> TheodoliteMeasurementView(viewModel = viewModel)
                     2 -> TheodoliteMeasurementResult(viewModel = viewModel)
                 }
 
@@ -107,6 +106,6 @@ fun TheodoliteSetupSettings (modifier: Modifier = Modifier, viewModel: GeoAppVie
 @Composable
 fun TheodoliteSetupPreview() {
     GeoAppTheme {
-        TheodoliteSetup {   }
+        TheodoliteSetupView {   }
         }
 }

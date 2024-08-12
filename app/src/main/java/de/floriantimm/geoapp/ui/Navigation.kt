@@ -5,11 +5,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import de.floriantimm.geoapp.ui.screens.PentagonMeasure
-import de.floriantimm.geoapp.ui.screens.PentagonSetup
+import de.floriantimm.geoapp.ui.screens.GnssScreen
+import de.floriantimm.geoapp.ui.screens.PentagonSetupView
 import de.floriantimm.geoapp.ui.screens.Homepage
-import de.floriantimm.geoapp.ui.screens.TheodoliteMeasurement
-import de.floriantimm.geoapp.ui.screens.TheodoliteSetup
+import de.floriantimm.geoapp.ui.screens.PentagonMeasureView
+import de.floriantimm.geoapp.ui.screens.TheodoliteMeasurementView
+import de.floriantimm.geoapp.ui.screens.TheodoliteSetupView
 import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 @Composable
@@ -20,26 +21,35 @@ fun Navigation (viewModel: GeoAppViewModel = GeoAppViewModel()) {
         composable("Homepage") {
             Homepage(viewModel = viewModel,
                 onTheodolite = { navController.navigate("theodolite") },
-                onPentagonPrism = { navController.navigate("pentagon") }
+                onPentagonPrism = { navController.navigate("pentagon") },
+                onGnss = { navController.navigate("gnss") }
             )
+        }
+
+        composable("gnss") {
+            GnssScreen()
         }
 
         composable("theodolite") {
             if (viewModel.stationed()) {
-               navController.navigate("theodoliteMeasure")
+               navController.navigate("theodoliteMeasure") {
+                   popUpTo("Homepage")
+               }
             } else {
-                navController.navigate("theodoliteSetup")
+                navController.navigate("theodoliteSetup") {
+                    popUpTo("Homepage")
+                }
 
             }
         }
 
         composable("theodoliteMeasure") {
-            TheodoliteMeasurement(viewModel = viewModel)
+            TheodoliteMeasurementView(viewModel = viewModel)
         }
 
 
         composable("theodoliteSetup") {
-            TheodoliteSetup(viewModel = viewModel) {
+            TheodoliteSetupView(viewModel = viewModel) {
                 navController.navigate("theodoliteMeasure") {
                     popUpTo("Homepage")
                 }
@@ -48,7 +58,7 @@ fun Navigation (viewModel: GeoAppViewModel = GeoAppViewModel()) {
 
 
         composable("pentagonSetup") {
-            PentagonSetup(viewModel = viewModel) {
+            PentagonSetupView(viewModel = viewModel) {
                 navController.navigate("pentagonMeasure") {
                     popUpTo("Homepage")
                 }
@@ -56,14 +66,18 @@ fun Navigation (viewModel: GeoAppViewModel = GeoAppViewModel()) {
         }
 
         composable("pentagonMeasure") {
-            PentagonMeasure(viewModel = viewModel) {}
+            PentagonMeasureView(viewModel = viewModel) {}
         }
 
         composable("pentagon") {
             if (viewModel.measureLineExists()) {
-                navController.navigate("pentagonMeasure")
+                navController.navigate("pentagonMeasure") {
+                    popUpTo("Homepage")
+                }
             } else {
-                navController.navigate("pentagonSetup")
+                navController.navigate("pentagonSetup") {
+                    popUpTo("Homepage")
+                }
             }
 
         }

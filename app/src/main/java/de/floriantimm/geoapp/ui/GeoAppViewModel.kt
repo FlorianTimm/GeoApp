@@ -2,11 +2,11 @@ package de.floriantimm.geoapp.ui
 
 import de.floriantimm.geoapp.data.DataStorage
 import de.floriantimm.geoapp.data.Point
+import de.floriantimm.geoapp.data.TheodoliteSetup
 
 class GeoAppViewModel {
     private val data = DataStorage()
-    private var station: Point? = null
-    private var instrumentHeight = 1.6
+    private var theodoliteSetup: TheodoliteSetup? = null
     private var startPoint: Point? = null
     private var endPoint: Point? = null
 
@@ -16,24 +16,23 @@ class GeoAppViewModel {
 
     fun addMeasure (pointNumber: String,horizontalAngle: Double? = null,zenithAngle: Double? = null,distance: Double? = null) {
         val point: Point = data.getPoint(pointNumber)
-        if (this.station == null) {
+        if (this.theodoliteSetup == null) {
             return
         }
-        data.addMeasurement(this.station!!, point, horizontalAngle, zenithAngle, distance)
+        data.addMeasurement(this.theodoliteSetup!!, point, horizontalAngle, zenithAngle, distance)
     }
 
     fun stationed(): Boolean {
-        return this.station != null
+        return this.theodoliteSetup != null
     }
 
     fun newStation (pointNumber: String, instrumentHeight: Double) {
         val point: Point = data.getPoint(pointNumber)
-        this.station = point
-        this.instrumentHeight = instrumentHeight
+        this.theodoliteSetup = TheodoliteSetup(point, instrumentHeight = instrumentHeight)
     }
 
     fun getStation(): String {
-        return station!!.name
+        return theodoliteSetup!!.point.name
     }
 
     fun measureLineExists():Boolean {

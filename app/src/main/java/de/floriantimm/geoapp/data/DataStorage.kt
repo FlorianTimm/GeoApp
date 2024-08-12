@@ -2,7 +2,7 @@ package de.floriantimm.geoapp.data
 
 class DataStorage {
     private val points: MutableList<Point> = mutableListOf()
-    private val measurements: MutableList<Measure> = mutableListOf()
+    private val measurements: MutableList<TheodoliteMeasure> = mutableListOf()
 
     fun getPoints(): List<Point> {
         return points
@@ -22,13 +22,13 @@ class DataStorage {
         return point
     }
 
-    fun addMeasurement(from: Point,
+    fun addMeasurement(setup: TheodoliteSetup,
                        to: Point,
                        horizontalDirection: Double? = null,
                        zenithAngle: Double? = null,
                        distance: Double? = null) {
 
-        val measurement = Measure(from, to, horizontalDirection, zenithAngle, distance)
+        val measurement = TheodoliteMeasure(setup, to, horizontalDirection, zenithAngle, distance)
         measurements.add(measurement)
     }
 

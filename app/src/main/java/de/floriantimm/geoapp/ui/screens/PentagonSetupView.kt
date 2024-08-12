@@ -17,7 +17,7 @@ import de.floriantimm.geoapp.ui.elements.PointComboBox
 
 
 @Composable
-fun PentagonSetup (modifier: Modifier = Modifier, viewModel: GeoAppViewModel = GeoAppViewModel(), onSave: () -> Unit)  {
+fun PentagonSetupView (modifier: Modifier = Modifier, viewModel: GeoAppViewModel = GeoAppViewModel(), onSave: () -> Unit)  {
     var startPoint by rememberSaveable { mutableStateOf<String?>(null) }
     var endPoint by rememberSaveable { mutableStateOf<String?>(null) }
     var distance by rememberSaveable { mutableStateOf<Double?>(null) }
@@ -56,5 +56,5 @@ fun PentagonSetup (modifier: Modifier = Modifier, viewModel: GeoAppViewModel = G
 @Preview(showBackground = true)
 @Composable
 fun PentagonPrismPreview() {
-    PentagonSetup{}
+    PentagonSetupView{}
 }

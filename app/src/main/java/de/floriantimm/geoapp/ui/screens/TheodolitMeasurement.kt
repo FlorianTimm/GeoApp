@@ -19,7 +19,7 @@ import de.floriantimm.geoapp.ui.elements.PointComboBox
 import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 @Composable
-fun TheodoliteMeasurement(
+fun TheodoliteMeasurementView(
     modifier: Modifier = Modifier,
     viewModel: GeoAppViewModel,
 ) {
@@ -68,6 +68,6 @@ fun TheodoliteMeasurement(
 @Composable
 fun TheodoliteMeasurementPreview() {
     GeoAppTheme {
-        TheodoliteMeasurement(viewModel = GeoAppViewModel())
+        TheodoliteMeasurementView(viewModel = GeoAppViewModel())
     }
 }

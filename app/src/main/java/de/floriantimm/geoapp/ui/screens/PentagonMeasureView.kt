@@ -17,7 +17,7 @@ import de.floriantimm.geoapp.ui.elements.PointComboBox
 
 
 @Composable
-fun PentagonMeasure (modifier: Modifier = Modifier, viewModel: GeoAppViewModel = GeoAppViewModel(), onSave: () -> Unit)  {
+fun PentagonMeasureView (modifier: Modifier = Modifier, viewModel: GeoAppViewModel = GeoAppViewModel(), onSave: () -> Unit)  {
     var pointNumber by rememberSaveable { mutableStateOf<String?>(null) }
     var ordinate by rememberSaveable { mutableStateOf<Double?>(null) }
     var abscissa by rememberSaveable { mutableStateOf<Double?>(null) }
@@ -56,5 +56,5 @@ fun PentagonMeasure (modifier: Modifier = Modifier, viewModel: GeoAppViewModel =
 @Preview(showBackground = true)
 @Composable
 fun PentagonMeasurePreview() {
-    PentagonMeasure {}
+    PentagonMeasureView {}
 }

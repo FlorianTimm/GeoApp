@@ -14,7 +14,11 @@ import de.floriantimm.geoapp.ui.theme.GeoAppTheme
 
 
 @Composable
-fun Homepage(modifier: Modifier = Modifier, viewModel: GeoAppViewModel, onTheodolite: () -> Unit, onPentagonPrism: () -> Unit) {
+fun Homepage(modifier: Modifier = Modifier,
+             viewModel: GeoAppViewModel,
+             onTheodolite: () -> Unit,
+             onPentagonPrism: () -> Unit,
+             onGnss: () -> Unit = {}) {
     Column(modifier = modifier.fillMaxSize()) {
         if (viewModel.stationed()) {
             Text(text = stringResource(R.string.stationed))
@@ -27,6 +31,10 @@ fun Homepage(modifier: Modifier = Modifier, viewModel: GeoAppViewModel, onTheodo
         }
         Button(text = stringResource( R.string.pentagonprism)) {
             onPentagonPrism()
+        }
+
+        Button(text = stringResource( R.string.gnss)) {
+            onGnss()
         }
         
     }
