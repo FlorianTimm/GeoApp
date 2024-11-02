@@ -1,0 +1,8 @@
+{
+  "name": "GeoApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite",
+  "id": "aaacf7b4"
+}
