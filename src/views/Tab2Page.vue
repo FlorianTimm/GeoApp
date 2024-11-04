@@ -12,7 +12,20 @@
         </ion-toolbar>
       </ion-header>
 
-      <ExploreContainer name="Tab 2 page" />
+      <div>
+        <table v-if="source">
+          <tr>
+            <th>Name</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+          </tr>
+          <tr v-for="item in source.getFeatures()" :key="item.getId()">
+            <td>{{ item.get('name') }}</td>
+            <td>{{ (item.getGeometry() as Point)?.getCoordinates()[0] }}</td>
+            <td>{{ (item.getGeometry() as Point)?.getCoordinates()[1] }}</td>
+          </tr>
+        </table>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -20,4 +33,10 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import ExploreContainer from '@/components/ExploreContainer.vue';
+import VectorSource from 'ol/source/Vector';
+import Point from 'ol/geom/Point';
+
+defineProps({
+  source: VectorSource
+})
 </script>
