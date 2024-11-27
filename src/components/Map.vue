@@ -13,6 +13,12 @@ import Point from "ol/geom/Point";
 import Feature from "ol/Feature";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
+import axios from "axios";
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import ImageTile from "ol/ImageTile";
+import TileState from 'ol/TileState';
+import Tile from "ol/Tile";
+
 
 export default {
     name: "Map",
@@ -29,12 +35,64 @@ export default {
         this.myMap();
     },
     methods: {
+        tiles(tile: Tile, src: string) {
+            axios({
+                url: src, //your url
+                method: 'GET',
+                responseType: 'blob', // important
+            }).then((response) => {
+                const data = response.data;
+                if (data !== undefined) {
+                    (<ImageTile>tile).getImage().src = URL.createObjectURL(data);
+                    this.saveImage(tile, data);
+                } else {
+                    tile.setState(TileState.ERROR);
+                }
+            }).catch((err) => {
+                return this.loadTile(tile, src);
+            });
+        },
+        async saveImage(imageTile: Tile, data: Blob) {
+            const imagePath = `osm/${imageTile.tileCoord[0]}/${imageTile.tileCoord[1]}/${imageTile.tileCoord[2]}.png`;
+            await Filesystem.mkdir({
+                path: `osm/${imageTile.tileCoord[0]}/${imageTile.tileCoord[1]}/`,
+                directory: Directory.Data,
+                recursive: true,
+            }).then((result) => {
+                console.log('Directory created', result);
+            }).catch((err) => {
+                console.log('Unable to create directory', err);
+            });
+            Filesystem.writeFile({
+                path: imagePath,
+                data: data,
+                directory: Directory.Data,
+                encoding: Encoding.UTF8
+            })
+        },
+        async loadTile(imageTile: Tile, src: string) {
+            const imagePath = `osm/${imageTile.tileCoord[0]}/${imageTile.tileCoord[1]}/${imageTile.tileCoord[2]}.png`;
+            await Filesystem.readFile({
+                path: imagePath,
+                directory: Directory.Data
+            }).then((result) => {
+                console.log('Read file', result);
+                //imageTile.getImage().src = result.data;
+                (<ImageTile>imageTile).getImage().src = URL.createObjectURL(result.data);
+            }).catch((err) => {
+                console.error('Unable to read file', err);
+            });
+
+        },
+
         myMap() {
             useGeographic();
             this.mainMap = new Map({
                 layers: [
                     new TileLayer({
-                        source: new OSM(),
+                        source: new OSM({
+                            tileLoadFunction: this.tiles
+                        }),
                     }),
                 ],
                 target: "map",
