@@ -6,7 +6,10 @@ import Point from 'ol/geom/Point';
 import Feature from 'ol/Feature';
 
 let source = new VectorSource();
-source.addFeature(new Feature(new Point([10.0, 53.5])));
+let f = new Feature(new Point([10.0, 53.5]));
+f.set('nr', '100');
+f.set('description', 'This is my point');
+source.addFeature(f);
 
 let props = {
   source: source

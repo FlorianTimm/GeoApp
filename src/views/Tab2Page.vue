@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
-import ExploreContainer from '@/components/ExploreContainer.vue';
 import VectorSource from 'ol/source/Vector';
 import Point from 'ol/geom/Point';
 

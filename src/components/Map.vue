@@ -83,18 +83,17 @@ onMounted(() => {
                 },
                 {
                     text: 'Speichern',
-                    htmlAttributes: {
-                        'aria-label': 'close',
-                    },
                     handler: (val) => {
-                        if (props.source) {
+                        if (val.nr && props.source) {
                             let f = new Feature(new Point(lonLat));
                             f.setProperties({
                                 nr: val.nr,
                                 description: val.description
                             });
-                            props.source.addFeatures([f]);
+                            props.source.addFeature(f);
+                            return true;
                         }
+                        return false;
                     }
                 }
             ],
