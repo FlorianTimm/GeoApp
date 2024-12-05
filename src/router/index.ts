@@ -31,7 +31,23 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'tab1',
         component: () => import('@/views/Tab1Page.vue'),
-        props: props
+        props: props,
+        children: [
+          {
+
+            path: 'winkelprisma',
+            component: () => import('@/views/Winkelprisma.vue'),
+            props: props
+          },
+          {
+            path: 'nivellier',
+            component: () => import('@/views/Nivellier.vue'),
+          },
+          {
+            path: 'theodolit',
+            component: () => import('@/views/Theodolit.vue'),
+          }
+        ]
       },
       {
         path: 'tab2',
