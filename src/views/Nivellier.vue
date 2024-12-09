@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-
+import { IonSelect, IonSelectOption } from '@ionic/vue';
 import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';
 
