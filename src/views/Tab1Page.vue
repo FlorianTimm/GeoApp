@@ -14,7 +14,6 @@
           <ion-title size="large">Tab 1</ion-title>
         </ion-toolbar>
       </ion-header>
-      <ion-button @click="optionSelected('')" v-if="selected">zurück</ion-button>
       <SelectMeasureMethod v-if="!selected" @select="optionSelected" />
       <Theodolit v-if="selected == 'theodolit'" v-bind:source="source" />
       <Winkelprisma v-if="selected == 'winkelprisma'" v-bind:source="source" />
