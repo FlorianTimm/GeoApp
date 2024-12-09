@@ -36,8 +36,9 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import VectorSource from 'ol/source/Vector';
 import Point from 'ol/geom/Point';
+import { Feature } from 'ol';
 
 defineProps({
-  source: VectorSource
+  source: VectorSource<Feature<Point>>
 })
 </script>

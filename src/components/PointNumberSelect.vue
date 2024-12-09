@@ -1,28 +1,31 @@
 <template>
-    <ion-select @selected="optionSelected" v-model="selected" placeholder="Select One" v-if="source">
-        <ion-select-option v-for="item in source.getFeatures()" :key="item.getId()">{{ item.get('nr')
-            }}</ion-select-option>
+    <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-if="source" :value>
+        <ion-select-option v-for="item in source.getFeatures()" :value="item">
+            {{ item.get('nr') }}
+        </ion-select-option>
     </ion-select>
 </template>
 
 <script setup lang="ts">
 import { IonSelect, IonSelectOption } from '@ionic/vue';
-import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
+import { Point } from 'ol/geom';
 
-const selected = ref<string>('');
 
 const props = defineProps({
-    source: VectorSource
+    source: VectorSource<Feature<Point>>,
+    value: Feature,
+    placeholder: {
+        type: String,
+        default: 'Punkt auswählen'
+    }
 })
 
-const emit = defineEmits(['selected']);
+const emit = defineEmits(['input']);
 
 const optionSelected = (e: CustomEvent) => {
-    selected.value = e.detail.value;
-    const feature = props.source?.getFeatureById(selected.value);
-    emit('selected', feature);
+    emit('input', e.detail.value);
 }
 
 </script>

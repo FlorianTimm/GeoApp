@@ -24,7 +24,7 @@ import { onMounted } from "vue";
 
 
 const props = defineProps({
-    source: VectorSource,
+    source: VectorSource<Feature<Point>>,
     initialCoordinates: {
         default: [10, 53.5],
         type: Array as () => Coordinate

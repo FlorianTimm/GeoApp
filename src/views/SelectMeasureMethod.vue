@@ -16,15 +16,12 @@
             </ion-col>
         </ion-row>
     </ion-grid>
+
 </template>
 
 
 <script setup lang="ts">
 import { IonButton, IonCol, IonRow, IonGrid } from '@ionic/vue';
-
-defineProps({
-    source: Object,
-});
 
 const emit = defineEmits(['select']);
 

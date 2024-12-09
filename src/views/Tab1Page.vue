@@ -16,9 +16,9 @@
       </ion-header>
       <ion-button @click="optionSelected('')" v-if="selected">zurück</ion-button>
       <SelectMeasureMethod v-if="!selected" @select="optionSelected" />
-      <Theodolit v-if="selected == 'theodolit'" :source="source" />
-      <Winkelprisma v-if="selected == 'winkelprisma'" :source="source" />
-      <Nivellier v-if="selected == 'nivellier'" :source="source" />
+      <Theodolit v-if="selected == 'theodolit'" v-bind:source="source" />
+      <Winkelprisma v-if="selected == 'winkelprisma'" v-bind:source="source" />
+      <Nivellier v-if="selected == 'nivellier'" v-bind:source="source" />
     </ion-content>
   </ion-page>
 </template>
@@ -31,6 +31,8 @@ import VectorSource from 'ol/source/Vector';
 import Theodolit from '@/views/Theodolit.vue';
 import Winkelprisma from '@/views/Winkelprisma.vue';
 import Nivellier from '@/views/Nivellier.vue';
+import { Point } from 'ol/geom';
+import { Feature } from 'ol';
 
 let selected = ref<string>('');
 let title = ref<string>('Tab 1');
@@ -44,7 +46,7 @@ const optionSelected = (option: string) => {
 }
 
 defineProps({
-  source: VectorSource
+  source: VectorSource<Feature<Point>>
 })
 </script>
 

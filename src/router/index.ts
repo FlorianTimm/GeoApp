@@ -4,8 +4,9 @@ import TabsPage from '../views/TabsPage.vue';
 import VectorSource from "ol/source/Vector";
 import Point from 'ol/geom/Point';
 import Feature from 'ol/Feature';
+import { reactive } from 'vue';
 
-let source = new VectorSource();
+let source = reactive(new VectorSource());
 let f = new Feature(new Point([10.0, 53.5]));
 f.set('nr', '100');
 f.set('description', 'This is my point');

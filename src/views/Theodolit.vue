@@ -8,10 +8,12 @@
 
 import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';
+import { Feature } from 'ol';
+import { Point } from 'ol/geom';
 
 const selected = ref<string>('');
 
 defineProps({
-    source: VectorSource
+    source: VectorSource<Feature<Point>>
 })
 </script>

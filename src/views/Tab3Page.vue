@@ -21,6 +21,8 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 import Map from '@/components/Map.vue';
 import VectorSource from 'ol/source/Vector';
+import { Feature } from 'ol';
+import { Point } from 'ol/geom';
 
 export default {
   components: {
@@ -32,7 +34,7 @@ export default {
     Map,
   },
   props: {
-    source: VectorSource,
+    source: VectorSource<Feature<Point>>,
   },
   mounted() {
     console.log(this.source);
