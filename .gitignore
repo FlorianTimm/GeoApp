@@ -30,3 +30,5 @@ npm-debug.log*
 /platforms
 /plugins
 /www
+data/*.gpkg
+data/afis_xml/*.xml
