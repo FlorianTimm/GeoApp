@@ -1,14 +1,40 @@
 <template>
-  <ion-page>
+  <ion-menu content-id="main-content" side="end">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Menu Content</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+        <ion-item button @click="optionSelected('theodolit')">
+          <ion-label>Theodolit</ion-label>
+        </ion-item>
+        <ion-item button @click="optionSelected('winkelprisma')">
+          <ion-label>Winkelprisma</ion-label>
+        </ion-item>
+        <ion-item button @click="optionSelected('nivellier')">
+          <ion-label>Nivellier</ion-label>
+        </ion-item>
+        <ion-item button nav="/tabs/tab3" routerDirection="root">
+          <ion-label>Map</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  <ion-page id="main-content">
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="#" @click="optionSelected('')" v-if="selected"></ion-back-button>
         </ion-buttons>
         <ion-title>{{ title }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content :fullscreen="true" class="ion-padding">
       <ion-header collapse="condense">
         <ion-toolbar>
           <ion-title size="large">Tab 1</ion-title>
@@ -23,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenu, IonMenuButton } from '@ionic/vue';
 import SelectMeasureMethod from '@/views/SelectMeasureMethod.vue';
 import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';

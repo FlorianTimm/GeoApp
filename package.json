@@ -26,7 +26,8 @@
     "ionicons": "^7.0.0",
     "ol": "^10.2.1",
     "vue": "^3.3.0",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.2.0",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@capacitor/cli": "6.1.2",
