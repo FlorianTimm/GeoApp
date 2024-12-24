@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue';
+import TabsPage from '../views/tabs/TabsPage.vue';
 import VectorSource from "ol/source/Vector";
 import Point from 'ol/geom/Point';
 import Feature from 'ol/Feature';
@@ -31,17 +31,17 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'tab1',
-        component: () => import('@/views/Tab1Page.vue'),
+        component: () => import('@/views/tabs/MeasurementPage.vue'),
         props: props
       },
       {
         path: 'tab2',
-        component: () => import('@/views/Tab2Page.vue'),
+        component: () => import('@/views/tabs/CoordinatesListPage.vue'),
         props: props
       },
       {
         path: 'tab3',
-        component: () => import('@/views/Tab3Page.vue'),
+        component: () => import('@/views/tabs/MapPage.vue'),
         props: props
       }
     ]

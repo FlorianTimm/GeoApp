@@ -40,7 +40,6 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton } f
 import VectorSource from 'ol/source/Vector';
 import Point from 'ol/geom/Point';
 import { Feature } from 'ol';
-import Menu from '../components/Menu.vue';
 
 defineProps({
   source: VectorSource<Feature<Point>>

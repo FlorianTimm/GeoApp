@@ -26,7 +26,6 @@ import Map from '@/components/Map.vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
-import Menu from '../components/Menu.vue';
 
 defineProps({
   source: VectorSource<Feature<Point>>,

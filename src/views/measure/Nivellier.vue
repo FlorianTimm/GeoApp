@@ -1,7 +1,5 @@
 <template>
-    <ion-select v-model="selected" placeholder="Select One" v-if="source">
-        <ion-select-option v-for="item in source.getFeatures()">item.get('nr')</ion-select-option>
-    </ion-select>
+    <PointNumberSelect :source v-model="point" />
 </template>
 
 <script setup lang="ts">
@@ -10,8 +8,9 @@ import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
+import PointNumberSelect from '@/components/PointNumberSelect.vue';
 
-const selected = ref<string>('');
+const point = ref<Feature<Point>>();
 
 defineProps({
     source: VectorSource<Feature<Point>>

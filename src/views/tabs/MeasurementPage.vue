@@ -27,15 +27,14 @@
 
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenuButton } from '@ionic/vue';
-import SelectMeasureMethod from '@/views/SelectMeasureMethod.vue';
+import SelectMeasureMethod from '@/views/measure/SelectMeasureMethod.vue';
 import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';
-import Theodolit from '@/views/Theodolit.vue';
-import Winkelprisma from '@/views/Winkelprisma.vue';
-import Nivellier from '@/views/Nivellier.vue';
+import Theodolit from '@/views/measure/Theodolit.vue';
+import Winkelprisma from '@/views/measure/Winkelprisma.vue';
+import Nivellier from '@/views/measure/Nivellier.vue';
 import { Point } from 'ol/geom';
 import { Feature } from 'ol';
-import Menu from '../components/Menu.vue';
 
 let selected = ref<string>('');
 let title = ref<string>('Tab 1');
@@ -52,5 +51,3 @@ defineProps({
   source: VectorSource<Feature<Point>>
 })
 </script>
-
-
