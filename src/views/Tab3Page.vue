@@ -3,6 +3,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Map</ion-title>
+        <ion-buttons slot="end">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -12,33 +15,20 @@
         </ion-toolbar>
       </ion-header>
 
-      <Map :source=source />
+      <Map :source />
     </ion-content>
   </ion-page>
 </template>
 
-<script lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+<script lang="ts" setup>
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons } from '@ionic/vue';
 import Map from '@/components/Map.vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
+import Menu from '../components/Menu.vue';
 
-export default {
-  components: {
-    IonPage,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    Map,
-  },
-  props: {
-    source: VectorSource<Feature<Point>>,
-  },
-  mounted() {
-    console.log(this.source);
-  },
-};
-
+defineProps({
+  source: VectorSource<Feature<Point>>,
+});
 </script>

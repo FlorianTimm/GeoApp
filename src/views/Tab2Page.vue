@@ -3,6 +3,9 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Tab 2</ion-title>
+        <ion-buttons slot="end">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
@@ -33,10 +36,11 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton } from '@ionic/vue';
 import VectorSource from 'ol/source/Vector';
 import Point from 'ol/geom/Point';
 import { Feature } from 'ol';
+import Menu from '../components/Menu.vue';
 
 defineProps({
   source: VectorSource<Feature<Point>>

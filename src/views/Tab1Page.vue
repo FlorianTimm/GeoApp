@@ -1,28 +1,5 @@
 <template>
-  <ion-menu content-id="main-content" side="end">
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Menu Content</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list>
-        <ion-item button @click="optionSelected('theodolit')">
-          <ion-label>Theodolit</ion-label>
-        </ion-item>
-        <ion-item button @click="optionSelected('winkelprisma')">
-          <ion-label>Winkelprisma</ion-label>
-        </ion-item>
-        <ion-item button @click="optionSelected('nivellier')">
-          <ion-label>Nivellier</ion-label>
-        </ion-item>
-        <ion-item button nav="/tabs/tab3" routerDirection="root">
-          <ion-label>Map</ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ion-menu>
-  <ion-page id="main-content">
+  <ion-page>
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
@@ -49,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenu, IonMenuButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenuButton } from '@ionic/vue';
 import SelectMeasureMethod from '@/views/SelectMeasureMethod.vue';
 import { ref } from 'vue';
 import VectorSource from 'ol/source/Vector';
@@ -58,6 +35,7 @@ import Winkelprisma from '@/views/Winkelprisma.vue';
 import Nivellier from '@/views/Nivellier.vue';
 import { Point } from 'ol/geom';
 import { Feature } from 'ol';
+import Menu from '../components/Menu.vue';
 
 let selected = ref<string>('');
 let title = ref<string>('Tab 1');

@@ -21,6 +21,11 @@ import TileState from 'ol/TileState';
 import Tile from "ol/Tile";
 import { alertController, IonAlert } from '@ionic/vue';
 import { onMounted } from "vue";
+import Geolocation from "ol/Geolocation";
+import Style from "ol/style/Style";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
+import CircleStyle from "ol/style/Circle";
 
 
 const props = defineProps({
@@ -101,6 +106,54 @@ onMounted(() => {
             alert.present();
         });
     });
+
+    const geolocation = new Geolocation({
+        // enableHighAccuracy must be set to true to have the heading value.
+        trackingOptions: {
+            enableHighAccuracy: true,
+        },
+        //projection: map.getView().getProjection(),
+    });
+
+    const accuracyFeature = new Feature();
+    geolocation.on('change:accuracyGeometry', function () {
+        const geom = geolocation.getAccuracyGeometry();
+        if (geom) {
+            accuracyFeature.setGeometry(geom);
+        }
+    });
+
+    const positionFeature = new Feature();
+    positionFeature.setStyle(
+        new Style({
+            image: new CircleStyle({
+                radius: 6,
+                fill: new Fill({
+                    color: '#3399CC',
+                }),
+                stroke: new Stroke({
+                    color: '#fff',
+                    width: 2,
+                }),
+            }),
+        }),
+    );
+
+    geolocation.on('change:position', function () {
+        const coordinates = geolocation.getPosition();
+        positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
+        console.log('Position changed', coordinates);
+        map.getView().setCenter(coordinates);
+    });
+
+    const vl = new VectorLayer({
+        map: map,
+        source: new VectorSource({
+            features: [accuracyFeature, positionFeature],
+        }),
+    });
+    geolocation.setTracking(true);
+
 });
 
 function tiles(tile: Tile, src: string) {

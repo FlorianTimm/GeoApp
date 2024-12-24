@@ -1,5 +1,19 @@
 <template>
-  <ion-page>
+  <ion-menu content-id="main-content" side="end">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Menu Content</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-list>
+        <ion-item button @click="console.log('Export JSON')">
+          <ion-label>Export JSON</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  <ion-page id="main-content">
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
@@ -23,6 +37,6 @@
 </template>
 
 <script setup lang="ts">
-import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
+import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet, IonMenu, IonTitle, IonContent, IonToolbar, IonHeader, IonItem, IonList } from '@ionic/vue';
 import { triangle, map, reader } from 'ionicons/icons';
 </script>
