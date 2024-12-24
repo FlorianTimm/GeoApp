@@ -16,14 +16,14 @@
             </tr>
             <tr v-if=measure v-for="point, i in measure.points" :key="i">
                 <td>
-                    <PointNumberSelect :source v-model="point.point" />
+                    <PointNumberSelect :source v-model="point.point" newPoint />
                 </td>
                 <td><ion-input v-model="point.ordinate" aria-label="Ordinate" type="number"></ion-input></td>
                 <td><ion-input v-model="point.abscissa" aria-label="Abszisse" type="number"></ion-input></td>
             </tr>
             <tr>
                 <td>
-                    <PointNumberSelect :source v-model="point_new" />
+                    <PointNumberSelect :source v-model="point_new" newPoint />
                 </td>
                 <td>
                     <ion-input v-model="ordinate_new" label="Ordinate" type="number"
@@ -50,7 +50,7 @@ import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { getDistance } from 'ol/sphere';
 import { WinkelprismaMeasure } from '@/types';
-import { IonInput } from '@ionic/vue';
+import { IonInput, IonIcon } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 import { IonButton } from '@ionic/vue';
 import { addIcons } from 'ionicons';
