@@ -20,16 +20,34 @@ import ImageTile from "ol/ImageTile";
 import TileState from 'ol/TileState';
 import Tile from "ol/Tile";
 import { alertController, IonAlert } from '@ionic/vue';
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import Geolocation from "ol/Geolocation";
 import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import CircleStyle from "ol/style/Circle";
+import { useMeasureStore } from "@/store";
+import { storeToRefs } from "pinia";
+import { PointHelper } from "@/store";
+
+const store = useMeasureStore();
+
+
+const source = new VectorSource<Feature<Point>>();
+watch(() => store.points, (points) => {
+    source.clear();
+    points.forEach((pd) => {
+        const c = PointHelper.getLatLon(pd);
+        if (!c) {
+            return;
+        }
+        const p = new Feature(new Point(c));
+        source.addFeature(p);
+    });
+});
 
 
 const props = defineProps({
-    source: VectorSource<Feature<Point>>,
     initialCoordinates: {
         default: [10, 53.5],
         type: Array as () => Coordinate
@@ -37,9 +55,10 @@ const props = defineProps({
 });
 
 
+
 useGeographic();
 onMounted(() => {
-    console.log(props.source);
+    console.log(source);
     const map = new Map({
         layers: [
             new TileLayer({
@@ -60,7 +79,7 @@ onMounted(() => {
 
     //this.source.addFeatures([new Feature(new Point(this.initialCoordinates))]);
     const layer = new VectorLayer({
-        source: props.source,
+        source: source,
     });
     map.addLayer(layer);
 
@@ -89,13 +108,15 @@ onMounted(() => {
                 {
                     text: 'Speichern',
                     handler: (val) => {
-                        if (val.nr && props.source) {
-                            let f = new Feature(new Point(lonLat));
-                            f.setProperties({
+                        if (val.nr) {
+                            const p = {
                                 nr: val.nr,
-                                description: val.description
-                            });
-                            props.source.addFeature(f);
+                                description: val.description,
+                                coordinates: []
+                            };
+                            PointHelper.addCoordinate(p, map.getView().getProjection(), lonLat[0], lonLat[1]);
+                            store.points.push(p);
+                            //store.addPoint(p);
                             return true;
                         }
                         return false;

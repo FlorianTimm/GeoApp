@@ -1,28 +1,29 @@
 <template>
-    <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-if="source" :value>
+    <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-if="points" :value>
         <ion-select-option v-if="newPoint" value="new">Neuer Punkt</ion-select-option>
-        <ion-select-option v-for="item in source.getFeatures()" :value="item">
-            {{ item.get('nr') }}
+        <ion-select-option v-for="item in points" :value="item">
+            {{ item.nr }}
         </ion-select-option>
     </ion-select>
 </template>
 
 <script setup lang="ts">
 import { IonSelect, IonSelectOption } from '@ionic/vue';
-import VectorSource from 'ol/source/Vector';
-import { Feature } from 'ol';
-import { Point } from 'ol/geom';
-
 import { alertController } from '@ionic/vue';
+import { useMeasureStore } from '@/store';
+import { storeToRefs } from 'pinia';
 
 const model = defineModel('value', {
-    type: Feature,
+    type: Object,
+    // type: Point,
     default: null
 });
 
 
+const store = useMeasureStore();
+const { points, measurements } = storeToRefs(store);
+
 const props = defineProps({
-    source: VectorSource<Feature<Point>>,
     newPoint: Boolean,
     placeholder: {
         type: String,
@@ -58,18 +59,15 @@ const optionSelected = (e: CustomEvent) => {
                 {
                     text: 'Speichern',
                     handler: (val) => {
-                        if (val.nr && props.source) {
-                            let f = new Feature<Point>();
-                            f.setProperties({
+                        if (val.nr) {
+                            let p = {
                                 nr: val.nr,
-                                description: val.description
-                            });
-                            props.source.addFeature(f);
-                            setTimeout(() => {
-                                if (model.value)
-                                    model.value = f;
-                                emit('input', f);
-                            }, 100);
+                                description: val.description,
+                                coordinates: []
+                            };
+                            store.points.push(p);
+                            //model.value = p;
+                            emit('input', p);
 
                         }
                     }

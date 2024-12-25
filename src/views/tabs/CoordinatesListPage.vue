@@ -16,17 +16,17 @@
       </ion-header>
 
       <div>
-        <table v-if="source">
+        <table>
           <tbody>
             <tr>
               <th>Name</th>
               <th>Latitude</th>
               <th>Longitude</th>
             </tr>
-            <tr v-for="item in source.getFeatures()" :key="item.getId()">
-              <td>{{ item.get('nr') }}</td>
-              <td>{{ (item.getGeometry() as Point)?.getCoordinates()[0] }}</td>
-              <td>{{ (item.getGeometry() as Point)?.getCoordinates()[1] }}</td>
+            <tr v-for="item in store.points" :key="item.nr">
+              <td>{{ item.nr }}</td>
+              <td>{{ PointHelper.getLat(item) }}</td>
+              <td>{{ PointHelper.getLon(item) }}</td>
             </tr>
           </tbody>
         </table>
@@ -36,12 +36,10 @@
 </template>
 
 <script setup lang="ts">
+import { useMeasureStore, PointHelper } from '@/store';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton } from '@ionic/vue';
-import VectorSource from 'ol/source/Vector';
-import Point from 'ol/geom/Point';
-import { Feature } from 'ol';
 
-defineProps({
-  source: VectorSource<Feature<Point>>
-})
+const store = useMeasureStore();
+
+
 </script>

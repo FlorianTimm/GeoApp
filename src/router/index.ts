@@ -1,20 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import TabsPage from '../views/tabs/TabsPage.vue';
-import VectorSource from "ol/source/Vector";
-import Point from 'ol/geom/Point';
-import Feature from 'ol/Feature';
-import { reactive } from 'vue';
-
-let source = reactive(new VectorSource());
-let f = new Feature(new Point([10.0, 53.5]));
-f.set('nr', '100');
-f.set('description', 'This is my point');
-source.addFeature(f);
-
-let props = {
-  source: source
-}
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -31,18 +17,15 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'tab1',
-        component: () => import('@/views/tabs/MeasurementPage.vue'),
-        props: props
+        component: () => import('@/views/tabs/MeasurementPage.vue')
       },
       {
         path: 'tab2',
-        component: () => import('@/views/tabs/CoordinatesListPage.vue'),
-        props: props
+        component: () => import('@/views/tabs/CoordinatesListPage.vue')
       },
       {
         path: 'tab3',
-        component: () => import('@/views/tabs/MapPage.vue'),
-        props: props
+        component: () => import('@/views/tabs/MapPage.vue')
       }
     ]
   }

@@ -25,6 +25,8 @@
     "axios": "^1.7.7",
     "ionicons": "^7.0.0",
     "ol": "^10.2.1",
+    "pinia": "^2.3.0",
+    "pinia-plugin-capacitor-persist": "^1.4.0",
     "vue": "^3.3.0",
     "vue-router": "^4.2.0",
     "vuex": "^4.0.2"
