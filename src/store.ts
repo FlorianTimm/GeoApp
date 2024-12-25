@@ -38,7 +38,7 @@ export class PointHelper {
     }
 
     static getLatLon(point: Point): Coordinate | null {
-        return PointHelper.get2DCoordinate(point, 'EPSG:4326');
+        return PointHelper.get2DCoordinate(point, 'EPSG:3857');
     }
 
     static getLat(point: Point): number | null {
