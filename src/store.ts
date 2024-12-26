@@ -74,6 +74,7 @@ export interface StateTree {
     measurements: Measurement[];
 }
 
+//@ts-ignore
 export const useMeasureStore = defineStore('measure', {
     state: () => ({
         points: {} as { [nr: string]: Point },

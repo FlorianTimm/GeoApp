@@ -44,6 +44,11 @@ const optionSelected = (e: CustomEvent) => {
                     name: 'description',
                     type: 'text',
                     placeholder: 'Beschreibung'
+                },
+                {
+                    name: 'local',
+                    type: 'checkbox',
+                    label: 'Aktuelle Position verwenden'
                 }
             ],
             buttons: [
@@ -56,7 +61,11 @@ const optionSelected = (e: CustomEvent) => {
                     handler: (val) => {
                         if (val.nr && !(val.nr in store.points)) {
                             let p = new Point(val.nr, val.description)
-                            store.addPoint(p);
+                            if (val.local) {
+                                //TODO: get current position
+                            }
+                            //@ts-ignore
+                            store.addPoint(p); 
                             model.value = p;
                             emit('input', p);
                             return true;

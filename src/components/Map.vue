@@ -102,6 +102,7 @@ onMounted(() => {
                             const p = new StorePoint(val.nr, val.description);
                             p.addCoordinate(map.getView().getProjection(), lonLat[0], lonLat[1]);
                             //store.points.push(p);
+                            //@ts-ignore
                             store.addPoint(p);
 
                             return true;
