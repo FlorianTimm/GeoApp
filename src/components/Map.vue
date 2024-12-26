@@ -3,7 +3,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Point as StorePoint, useMeasureStore } from "@/store";
+import { useMeasureStore } from "@/store";
+import { Point as StorePoint } from "@/types/Point";
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { alertController, IonAlert } from '@ionic/vue';
 import axios from "axios";

@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { useMeasureStore, Point } from '@/store';
+import { useMeasureStore } from '@/store';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons } from '@ionic/vue';
 
 const store = useMeasureStore();

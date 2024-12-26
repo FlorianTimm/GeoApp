@@ -1,5 +1,4 @@
-import { Point } from "./store";
-
+import { Point } from "@/types/Point";
 
 export class WinkelprismaMeasure {
     start: string | null = null;

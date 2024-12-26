@@ -46,12 +46,12 @@
 import { ref } from 'vue';
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import { getDistance } from 'ol/sphere';
-import { WinkelprismaMeasure } from '@/types';
+import { WinkelprismaMeasure } from '@/types/WinkelprismaMeasure';
 import { IonInput, IonIcon } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 import { IonButton } from '@ionic/vue';
 import { addIcons } from 'ionicons';
-import { Point } from '@/store';
+import { Point } from "@/types/Point";
 
 addIcons({
     'add': add

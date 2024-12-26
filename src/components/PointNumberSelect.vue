@@ -10,7 +10,8 @@
 <script setup lang="ts">
 import { IonSelect, IonSelectOption } from '@ionic/vue';
 import { alertController } from '@ionic/vue';
-import { useMeasureStore, Point } from '@/store';
+import { useMeasureStore } from '@/store';
+import { Point } from "@/types/Point";
 import { storeToRefs } from 'pinia';
 
 const model = defineModel();
