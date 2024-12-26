@@ -1,8 +1,8 @@
 <template>
-    <PointNumberSelect :source v-model="point1" />
-    {{ point1?.getGeometry()?.getCoordinates() ?? 'nicht ausgewählt' }}
-    <PointNumberSelect :source v-model="point2" />
-    {{ point2?.getGeometry()?.getCoordinates() ?? 'nicht ausgewählt' }}
+    <PointNumberSelect v-model="point1" />
+    {{ point1?.getLatLon() ?? 'nicht ausgewählt' }}
+    <PointNumberSelect v-model="point2" />
+    {{ point2?.getLatLon() ?? 'nicht ausgewählt' }}
     <br /><br />
 
     <ion-input :value="measure?.distance" label="Länge" type="number"
@@ -16,14 +16,14 @@
             </tr>
             <tr v-if=measure v-for="point, i in measure.points" :key="i">
                 <td>
-                    <PointNumberSelect :source v-model="point.point" newPoint />
+                    <PointNumberSelect v-model="point.point" newPoint />
                 </td>
                 <td><ion-input v-model="point.ordinate" aria-label="Ordinate" type="number"></ion-input></td>
                 <td><ion-input v-model="point.abscissa" aria-label="Abszisse" type="number"></ion-input></td>
             </tr>
             <tr>
                 <td>
-                    <PointNumberSelect :source v-model="point_new" newPoint />
+                    <PointNumberSelect v-model="point_new" newPoint />
                 </td>
                 <td>
                     <ion-input v-model="ordinate_new" label="Ordinate" type="number"
@@ -43,38 +43,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import VectorSource from 'ol/source/Vector';
+import { ref } from 'vue';
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
-import { Feature } from 'ol';
-import { Point } from 'ol/geom';
 import { getDistance } from 'ol/sphere';
 import { WinkelprismaMeasure } from '@/types';
 import { IonInput, IonIcon } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 import { IonButton } from '@ionic/vue';
 import { addIcons } from 'ionicons';
+import { Point } from '@/store';
 
 addIcons({
     'add': add
 })
 
-const point1 = ref<Feature<Point>>();
-const point2 = ref<Feature<Point>>();
+const point1 = ref<Point>();
+const point2 = ref<Point>();
 
 const measure = ref<WinkelprismaMeasure>();
 
-const point_new = ref<Feature<Point>>();
+const point_new = ref<Point>();
 const abscissa_new = ref<number>();
 const ordinate_new = ref<number>();
 
-defineProps({
-    source: VectorSource<Feature<Point>>
-})
-
-const lengthP = (point1: Feature<Point>, point2: Feature<Point>): number => {
-    const coords1 = point1?.getGeometry()?.getCoordinates();
-    const coords2 = point2?.getGeometry()?.getCoordinates();
+const lengthP = (point1: Point, point2: Point): number => {
+    const coords1 = point1?.getLatLon();
+    const coords2 = point2?.getLatLon();
     if (!coords1 || !coords2) {
         return 0;
     }

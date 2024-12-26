@@ -25,8 +25,8 @@
             </tr>
             <tr v-for="item in store.points" :key="item.nr">
               <td>{{ item.nr }}</td>
-              <td>{{ PointHelper.getLat(item) }}</td>
-              <td>{{ PointHelper.getLon(item) }}</td>
+              <td>{{ item.getLat() }}</td>
+              <td>{{ item.getLon() }}</td>
             </tr>
           </tbody>
         </table>
@@ -36,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import { useMeasureStore, PointHelper } from '@/store';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton } from '@ionic/vue';
+import { useMeasureStore, Point } from '@/store';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons } from '@ionic/vue';
 
 const store = useMeasureStore();
 

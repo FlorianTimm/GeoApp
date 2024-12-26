@@ -1,5 +1,5 @@
 <template>
-    <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-if="points" :value>
+    <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-model="model">
         <ion-select-option v-if="newPoint" value="new">Neuer Punkt</ion-select-option>
         <ion-select-option v-for="item in points" :value="item">
             {{ item.nr }}
@@ -10,15 +10,10 @@
 <script setup lang="ts">
 import { IonSelect, IonSelectOption } from '@ionic/vue';
 import { alertController } from '@ionic/vue';
-import { useMeasureStore } from '@/store';
+import { useMeasureStore, Point } from '@/store';
 import { storeToRefs } from 'pinia';
 
-const model = defineModel('value', {
-    type: Object,
-    // type: Point,
-    default: null
-});
-
+const model = defineModel();
 
 const store = useMeasureStore();
 const { points, measurements } = storeToRefs(store);
@@ -59,17 +54,21 @@ const optionSelected = (e: CustomEvent) => {
                 {
                     text: 'Speichern',
                     handler: (val) => {
-                        if (val.nr) {
-                            let p = {
-                                nr: val.nr,
-                                description: val.description,
-                                coordinates: []
-                            };
-                            store.points.push(p);
-                            //model.value = p;
+                        if (val.nr && !(val.nr in store.points)) {
+                            let p = new Point(val.nr, val.description)
+                            store.addPoint(p);
+                            model.value = p;
                             emit('input', p);
-
+                            return true;
                         }
+                        alertController.create({
+                            header: 'Fehler',
+                            message: 'Punktnummer leer oder bereits vergeben.',
+                            buttons: ['OK']
+                        }).then(alert => {
+                            alert.present();
+                        });
+                        return false;
                     }
                 }
             ],
@@ -77,7 +76,7 @@ const optionSelected = (e: CustomEvent) => {
             alert.present();
         });
     } else {
-        emit('input', e.detail.value);
+        //emit('input', e.detail.value);
         console.log(e.detail.value);
     }
 }

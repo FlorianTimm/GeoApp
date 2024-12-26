@@ -1,12 +1,12 @@
-import { Feature } from "ol";
-import Point from "ol/geom/Point";
+import { Point } from "./store";
+
 
 export class WinkelprismaMeasure {
-    start: Feature<Point> | null = null;
-    end: Feature<Point> | null = null;
+    start: string | null = null;
+    end: string | null = null;
     distance: number | null = null;
     points: {
-        point: Feature<Point>
+        point: Point
         ordinate: number;
         abscissa: number;
     }[] = [];

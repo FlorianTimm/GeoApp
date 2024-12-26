@@ -2,8 +2,8 @@ import { Coordinate } from 'ol/coordinate';
 import { Projection } from 'ol/proj';
 import { defineStore } from 'pinia';
 
-export interface Point {
-    nr: number;
+export class Point {
+    nr: string;
     description?: string;
     coordinates: {
         epsg: string;
@@ -12,23 +12,26 @@ export interface Point {
         z?: number;
         accuracy: number;
     }[]
-}
 
-export class PointHelper {
-
-    static addCoordinate(point: Point, epsg: Projection | string, x?: number, y?: number, z?: number, accuracy: number = 5) {
-        if (typeof epsg !== 'string') {
-            epsg = epsg.getCode();
-        }
-        point.coordinates.push({ epsg, x, y, z, accuracy });
+    constructor(nr: string, description?: string) {
+        this.nr = nr;
+        this.description = description;
+        this.coordinates = [];
     }
 
-    static get2DCoordinate(point: Point, epsg: Projection | string): Coordinate | null {
+    addCoordinate(epsg: Projection | string, x?: number, y?: number, z?: number, accuracy: number = 5) {
+        if (typeof epsg !== 'string') {
+            epsg = epsg.getCode();
+        }
+        this.coordinates.push({ epsg, x, y, z, accuracy });
+    }
+
+    get2DCoordinate(epsg: Projection | string): Coordinate | null {
         if (typeof epsg !== 'string') {
             epsg = epsg.getCode();
         }
 
-        const coord = point.coordinates.find(c => c.epsg === epsg);
+        const coord = this.coordinates.find(c => c.epsg === epsg);
         if (!coord || !coord.x || !coord.y) {
             console.error(`Coordinate system ${epsg} not found`);
             return null;
@@ -37,17 +40,17 @@ export class PointHelper {
 
     }
 
-    static getLatLon(point: Point): Coordinate | null {
-        return PointHelper.get2DCoordinate(point, 'EPSG:3857');
+    getLatLon(): Coordinate | null {
+        return this.get2DCoordinate('EPSG:3857');
     }
 
-    static getLat(point: Point): number | null {
-        const coord = PointHelper.getLatLon(point);
+    getLat(): number | null {
+        const coord = this.getLatLon();
         return coord ? coord[1] : null;
     }
 
-    static getLon(point: Point): number | null {
-        const coord = PointHelper.getLatLon(point);
+    getLon(): number | null {
+        const coord = this.getLatLon();
         return coord ? coord[0] : null;
     }
 }
@@ -66,27 +69,65 @@ export interface Measurement {
     }[]
 }
 
+export interface StateTree {
+    points: { [nr: string]: Point }
+    measurements: Measurement[];
+}
 
 export const useMeasureStore = defineStore('measure', {
-    state() {
-        return {
-            points: [] as Point[],
-            measurements: [] as Measurement[],
-        };
+    state: () => ({
+        points: {} as { [nr: string]: Point },
+        measurements: [] as Measurement[],
+    }),
+    getters: {
+        getPoint: (state) => (nr: string) => state.points[nr],
     },
     actions: {
         truncate() {
-            this.points = [];
+            this.points = {} as { [nr: string]: Point };
             this.measurements = [];
         },
         addPoint(point: Point) {
-            this.points.push(point);
+            this.points[point.nr] = point;
         },
     },
+
     persist: {
         enabled: true,
-        onRestored: (store) => {
-            console.log('store restored', store);
+        serializer: {
+            deserialize: (value: string) => {
+                let n = {
+                    points: {} as { [nr: string]: Point },
+                    measurements: [] as Measurement[],
+                };
+                let json: {
+                    points: {
+                        [nr: string]: {
+                            nr: string,
+                            description?: string,
+                            coordinates: {
+                                epsg: string,
+                                x?: number,
+                                y?: number,
+                                z?: number,
+                                accuracy: number,
+                            }[],
+                        }
+                    },
+                    measurements: Measurement[],
+                } = JSON.parse(value);
+                for (let nr in json.points) {
+                    let p = json.points[nr];
+                    let point = new Point(p.nr, p.description);
+                    for (let coord of p.coordinates) {
+                        point.addCoordinate(coord.epsg, coord.x, coord.y, coord.z, coord.accuracy);
+                    }
+                    n.points[p.nr] = point;
+                }
+                console.log('deserialized', n);
+                return n;
+            },
+            serialize: JSON.stringify,
         }
     },
 });

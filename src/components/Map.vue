@@ -3,49 +3,40 @@
 </template>
 
 <script lang="ts" setup>
-import "ol/ol.css";
-import Map from "ol/Map";
-import View from "ol/View";
-import TileLayer from "ol/layer/Tile";
-import OSM from "ol/source/OSM";
-import { useGeographic } from "ol/proj";
-import Point from "ol/geom/Point";
-import Feature from "ol/Feature";
-import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
-import axios from "axios";
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { Coordinate } from 'ol/coordinate';
-import ImageTile from "ol/ImageTile";
-import TileState from 'ol/TileState';
-import Tile from "ol/Tile";
+import { Point as StorePoint, useMeasureStore } from "@/store";
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { alertController, IonAlert } from '@ionic/vue';
-import { onMounted, watch } from "vue";
+import axios from "axios";
+import { Coordinate } from 'ol/coordinate';
+import Feature from "ol/Feature";
 import Geolocation from "ol/Geolocation";
-import Style from "ol/style/Style";
+import { Point } from "ol/geom";
+import ImageTile from "ol/ImageTile";
+import TileLayer from "ol/layer/Tile";
+import VectorLayer from "ol/layer/Vector";
+import Map from "ol/Map";
+import "ol/ol.css";
+import { useGeographic } from "ol/proj";
+import OSM from "ol/source/OSM";
+import VectorSource from "ol/source/Vector";
+import CircleStyle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
-import CircleStyle from "ol/style/Circle";
-import { useMeasureStore } from "@/store";
-import { storeToRefs } from "pinia";
-import { PointHelper } from "@/store";
+import Style from "ol/style/Style";
+import Tile from "ol/Tile";
+import TileState from 'ol/TileState';
+import View from "ol/View";
+import { onMounted, watch } from "vue";
+import { Store } from "vuex";
 
 const store = useMeasureStore();
 
 
 const source = new VectorSource<Feature<Point>>();
-watch(() => store.points, (points) => {
-    source.clear();
-    points.forEach((pd) => {
-        const c = PointHelper.getLatLon(pd);
-        if (!c) {
-            return;
-        }
-        const p = new Feature(new Point(c));
-        source.addFeature(p);
-    });
-});
 
+store.$subscribe(() => {
+    storePoints2LayerSource(store.points);
+})
 
 const props = defineProps({
     initialCoordinates: {
@@ -53,7 +44,6 @@ const props = defineProps({
         type: Array as () => Coordinate
     },
 });
-
 
 
 useGeographic();
@@ -108,17 +98,22 @@ onMounted(() => {
                 {
                     text: 'Speichern',
                     handler: (val) => {
-                        if (val.nr) {
-                            const p = {
-                                nr: val.nr,
-                                description: val.description,
-                                coordinates: []
-                            };
-                            PointHelper.addCoordinate(p, map.getView().getProjection(), lonLat[0], lonLat[1]);
-                            store.points.push(p);
-                            //store.addPoint(p);
+                        if (val.nr && !(val.nr in store.points)) {
+                            const p = new StorePoint(val.nr, val.description);
+                            p.addCoordinate(map.getView().getProjection(), lonLat[0], lonLat[1]);
+                            //store.points.push(p);
+                            store.addPoint(p);
+
                             return true;
                         }
+
+                        alertController.create({
+                            header: 'Fehler',
+                            message: 'Punktnummer leer oder bereits vergeben.',
+                            buttons: ['OK']
+                        }).then(alert => {
+                            alert.present();
+                        });
                         return false;
                     }
                 }
@@ -175,7 +170,21 @@ onMounted(() => {
     });
     geolocation.setTracking(true);
 
+    storePoints2LayerSource(store.points);
+
 });
+
+function storePoints2LayerSource(points: { [nr: string]: StorePoint }) {
+    source.clear();
+    Object.values(points).forEach((pd) => {
+        const c = pd.getLatLon();
+        if (!c) {
+            return;
+        }
+        const p = new Feature(new Point(c));
+        source.addFeature(p);
+    });
+}
 
 function tiles(tile: Tile, src: string) {
     axios({
