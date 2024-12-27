@@ -3,10 +3,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useMeasureStore } from "@/store";
+import { useMeasureStore, useSettingStore } from "@/store";
 import { Point as StorePoint } from "@/types/Point";
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
-import { alertController, IonAlert } from '@ionic/vue';
+import { alertController } from '@ionic/vue';
 import axios from "axios";
 import { Coordinate } from 'ol/coordinate';
 import Feature from "ol/Feature";
@@ -27,10 +27,10 @@ import Style from "ol/style/Style";
 import Tile from "ol/Tile";
 import TileState from 'ol/TileState';
 import View from "ol/View";
-import { onMounted, watch } from "vue";
-import { Store } from "vuex";
+import { onMounted } from "vue";
 
 const store = useMeasureStore();
+const settingStore = useSettingStore();
 
 
 const source = new VectorSource<Feature<Point>>();
@@ -102,8 +102,6 @@ onMounted(() => {
                         if (val.nr && !(val.nr in store.points)) {
                             const p = new StorePoint(val.nr, val.description);
                             p.addCoordinate(map.getView().getProjection(), lonLat[0], lonLat[1]);
-                            //store.points.push(p);
-                            //@ts-ignore
                             store.addPoint(p);
 
                             return true;
@@ -170,7 +168,15 @@ onMounted(() => {
             features: [accuracyFeature, positionFeature],
         }),
     });
-    geolocation.setTracking(true);
+
+    geolocation.setTracking(settingStore.geolocation);
+    vl.setVisible(settingStore.geolocation);
+
+    settingStore.$subscribe(() => {
+        geolocation.setTracking(settingStore.geolocation);
+        vl.setVisible(settingStore.geolocation);
+        map.render();
+    });
 
     storePoints2LayerSource(store.points);
 

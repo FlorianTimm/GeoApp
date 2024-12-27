@@ -19,7 +19,7 @@ const model = defineModel();
 const store = useMeasureStore();
 const { points, measurements } = storeToRefs(store);
 
-const props = defineProps({
+defineProps({
     newPoint: Boolean,
     placeholder: {
         type: String,
@@ -65,7 +65,6 @@ const optionSelected = (e: CustomEvent) => {
                             if (val.local) {
                                 //TODO: get current position
                             }
-                            //@ts-ignore
                             store.addPoint(p); 
                             model.value = p;
                             emit('input', p);
@@ -86,7 +85,7 @@ const optionSelected = (e: CustomEvent) => {
             alert.present();
         });
     } else {
-        //emit('input', e.detail.value);
+        emit('input', e.detail.value);
         console.log(e.detail.value);
     }
 }

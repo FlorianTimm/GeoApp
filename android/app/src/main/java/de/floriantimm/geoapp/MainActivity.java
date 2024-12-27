@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package de.floriantimm.geoapp;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -3,9 +3,10 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="#" @click="optionSelected('')" v-if="selected"></ion-back-button>
+          <ion-back-button default-href="#" @click="store.setMeasureMethod('')"
+            v-if="store.getMeasureMethod() != ''"></ion-back-button>
         </ion-buttons>
-        <ion-title>{{ title }}</ion-title>
+        <ion-title>{{ title[store.getMeasureMethod()] }}</ion-title>
         <ion-buttons slot="end">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
@@ -17,10 +18,11 @@
           <ion-title size="large">Tab 1</ion-title>
         </ion-toolbar>
       </ion-header>
-      <SelectMeasureMethod v-if="!selected" @select="optionSelected" />
-      <Theodolit v-if="selected == 'theodolit'" v-bind:source="source" />
-      <Winkelprisma v-if="selected == 'winkelprisma'" v-bind:source="source" />
-      <Nivellier v-if="selected == 'nivellier'" v-bind:source="source" />
+      <SelectMeasureMethod v-if="store.getMeasureMethod() == ''" />
+      <Theodolit v-if="store.getMeasureMethod() == 'theo_measure'" />
+      <TheoResection v-if="store.getMeasureMethod() == 'theo_resection'" />
+      <Winkelprisma v-if="store.getMeasureMethod() == 'prism'" />
+      <Nivellier v-if="store.getMeasureMethod() == 'level'" />
     </ion-content>
   </ion-page>
 </template>
@@ -28,26 +30,24 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenuButton } from '@ionic/vue';
 import SelectMeasureMethod from '@/views/measure/SelectMeasureMethod.vue';
-import { ref } from 'vue';
-import VectorSource from 'ol/source/Vector';
-import Theodolit from '@/views/measure/Theodolit.vue';
+import Theodolit from '@/views/measure/theo/Theodolit.vue';
+import TheoResection from '@/views/measure/theo/TheoResection.vue';
 import Winkelprisma from '@/views/measure/Winkelprisma.vue';
 import Nivellier from '@/views/measure/Nivellier.vue';
-import { Point } from 'ol/geom';
-import { Feature } from 'ol';
+import { useStore, MeasureMethodType } from '@/store';
 
-let selected = ref<string>('');
-let title = ref<string>('Tab 1');
+type TitleMap = Record<MeasureMethodType, string>;
 
-const optionSelected = (option: string) => {
-  selected.value = option;
-  title.value = option.charAt(0).toUpperCase() + option.slice(1);
-  if (option == '') {
-    title.value = 'Tab 1';
-  }
-}
+const title: TitleMap = {
+  '': 'Select Method',
+  theo_measure: 'Measurement',
+  theo_freestation: 'Free Station',
+  theo_resection: 'Resection',
+  theo_onpoint: 'Setup on Point',
+  theo_stakeout: 'Stakeout',
+  level: 'Level',
+  prism: 'Prism',
+};
 
-defineProps({
-  source: VectorSource<Feature<Point>>
-})
+const store = useStore();
 </script>

@@ -53,3 +53,15 @@ export class Point {
         return coord ? coord[0] : null;
     }
 }
+
+export type PointJSON = {
+    nr: string,
+    description?: string,
+    coordinates: {
+        epsg: string,
+        x?: number,
+        y?: number,
+        z?: number,
+        accuracy: number,
+    }[],
+}

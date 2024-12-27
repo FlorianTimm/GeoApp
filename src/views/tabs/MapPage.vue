@@ -2,7 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
+
         <ion-title>Map</ion-title>
+        <ion-buttons slot="secondary">
+          <ion-toggle v-model="settingStore.geolocation">Geolocation</ion-toggle>
+        </ion-buttons>
         <ion-buttons slot="end">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
@@ -21,13 +25,17 @@
 </template>
 
 <script lang="ts" setup>
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonToggle } from '@ionic/vue';
 import Map from '@/components/Map.vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
+import { useSettingStore } from '@/store';
 
 defineProps({
   source: VectorSource<Feature<Point>>,
 });
+
+const settingStore = useSettingStore();
+
 </script>

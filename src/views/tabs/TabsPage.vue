@@ -10,6 +10,12 @@
         <ion-item button @click="console.log('Export JSON')">
           <ion-label>Export JSON</ion-label>
         </ion-item>
+        <ion-item button @click="console.log('Import JSON')">
+          <ion-label>Import JSON</ion-label>
+        </ion-item>
+        <ion-item button href="/settings">
+          <ion-label>Settings</ion-label>
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>
