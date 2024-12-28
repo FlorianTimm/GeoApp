@@ -29,6 +29,8 @@ import TileState from 'ol/TileState';
 import View from "ol/View";
 import { onMounted } from "vue";
 
+import { transform } from 'ol/proj';
+
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
 const store = useStore();
@@ -61,6 +63,7 @@ onMounted(() => {
         target: "map",
         view: new View({
             center: props.initialCoordinates,
+            projection: 'EPSG:3857',
             zoom: 12,
         }),
     });
@@ -101,9 +104,9 @@ onMounted(() => {
                     handler: (val) => {
                         if (val.nr && !(val.nr in measureStore.points)) {
                             const p = new StorePoint(val.nr, val.description);
-                            p.addCoordinate(map.getView().getProjection(), lonLat[0], lonLat[1]);
+                            const coord = transform(lonLat, 'EPSG:4326', settingStore.getProjection());
+                            p.addCoordinate(settingStore.getProjection(), coord[0], coord[1],);
                             measureStore.addPoint(p);
-
                             return true;
                         }
 
@@ -128,7 +131,7 @@ onMounted(() => {
         trackingOptions: {
             enableHighAccuracy: true,
         },
-        //projection: map.getView().getProjection(),
+        projection: 'EPSG:4326',
     });
 
     const accuracyFeature = new Feature();
@@ -137,6 +140,7 @@ onMounted(() => {
         if (geom) {
             accuracyFeature.setGeometry(geom);
         }
+        store.setAccuracy(geolocation.getAccuracy() ?? null);
     });
 
     const positionFeature = new Feature();
@@ -155,12 +159,22 @@ onMounted(() => {
         }),
     );
 
+    let firstGeolocation = true;
     geolocation.on('change:position', function () {
         const coordinates = geolocation.getPosition();
-        positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
         console.log('Position changed', coordinates);
-        map.getView().setCenter(coordinates);
-        store.setPosition(coordinates ?? null);
+        if (!coordinates) {
+            return;
+        }
+        positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
+        if (firstGeolocation) {
+            map.getView().setCenter(coordinates);
+            firstGeolocation = false;
+        }
+        if (coordinates) {
+            store.setPosition(transform(coordinates, 'EPSG:4326', settingStore.getProjection()));
+            console.log('Position changed', store.position);
+        }
     });
 
     const vl = new VectorLayer({
@@ -177,6 +191,7 @@ onMounted(() => {
         geolocation.setTracking(settingStore.geolocation);
         vl.setVisible(settingStore.geolocation);
         map.render();
+        firstGeolocation = true;
     });
 
     storePoints2LayerSource(measureStore.points);
@@ -186,7 +201,8 @@ onMounted(() => {
 function storePoints2LayerSource(points: { [nr: string]: StorePoint }) {
     source.clear();
     Object.values(points).forEach((pd) => {
-        const c = pd.getLatLon();
+        const c = pd.get2DCoordinate('EPSG:4326');
+        console.log(c);
         if (!c) {
             return;
         }

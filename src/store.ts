@@ -32,6 +32,21 @@ export const useMeasureStore = defineStore('measure', {
         },
         getMeasurements() {
             return this.measurements;
+        },
+        removePoint(nr: string): boolean {
+            console.log('remove point', nr);
+            const isReferenced = this.measurements.some(measurement => {
+                if (measurement instanceof TheoResectionMeasure) {
+                    return measurement.pointNumber === nr || measurement.measures.some(measure => measure.nr === nr);
+                }
+                return false;
+            });
+
+            if (isReferenced) {
+                return false;
+            }
+            delete this.points[nr];
+            return true;
         }
     },
 
@@ -114,6 +129,7 @@ export const useStore = defineStore('store', {
     state: () => ({
         measureMethod: '' as MeasureMethodType,
         position: null as Coordinate | null,
+        accuracy: null as number | null
     }),
     getters: {
         getMeasureMethod: (state) => () => state.measureMethod,
@@ -125,6 +141,9 @@ export const useStore = defineStore('store', {
         },
         setPosition(position: Coordinate | null) {
             this.position = position;
+        },
+        setAccuracy(accuracy: number | null) {
+            this.accuracy = accuracy;
         }
     },
 });

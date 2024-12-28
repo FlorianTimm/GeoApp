@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Tab 2</ion-title>
+        <ion-title>Coordinates</ion-title>
         <ion-buttons slot="end">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
@@ -20,13 +20,19 @@
           <tbody>
             <tr>
               <th>Name</th>
-              <th>Latitude</th>
-              <th>Longitude</th>
+              <th>Easting</th>
+              <th>Northing</th>
+              <th></th>
             </tr>
-            <tr v-for="item in store.points" :key="item.nr">
+            <tr v-for="item in measureStore.points" :key="item.nr">
               <td>{{ item.nr }}</td>
-              <td>{{ item.getLat() }}</td>
-              <td>{{ item.getLon() }}</td>
+              <td>{{ round(item.getCoordinateComponents('x'), 3) }}</td>
+              <td>{{ round(item.getCoordinateComponents('y'), 3) }}</td>
+              <td>
+                <ion-button @click="removePoint(item.nr)">
+                  <ion-icon :icon="trash"></ion-icon>
+                </ion-button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -42,12 +48,15 @@
 
 <script setup lang="ts">
 import { useMeasureStore } from '@/store';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon, IonButton } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 import { alertController } from '@ionic/vue';
 import { Point } from '@/types/Point';
+import { round } from '@/utils';
+import { trash } from 'ionicons/icons';
 
-const store = useMeasureStore();
+
+const measureStore = useMeasureStore();
 
 const addPoint = () => {
   alertController.create({
@@ -83,7 +92,7 @@ const addPoint = () => {
       {
         text: 'Speichern',
         handler: (val) => {
-          if (val.nr && !(val.nr in store.points)) {
+          if (val.nr && !(val.nr in measureStore.points)) {
             let p = new Point(val.nr, val.description)
             if (val.local) {
               //TODO: get current position
@@ -91,7 +100,7 @@ const addPoint = () => {
             if (val.lat && val.lon) {
               p.addCoordinate('EPSG:3857', val.lat, val.lon);
             }
-            store.addPoint(p);
+            measureStore.addPoint(p);
             return true;
           }
           alertController.create({
@@ -110,4 +119,48 @@ const addPoint = () => {
   });
 };
 
+
+const removePoint = (nr: string) => {
+  alertController.create({
+    header: 'Delete Point',
+    message: 'Do you really want to delete point ' + nr + '?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'DELETE',
+        handler: () => {
+          if (!measureStore.removePoint(nr)) {
+            alertController.create({
+              header: 'Error',
+              message: 'Point is in use by measurements.',
+              buttons: ['OK']
+            }).then(alert => {
+              alert.present();
+            });
+          }
+        }
+      }
+    ],
+  }).then(alert => {
+    alert.present();
+  });
+}
 </script>
+
+<style scoped>
+table {
+  width: 100%;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+}
+</style>
