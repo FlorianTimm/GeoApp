@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { useMeasureStore } from '@/store';
+import { useMeasureStore, useSettingStore, useStore } from '@/store';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon, IonButton } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 import { alertController } from '@ionic/vue';
@@ -57,8 +57,13 @@ import { trash } from 'ionicons/icons';
 
 
 const measureStore = useMeasureStore();
+const settingStore = useSettingStore();
+const store = useStore();
 
 const addPoint = () => {
+  const pos = store.getPosition()
+  const acc = store.getAccuracy()
+  console.log(pos, acc)
   alertController.create({
     header: 'Neuer Punkt',
     message: 'Bitte geben Sie die Informationen für den neuen Punkt ein.',
@@ -74,14 +79,21 @@ const addPoint = () => {
         placeholder: 'Beschreibung'
       },
       {
-        name: 'lat',
+        name: 'easting',
         type: 'number',
-        placeholder: 'Latitude'
+        placeholder: pos ? pos[0].toFixed(0) : 'Easting',
+        label: 'Easting'
       },
       {
-        name: 'lon',
+        name: 'northing',
         type: 'number',
-        placeholder: 'Longitude'
+        placeholder: pos ? pos[1].toFixed(0) : 'Northing',
+        label: 'Northing'
+      },
+      {
+        name: 'local',
+        type: 'checkbox',
+        label: 'Aktuelle Position verwenden'
       }
     ],
     buttons: [
@@ -94,11 +106,23 @@ const addPoint = () => {
         handler: (val) => {
           if (val.nr && !(val.nr in measureStore.points)) {
             let p = new Point(val.nr, val.description)
-            if (val.local) {
-              //TODO: get current position
+            if (val.local && pos) {
+              p.addCoordinate({
+                source: 'gps',
+                epsg: settingStore.getEpsg(),
+                x: pos[0],
+                y: pos[1],
+                accuracy: acc ?? 5
+              });
             }
             if (val.lat && val.lon) {
-              p.addCoordinate('EPSG:3857', val.lat, val.lon);
+              p.addCoordinate({
+                source: 'manual',
+                epsg: settingStore.getEpsg(),
+                x: val.easting,
+                y: val.northing,
+                accuracy: 0
+              });
             }
             measureStore.addPoint(p);
             return true;

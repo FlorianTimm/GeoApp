@@ -3,7 +3,7 @@ import { Point, PointJSON } from '@/types/Point';
 import { Measurement } from '@/types/Measurement';
 import { MeasurementHelper } from '@/types/MeasurementHelper';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
-import { Projection } from 'ol/proj';
+import { get, Projection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 
 export interface StateTree {
@@ -80,7 +80,7 @@ export const useMeasureStore = defineStore('measure', {
                     let p = json.points[nr];
                     let point = new Point(p.nr, p.description);
                     for (let coord of p.coordinates) {
-                        point.addCoordinate(coord.epsg, coord.x, coord.y, coord.z, coord.accuracy);
+                        point.addCoordinate(coord);
                     }
                     n.points[p.nr] = point;
                 }
@@ -122,7 +122,8 @@ export const useStore = defineStore('store', {
     }),
     getters: {
         getMeasureMethod: (state) => () => state.measureMethod,
-        getPosition: (state) => () => state.position
+        getPosition: (state) => () => state.position,
+        getAccuracy: (state) => () => state.accuracy
     },
     actions: {
         setMeasureMethod(method: MeasureMethodType) {

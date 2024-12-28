@@ -71,6 +71,15 @@
                     <td>{{ item.nr }}</td>
                     <td>{{ item.hz }}</td>
                     <td>{{ item.v }}</td>
+                    <td>{{
+                        (measure?.headingAngle(measureStore.getPoint(measure?.pointNumber)?.getCoordinate() ?? {
+                            x: 0, y:
+                                0
+                        },
+                            measureStore.getPoint(item.nr).getCoordinate() ?? { x: 0, y: 0 }) ?? 0) -
+                        (measure.orientation ?? 1)
+                    }}
+                    </td>
                 </tr>
             </tbody>
         </table>

@@ -20,11 +20,8 @@ export class Point {
         this.settingStore = useSettingStore();
     }
 
-    addCoordinate(epsg: Projection | string, x?: number, y?: number, z?: number, accuracy: number = 5) {
-        if (typeof epsg !== 'string') {
-            epsg = epsg.getCode();
-        }
-        this.coordinates.push({ epsg, x, y, z, accuracy });
+    addCoordinate(e: CoordinateEntry) {
+        this.coordinates.push(e);
     }
 
     getCoordinate(epsg?: Projection | string): CoordinateEntry | null {
@@ -42,7 +39,7 @@ export class Point {
             const altCoord = this.coordinates[0];
             if (altCoord.x && altCoord.y) {
                 let nCoord = transform([altCoord.x, altCoord.y], altCoord.epsg, epsg);
-                return { epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 1 };
+                return { source: 'transform', epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 1 };
             }
         }
         return null;
@@ -87,9 +84,12 @@ export type PointJSON = {
 }
 
 export type CoordinateEntry = {
+    source: CoordinateSource;
     epsg: string;
     x?: number;
     y?: number;
     z?: number;
     accuracy: number;
 };
+
+export type CoordinateSource = 'manual' | 'gps' | 'map' | 'import' | 'calculation' | 'transform';

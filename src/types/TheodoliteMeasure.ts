@@ -60,7 +60,57 @@ export class TheodoliteMeasure extends Measurement {
     }
 
     resection(location: Point, measures: { target: CoordinateEntry, measure: TheodoliteMeasureEntry }[]) {
-        return null;
+        const filtered = measures.filter(m => m.target.x && m.target.y && m.measure.hz).sort((a, b) => (a.measure.hz ?? 0) - (b.measure.hz ?? 0));
+        if (filtered.length < 3) {
+            return null;
+        }
+
+        const pa = filtered[0];
+        const pm = filtered[1];
+        const pb = filtered[2];
+
+        const ya = pa.target.x;
+        const xa = pa.target.y;
+        const yb = pb.target.x;
+        const xb = pb.target.y;
+        const ym = pm.target.x;
+        const xm = pm.target.y;
+
+        if (!pm.measure.hz || !pa.measure.hz || !pb.measure.hz || !ya || !xa || !yb || !xb || !ym || !xm) {
+            return null;
+        }
+        const alpha = pm.measure.hz - pa.measure.hz;
+        const beta = pb.measure.hz - pm.measure.hz;
+
+        console.log('alpha', alpha);
+        console.log('beta', beta);
+
+        const tan = (x: number) => Math.tan(x / 200 * Math.PI);
+        const cot = (x: number) => 1 / tan(x);
+        const yc = ya + (xm - xa) * cot(alpha)
+        const xc = xa - (ym - ya) * cot(alpha)
+
+        const yd = yb + (xb - xm) * cot(beta)
+        const xd = xb - (yb - ym) * cot(beta)
+
+        const tcd = this.headingAngle({ x: yc, y: xc }, { x: yd, y: xd });
+
+        if (tcd === null) {
+            return null;
+        }
+
+        const xn = xc + ((ym - yc + (xm - xc) * cot(tcd)) / (tan(tcd) + cot(tcd)));
+        let yn;
+        if (tan(tcd) < cot(tcd)) {
+            yn = yc + (xn - xc) * tan(tcd);
+        } else {
+            yn = ym + (xn - xm) * cot(tcd);
+        }
+
+        console.log('xn', xn);
+        console.log('yn', yn);
+        location.addCoordinate({ x: yn, y: xn, accuracy: 5, source: 'calculation', epsg: pa.target.epsg });
+        this.setupOnPoint(location, measures);
     }
 
     setupOnPoint(location: Point, measures: { target: CoordinateEntry, measure: TheodoliteMeasureEntry }[]) {
@@ -92,13 +142,17 @@ export class TheodoliteMeasure extends Measurement {
         return true;
     }
 
-    headingAngle(fromCoord: CoordinateEntry, toCoord: CoordinateEntry): number | null {
+    headingAngle(fromCoord: CoordinateEntry | { x: number, y: number }, toCoord: CoordinateEntry | { x: number, y: number }): number | null {
         if (!fromCoord || !toCoord || !fromCoord.x || !fromCoord.y || !toCoord.x || !toCoord.y) {
             return null;
         }
         const dx = toCoord.x - fromCoord.x;
         const dy = toCoord.y - fromCoord.y;
-        return Math.atan2(dx, dy) / Math.PI * 200.;
+        let t = Math.atan2(dx, dy) / Math.PI * 200.;
+        if (t < 0) {
+            t += 400;
+        }
+        return t;
     }
 
     static fromJson(json: any): TheodoliteMeasure {

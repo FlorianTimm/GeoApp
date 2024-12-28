@@ -6,7 +6,7 @@
 import { useMeasureStore, useSettingStore, useStore } from "@/store";
 import { Point as StorePoint } from "@/types/Point";
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
-import { alertController } from '@ionic/vue';
+import { actionSheetController, alertController, IonIcon } from '@ionic/vue';
 import axios from "axios";
 import { Coordinate } from 'ol/coordinate';
 import Feature from "ol/Feature";
@@ -28,8 +28,13 @@ import Tile from "ol/Tile";
 import TileState from 'ol/TileState';
 import View from "ol/View";
 import { onMounted } from "vue";
+import { Select } from 'ol/interaction';
 
 import { transform } from 'ol/proj';
+import Text from "ol/style/Text";
+import Icon from "ol/style/Icon";
+import RegularShape from "ol/style/RegularShape";
+import { round } from "@/utils";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -70,15 +75,144 @@ onMounted(() => {
 
 
 
-
     //this.source.addFeatures([new Feature(new Point(this.initialCoordinates))]);
-    const layer = new VectorLayer({
+    const pointLayer = new VectorLayer({
         source: source,
-    });
-    map.addLayer(layer);
+        style: (feature) => new Style({
+            image: new RegularShape({
+                fill: new Fill({
+                    color: '#888',
+                }),
+                stroke: new Stroke({
+                    color: '#000',
+                    width: 2,
+                }),
+                points: 3,
+                radius: 7,
 
+                angle: 0,
+            }),
+            text: new Text({
+                text: feature.get('nr'),
+                font: '15px Calibri,sans-serif',
+                textBaseline: 'bottom',
+                textAlign: 'start',
+                offsetX: 3,
+                offsetY: -3,
+                stroke: new Stroke({
+                    color: '#fff',
+                    width: 2,
+                }),
+            }),
+        }),
+
+    });
+    map.addLayer(pointLayer);
+    const selectInteraction = new Select({
+        layers: [pointLayer],
+    });
+    map.addInteraction(selectInteraction);
+    selectInteraction.on('select', (e) => {
+        console.log(e);
+    });
+    selectInteraction.setActive(true);
+    selectInteraction.on('select', (e) => {
+        console.log(e);
+        if (e.selected.length === 0) {
+            return;
+        }
+        const f = e.selected[0];
+        console.log(f);
+        const nr = f.get('nr');
+        console.log(nr);
+        const point = measureStore.getPoint(nr);
+        console.log(point);
+        const coord = point.getCoordinate();
+        let text = ''
+        if (measureStore.points[nr].description)
+            text += 'Description: ' + measureStore.points[nr].description + '; ';
+        if (coord) {
+            text += 'X: ' + coord.x?.toFixed(3) + '; ' +
+                'Y: ' + coord.y?.toFixed(3) + ';\n' +
+                'Accuracy: ' + coord.accuracy.toFixed(3) + 'm';
+        }
+        actionSheetController.create({
+            header: 'Point ' + nr,
+            subHeader: text,
+            buttons: [
+                {
+                    text: 'Edit',
+                    handler: () => {
+                        alertController.create({
+                            header: 'Edit Point',
+                            message: 'Please enter the new information for the point.',
+                            inputs: [
+                                {
+                                    name: 'description',
+                                    type: 'text',
+                                    placeholder: 'Description',
+                                    value: point.description
+                                }
+                            ],
+                            buttons: [
+                                {
+                                    text: 'Cancel',
+                                    role: 'cancel'
+                                },
+                                {
+                                    text: 'Save',
+                                    handler: (val) => {
+                                        point.description = val.description;
+                                    }
+                                }
+                            ]
+                        }).then(alert => {
+                            alert.present();
+                        });
+                    }
+                },
+                {
+                    text: 'Delete',
+                    role: 'destructive',
+                    handler: () => {
+
+                        alertController.create({
+                            header: 'Point ' + nr,
+                            message: 'Do you really want to delete point ' + nr + '?',
+                            buttons: [
+                                {
+                                    text: 'Close',
+                                    role: 'cancel'
+                                },
+                                {
+                                    text: 'Delete',
+                                    handler: () => {
+                                        measureStore.removePoint(nr);
+                                    }
+                                }
+                            ]
+                        }).then(alert => {
+                            alert.present();
+                        });
+
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    role: 'cancel'
+                }
+            ]
+        }).then(actionSheet => {
+            actionSheet.present();
+        });
+    });
     map.on("click", (e) => {
         const lonLat = e.coordinate;
+        if (map.getFeaturesAtPixel(e.pixel, {
+            layerFilter: (layer) => layer === pointLayer,
+        }).length > 0) {
+            return;
+        }
         alertController.create({
             header: 'Neuer Punkt',
             message: 'Bitte geben Sie die Informationen für den neuen Punkt ein.',
@@ -105,7 +239,13 @@ onMounted(() => {
                         if (val.nr && !(val.nr in measureStore.points)) {
                             const p = new StorePoint(val.nr, val.description);
                             const coord = transform(lonLat, 'EPSG:4326', settingStore.getProjection());
-                            p.addCoordinate(settingStore.getProjection(), coord[0], coord[1],);
+                            p.addCoordinate({
+                                source: 'map',
+                                epsg: settingStore.getProjection().getCode(),
+                                x: coord[0],
+                                y: coord[1],
+                                accuracy: (map.getView().getResolution() ?? 1) * 5
+                            });
                             measureStore.addPoint(p);
                             return true;
                         }
@@ -202,11 +342,11 @@ function storePoints2LayerSource(points: { [nr: string]: StorePoint }) {
     source.clear();
     Object.values(points).forEach((pd) => {
         const c = pd.get2DCoordinate('EPSG:4326');
-        console.log(c);
         if (!c) {
             return;
         }
         const p = new Feature(new Point(c));
+        p.set('nr', pd.nr);
         source.addFeature(p);
     });
 }
