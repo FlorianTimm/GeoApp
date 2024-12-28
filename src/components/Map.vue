@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useMeasureStore, useSettingStore } from "@/store";
+import { useMeasureStore, useSettingStore, useStore } from "@/store";
 import { Point as StorePoint } from "@/types/Point";
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { alertController } from '@ionic/vue';
@@ -29,14 +29,14 @@ import TileState from 'ol/TileState';
 import View from "ol/View";
 import { onMounted } from "vue";
 
-const store = useMeasureStore();
+const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
-
+const store = useStore();
 
 const source = new VectorSource<Feature<Point>>();
 
-store.$subscribe(() => {
-    storePoints2LayerSource(store.points);
+measureStore.$subscribe(() => {
+    storePoints2LayerSource(measureStore.points);
 })
 
 const props = defineProps({
@@ -99,10 +99,10 @@ onMounted(() => {
                 {
                     text: 'Speichern',
                     handler: (val) => {
-                        if (val.nr && !(val.nr in store.points)) {
+                        if (val.nr && !(val.nr in measureStore.points)) {
                             const p = new StorePoint(val.nr, val.description);
                             p.addCoordinate(map.getView().getProjection(), lonLat[0], lonLat[1]);
-                            store.addPoint(p);
+                            measureStore.addPoint(p);
 
                             return true;
                         }
@@ -160,6 +160,7 @@ onMounted(() => {
         positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
         console.log('Position changed', coordinates);
         map.getView().setCenter(coordinates);
+        store.setPosition(coordinates ?? null);
     });
 
     const vl = new VectorLayer({
@@ -178,7 +179,7 @@ onMounted(() => {
         map.render();
     });
 
-    storePoints2LayerSource(store.points);
+    storePoints2LayerSource(measureStore.points);
 
 });
 

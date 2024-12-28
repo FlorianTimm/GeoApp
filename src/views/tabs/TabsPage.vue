@@ -16,6 +16,9 @@
         <ion-item button href="/settings">
           <ion-label>Settings</ion-label>
         </ion-item>
+        <ion-item button @click="resetMeasures()">
+          <ion-label style="color:red">Delete data</ion-label>
+        </ion-item>
       </ion-list>
     </ion-content>
   </ion-menu>
@@ -45,4 +48,28 @@
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet, IonMenu, IonTitle, IonContent, IonToolbar, IonHeader, IonItem, IonList } from '@ionic/vue';
 import { triangle, map, reader } from 'ionicons/icons';
+import { alertController } from '@ionic/vue';
+import { useMeasureStore } from '@/store';
+
+const resetMeasures = () => {
+  alertController.create({
+    header: 'Delete data',
+    message: 'Do you really want to delete all data?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'DELETE',
+        handler: (val) => {
+          const measureStore = useMeasureStore();
+          measureStore.truncate();
+        }
+      }
+    ],
+  }).then(alert => {
+    alert.present();
+  });
+};
 </script>

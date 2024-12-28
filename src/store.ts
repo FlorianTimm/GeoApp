@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import { Point, PointJSON } from '@/types/Point';
 import { Measurement } from '@/types/Measurement';
 import { TheoResectionMeasure } from '@/types/TheoResectionMeasure';
+import { Projection } from 'ol/proj';
+import { Coordinate } from 'ol/coordinate';
 
 export interface StateTree {
     points: { [nr: string]: Point }
@@ -98,6 +100,11 @@ export const useSettingStore = defineStore('settings', {
         'epsg': 'EPSG:25832',
         'geolocation': true
     }),
+    getters: {
+        getEpsg: (state) => () => state.epsg,
+        getProjection: (state) => () => new Projection({ code: state.epsg }),
+        getGeolocation: (state) => () => state.geolocation,
+    },
     persist: true
 });
 
@@ -106,13 +113,18 @@ export type MeasureMethodType = '' | 'theo_measure' | 'theo_onpoint' | 'theo_fre
 export const useStore = defineStore('store', {
     state: () => ({
         measureMethod: '' as MeasureMethodType,
+        position: null as Coordinate | null,
     }),
     getters: {
         getMeasureMethod: (state) => () => state.measureMethod,
+        getPosition: (state) => () => state.position
     },
     actions: {
         setMeasureMethod(method: MeasureMethodType) {
             this.measureMethod = method;
         },
+        setPosition(position: Coordinate | null) {
+            this.position = position;
+        }
     },
 });
