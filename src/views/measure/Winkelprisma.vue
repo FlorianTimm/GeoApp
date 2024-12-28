@@ -46,7 +46,7 @@
 import { ref } from 'vue';
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import { getDistance } from 'ol/sphere';
-import { WinkelprismaMeasure } from '@/types/WinkelprismaMeasure';
+import { PrismMeasure } from '@/types/PrismMeasure';
 import { IonInput, IonIcon } from '@ionic/vue';
 import { add } from 'ionicons/icons';
 import { IonButton } from '@ionic/vue';
@@ -60,7 +60,7 @@ addIcons({
 const point1 = ref<Point>();
 const point2 = ref<Point>();
 
-const measure = ref<WinkelprismaMeasure>();
+const measure = ref<PrismMeasure>();
 
 const point_new = ref<Point>();
 const abscissa_new = ref<number>();
@@ -80,7 +80,7 @@ const addPoint = () => {
     if (point_new.value && abscissa_new.value && ordinate_new.value) {
         console.log('new point', point_new.value, abscissa_new.value, ordinate_new.value);
         if (!measure.value) {
-            measure.value = new WinkelprismaMeasure();
+            measure.value = new PrismMeasure();
         }
         measure.value.points.push({
             point: point_new.value,

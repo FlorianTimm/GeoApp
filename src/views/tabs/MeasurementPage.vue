@@ -20,7 +20,7 @@
       </ion-header>
       <SelectMeasureMethod v-if="store.getMeasureMethod() == ''" />
       <Theodolit v-if="store.getMeasureMethod() == 'theo_measure'" />
-      <TheoResection v-if="store.getMeasureMethod() == 'theo_resection'" />
+      <TheoSetup v-if="store.getMeasureMethod() == 'theo_setup'" />
       <Winkelprisma v-if="store.getMeasureMethod() == 'prism'" />
       <Nivellier v-if="store.getMeasureMethod() == 'level'" />
     </ion-content>
@@ -31,7 +31,7 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenuButton } from '@ionic/vue';
 import SelectMeasureMethod from '@/views/measure/SelectMeasureMethod.vue';
 import Theodolit from '@/views/measure/theo/Theodolit.vue';
-import TheoResection from '@/views/measure/theo/TheoResection.vue';
+import TheoSetup from '@/views/measure/theo/TheoSetup.vue';
 import Winkelprisma from '@/views/measure/Winkelprisma.vue';
 import Nivellier from '@/views/measure/Nivellier.vue';
 import { useStore, MeasureMethodType } from '@/store';
@@ -41,9 +41,7 @@ type TitleMap = Record<MeasureMethodType, string>;
 const title: TitleMap = {
   '': 'Select Method',
   theo_measure: 'Measurement',
-  theo_freestation: 'Free Station',
-  theo_resection: 'Resection',
-  theo_onpoint: 'Setup on Point',
+  theo_setup: 'Setup',
   theo_stakeout: 'Stakeout',
   level: 'Level',
   prism: 'Prism',

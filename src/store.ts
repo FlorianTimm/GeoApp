@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { Point, PointJSON } from '@/types/Point';
 import { Measurement } from '@/types/Measurement';
-import { TheoResectionMeasure } from '@/types/TheoResectionMeasure';
+import { MeasurementHelper } from '@/types/MeasurementHelper';
+import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { Projection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 
@@ -36,7 +37,7 @@ export const useMeasureStore = defineStore('measure', {
         removePoint(nr: string): boolean {
             console.log('remove point', nr);
             const isReferenced = this.measurements.some(measurement => {
-                if (measurement instanceof TheoResectionMeasure) {
+                if (measurement instanceof TheodoliteMeasure) {
                     return measurement.pointNumber === nr || measurement.measures.some(measure => measure.nr === nr);
                 }
                 return false;
@@ -64,11 +65,14 @@ export const useMeasureStore = defineStore('measure', {
                     measurements: {
                         type: string,
                         pointNumber?: string,
+                        instrumentHeight?: number,
                         description?: string,
                         second?: boolean,
                         measures: {
                             nr?: string,
-                            v?: number
+                            v?: number,
+                            hz?: number,
+                            targetHeight?: number,
                         }[]
                     }[],
                 } = JSON.parse(value);
@@ -81,24 +85,9 @@ export const useMeasureStore = defineStore('measure', {
                     n.points[p.nr] = point;
                 }
                 for (let m of json.measurements) {
-                    switch (m.type) {
-                        case 'theo-resection':
-                            if (!m.pointNumber) {
-                                console.error('missing point number');
-                                break;
-                            }
-                            let theoResection = new TheoResectionMeasure(m.pointNumber, m.description, m.second);
-                            for (let measure of m.measures) {
-                                if (!measure.nr || !measure.v) {
-                                    console.error('missing measure nr or value');
-                                    continue;
-                                }
-                                theoResection.addMeasure(measure.nr, measure.v);
-                            }
-                            n.measurements.push(theoResection);
-                            break;
-                        default:
-                            console.error('unknown measurement type', m.type);
+                    let measure: Measurement | null = MeasurementHelper.fromJson(m)
+                    if (measure) {
+                        n.measurements.push(measure);
                     }
                 }
                 console.log('deserialized', n);
@@ -123,7 +112,7 @@ export const useSettingStore = defineStore('settings', {
     persist: true
 });
 
-export type MeasureMethodType = '' | 'theo_measure' | 'theo_onpoint' | 'theo_freestation' | 'theo_resection' | 'theo_stakeout' | 'prism' | 'level';
+export type MeasureMethodType = '' | 'theo_measure' | 'theo_setup' | 'theo_stakeout' | 'prism' | 'level';
 
 export const useStore = defineStore('store', {
     state: () => ({

@@ -7,13 +7,7 @@ import { transform } from 'ol/proj';
 export class Point {
     nr: string;
     description?: string;
-    coordinates: {
-        epsg: string;
-        x?: number;
-        y?: number;
-        z?: number;
-        accuracy: number;
-    }[];
+    coordinates: CoordinateEntry[];
     settingStore: ReturnType<typeof useSettingStore>;
 
 
@@ -33,14 +27,14 @@ export class Point {
         this.coordinates.push({ epsg, x, y, z, accuracy });
     }
 
-    getCoordinate(epsg?: Projection | string) {
+    getCoordinate(epsg?: Projection | string): CoordinateEntry | null {
         if (!epsg) {
             epsg = this.settingStore.getEpsg();
         } else if (typeof epsg !== 'string') {
             epsg = epsg.getCode();
         }
 
-        const coord = this.coordinates.find(c => c.epsg === epsg);
+        const coord = this.coordinates.sort((a, b) => a.accuracy - b.accuracy).find(c => c.epsg === epsg);
         if (coord) {
             return coord;
         }
@@ -89,11 +83,13 @@ export class Point {
 export type PointJSON = {
     nr: string,
     description?: string,
-    coordinates: {
-        epsg: string,
-        x?: number,
-        y?: number,
-        z?: number,
-        accuracy: number,
-    }[],
+    coordinates: CoordinateEntry[],
 }
+
+export type CoordinateEntry = {
+    epsg: string;
+    x?: number;
+    y?: number;
+    z?: number;
+    accuracy: number;
+};

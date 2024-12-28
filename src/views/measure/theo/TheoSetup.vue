@@ -2,10 +2,15 @@
     <span v-if="!measure">
         <ion-list>
             <ion-item>
-                <ion-input label-placement="stacked" label='Point' v-model="nr" type="text"></ion-input>
+                <ion-label label-placement="stacked">Point</ion-label>
+                <PointNumberSelect v-model="nr" newPoint />
             </ion-item>
             <ion-item>
                 <ion-input label-placement="stacked" label='Description' v-model="description" type="text"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-input label-placement="stacked" label='instrument height [m]' v-model="ih"
+                    type="number"></ion-input>
             </ion-item>
             <ion-item>
                 <ion-label>2. Lage</ion-label>
@@ -15,10 +20,6 @@
                 <ion-input label-placement="stacked" label='angle accuracy ["]' v-model="accuracy" type="number"
                     v-bind:placeholder="second ? '1' : '3'"></ion-input>
             </ion-item>
-            <ion-item v-if="settingStore.geolocation">
-                <ion-label>GPS as first guess</ion-label>
-                <ion-toggle v-model="gps" position="end"></ion-toggle>
-            </ion-item>
         </ion-list>
 
         <div class="ion-padding">
@@ -27,21 +28,34 @@
         </div>
     </span>
     <span v-if="measure">
-        Point {{ measure.measures.length + 1 }}<br>
+        <br>
         <ion-list>
+            <ion-item>
+                <ion-label>Point {{ measure.measures.length + 1 }}</ion-label>
+            </ion-item>
             <ion-item>
                 <ion-label position="stacked">Point</ion-label>
                 <PointNumberSelect v-model="point" />
             </ion-item>
             <ion-item>
-                <ion-label position="stacked">Direction</ion-label>
-                <GonInput v-model="gon" />
+                <ion-label position="stacked">Horizontal direction</ion-label>
+                <GonInput v-model="hz" />
+            </ion-item>
+            <ion-item>
+                <ion-label position="stacked">Vertical angle</ion-label>
+                <IonInput v-model="v" type="number" />
+            </ion-item>
+            <ion-item>
+                <ion-label position="stacked">Distance</ion-label>
+                <IonInput v-model="s" type="number" />
             </ion-item>
         </ion-list>
 
         <div class="ion-padding">
             <ion-button expand="block" @click="addPoint" class="ion-text-wrap ion-no-margin"
-                v-bind:disabled="!point || !gon">Next</ion-button>
+                v-bind:disabled="!point || !hz">Next</ion-button>
+        </div>
+        <div class="ion-padding">
             <ion-button expand="block" @click="calc" class="ion-text-wrap ion-no-margin"
                 v-bind:disabled="measure.measures.length < 3">Calculate Position</ion-button>
         </div>
@@ -50,14 +64,17 @@
             <tbody>
                 <tr>
                     <th>Point</th>
-                    <th>Direction</th>
+                    <th>Hz</th>
+                    <th>V</th>
                 </tr>
                 <tr v-for="item in measure.measures" :key="item.nr">
                     <td>{{ item.nr }}</td>
+                    <td>{{ item.hz }}</td>
                     <td>{{ item.v }}</td>
                 </tr>
             </tbody>
         </table>
+        Orientation: {{ measure.orientation }}
     </span>
 </template>
 
@@ -67,29 +84,39 @@ import { ref } from 'vue';
 import { Point } from "@/types/Point";
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import GonInput from '@/components/GonInput.vue';
-import { TheoResectionMeasure } from '@/types/TheoResectionMeasure';
-import { useMeasureStore, useSettingStore } from '@/store';
-import { alertController } from '@ionic/vue';
+import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
+import { useMeasureStore } from '@/store';
 
 const point = ref<Point>();
-const gon = ref<number>();
-const gps = ref<boolean>(true);
+const ih = ref<number>();
+const hz = ref<number>();
+const v = ref<number>();
+const th = ref<number>();
 const accuracy = ref<number>();
-const nr = ref<string>();
+const nr = ref<Point>();
+const s = ref<number>();
 const description = ref<string>();
 const second = ref<boolean>();
 
-let measure = ref<TheoResectionMeasure>();
+let measure = ref<TheodoliteMeasure>();
 const measureStore = useMeasureStore();
-const settingStore = useSettingStore();
 
 const addPoint = () => {
-    if (!measure.value || !point.value || !gon.value) {
+    if (!measure.value || !point.value || !hz.value) {
         return;
     }
-    measure.value.addMeasure(point.value, gon.value);
+    measure.value.addMeasure({
+        nr: point.value.nr,
+        lage: 1,
+        hz: hz.value,
+        v: v.value,
+        targetHeight: th.value,
+        distance: s.value
+    });
     point.value = undefined;
-    gon.value = undefined;
+    hz.value = undefined;
+    v.value = undefined;
+    s.value = undefined;
 }
 
 const start = () => {
@@ -97,21 +124,12 @@ const start = () => {
     if (!nr.value) {
         return;
     }
-    if (nr.value in measureStore.points) {
-        alertController.create({
-            header: 'Fehler',
-            message: 'Punktnummer leer oder bereits vergeben.',
-            buttons: ['OK']
-        }).then(alert => {
-            alert.present();
-        });
-    }
-    measure.value = new TheoResectionMeasure(
-        nr.value,
+    measure.value = new TheodoliteMeasure(
+        nr.value.nr,
         description.value,
         second.value,
         accuracy.value ?? (second.value ? 1 : 3),
-        settingStore.geolocation ? gps.value : false
+        ih.value ?? 0
     );
     measureStore.addMeasurement(measure.value);
 }
