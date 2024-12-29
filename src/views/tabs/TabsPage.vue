@@ -76,7 +76,7 @@ const resetMeasures = () => {
 const exportJSON = () => {
   const measureStore = useMeasureStore();
   const data = measureStore.export();
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -126,9 +126,8 @@ const importData = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const data = JSON.parse(e.target?.result as string);
         const measureStore = useMeasureStore();
-        measureStore.import(data);
+        measureStore.import(e.target?.result as string);
       };
       reader.readAsText(file);
     }

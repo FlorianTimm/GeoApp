@@ -20,6 +20,16 @@ export const gonToRad = (angle: number) => {
     return angle / 200 * Math.PI;
 }
 
+export const distance = (a: xy, b: xy) => {
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+export const zenithDistance = (distance: number, heightDifference: number) => {
+    return radToGon(Math.atan2(distance, heightDifference))
+}
+
 export const gonBetween0And400 = (angle: number) => {
     while (angle < 0) {
         angle += 400;

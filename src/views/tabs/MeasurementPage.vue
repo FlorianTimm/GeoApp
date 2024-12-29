@@ -21,6 +21,7 @@
       <SelectMeasureMethod v-if="store.getMeasureMethod() == ''" />
       <Theodolit v-if="store.getMeasureMethod() == 'theo_measure'" />
       <TheoSetup v-if="store.getMeasureMethod() == 'theo_setup'" />
+      <TheoStakeOut v-if="store.getMeasureMethod() == 'theo_stakeout'" />
       <Prism v-if="store.getMeasureMethod() == 'prism'" />
       <Level v-if="store.getMeasureMethod() == 'level'" />
     </ion-content>
@@ -32,6 +33,7 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, Io
 import SelectMeasureMethod from '@/views/measure/SelectMeasureMethod.vue';
 import Theodolit from '@/views/measure/theo/Theodolite.vue';
 import TheoSetup from '@/views/measure/theo/TheoSetup.vue';
+import TheoStakeOut from '@/views/measure/theo/TheoStakeOut.vue';
 import Prism from '@/views/measure/Prism.vue';
 import Level from '@/views/measure/Level.vue';
 import { useStore, MeasureMethodType } from '@/store';

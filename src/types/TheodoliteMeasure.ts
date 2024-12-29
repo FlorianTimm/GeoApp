@@ -2,7 +2,7 @@ import { useMeasureStore } from "@/store";
 import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry2D } from "./CoordinateEntry";
-import { azimuth, cot, tan, round, gonBetween0And400 } from "@/utils";
+import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance } from "@/utils";
 
 
 export class TheodoliteMeasure extends Measurement {
@@ -173,6 +173,44 @@ export class TheodoliteMeasure extends Measurement {
         }
         measure.measures = json.measures;
         return measure;
+    }
+
+    stakeOut(point: Point, target_height: number = 0): { distance?: number, hz?: number, v?: number } {
+        const coord = point.getCoordinate() as CoordinateEntry2D;
+        if (!coord || coord.x === undefined || coord.y === undefined) {
+            return { distance: undefined, hz: undefined, v: undefined };
+        }
+        const orientation = this.orientation;
+        if (orientation === undefined) {
+            return { distance: undefined, hz: undefined, v: undefined };
+        }
+        const measureStore = useMeasureStore();
+        const location = measureStore.getPoint(this.pointNumber);
+        if (!location) {
+            return { distance: undefined, hz: undefined, v: undefined };
+        }
+        const locationCoord = location.getCoordinate() as CoordinateEntry2D;
+        if (!locationCoord || locationCoord.x === undefined || locationCoord.y === undefined) {
+            return { distance: undefined, hz: undefined, v: undefined };
+        }
+
+        const dist = distance(locationCoord, coord);
+        const angle = azimuth(locationCoord, coord);
+
+        let v: number | undefined;
+        if (locationCoord.z !== undefined && coord.z !== undefined) {
+
+            let hdiff = coord.z - locationCoord.z + target_height - (this.instrumentHeight ?? 0);
+
+            v = zenithDistance(dist, hdiff);
+
+        }
+
+        return {
+            distance: round(dist),
+            hz: round(angle, 4),
+            v: v !== undefined ? round(v, 4) : undefined
+        }
     }
 
     getShortInfo(): string {

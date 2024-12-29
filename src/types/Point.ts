@@ -62,6 +62,10 @@ export class Point {
         return this.get2DCoordinate('EPSG:3857');
     }
 
+    getHeight(): number | null {
+        return this.getCoordinateComponents('z');
+    }
+
     getLat(): number | null {
         const coord = this.getLatLon();
         return coord ? coord[1] : null;
