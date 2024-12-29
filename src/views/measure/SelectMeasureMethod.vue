@@ -10,12 +10,12 @@
                 out</ion-button>
         </ion-item>
         <ion-item>
-            <ion-label>Nivellier</ion-label>
-            <ion-button @click="store.setMeasureMethod('level')">Nivellier</ion-button>
+            <ion-label>Level</ion-label>
+            <ion-button @click="store.setMeasureMethod('level')">Level</ion-button>
         </ion-item>
         <ion-item>
-            <ion-label>Maßband/Winkelprisma</ion-label>
-            <ion-button @click="store.setMeasureMethod('prism')">Winkelprisma</ion-button>
+            <ion-label>Tape/Prism</ion-label>
+            <ion-button @click="store.setMeasureMethod('prism')">Prism</ion-button>
         </ion-item>
     </ion-list>
     <ion-title>Measurements</ion-title>

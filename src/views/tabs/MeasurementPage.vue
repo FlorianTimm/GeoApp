@@ -21,8 +21,8 @@
       <SelectMeasureMethod v-if="store.getMeasureMethod() == ''" />
       <Theodolit v-if="store.getMeasureMethod() == 'theo_measure'" />
       <TheoSetup v-if="store.getMeasureMethod() == 'theo_setup'" />
-      <Winkelprisma v-if="store.getMeasureMethod() == 'prism'" />
-      <Nivellier v-if="store.getMeasureMethod() == 'level'" />
+      <Prism v-if="store.getMeasureMethod() == 'prism'" />
+      <Level v-if="store.getMeasureMethod() == 'level'" />
     </ion-content>
   </ion-page>
 </template>
@@ -30,10 +30,10 @@
 <script setup lang="ts">
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton, IonButtons, IonMenuButton } from '@ionic/vue';
 import SelectMeasureMethod from '@/views/measure/SelectMeasureMethod.vue';
-import Theodolit from '@/views/measure/theo/Theodolit.vue';
+import Theodolit from '@/views/measure/theo/Theodolite.vue';
 import TheoSetup from '@/views/measure/theo/TheoSetup.vue';
-import Winkelprisma from '@/views/measure/Winkelprisma.vue';
-import Nivellier from '@/views/measure/Nivellier.vue';
+import Prism from '@/views/measure/Prism.vue';
+import Level from '@/views/measure/Level.vue';
 import { useStore, MeasureMethodType } from '@/store';
 
 type TitleMap = Record<MeasureMethodType, string>;
