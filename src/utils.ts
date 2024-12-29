@@ -51,4 +51,15 @@ export const cot = (x: number) => {
     }
 }
 
+export const format = (value: number | null, decimals: number = 3) => {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    console.log(typeof value);
+    if (typeof value === 'string') {
+        value = parseFloat(value);
+    }
+    return value.toFixed(decimals);
+}
+
 type xy = { x: number, y: number } | CoordinateEntry2D;

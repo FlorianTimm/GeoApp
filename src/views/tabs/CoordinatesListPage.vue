@@ -26,8 +26,8 @@
             </tr>
             <tr v-for="item in measureStore.points" :key="item.nr">
               <td>{{ item.nr }}</td>
-              <td>{{ item.getCoordinateComponents('x')?.toFixed(3) }}</td>
-              <td>{{ item.getCoordinateComponents('y')?.toFixed(3) }}</td>
+              <td>{{ format(item.getCoordinateComponents('x')) }}</td>
+              <td>{{ format(item.getCoordinateComponents('y')) }}</td>
               <td>
                 <ion-button @click="removePoint(item.nr)">
                   <ion-icon :icon="trash"></ion-icon>
@@ -53,6 +53,7 @@ import { add } from 'ionicons/icons';
 import { alertController } from '@ionic/vue';
 import { Point } from '@/types/Point';
 import { trash } from 'ionicons/icons';
+import { format } from '@/utils';
 
 
 const measureStore = useMeasureStore();
@@ -114,12 +115,12 @@ const addPoint = () => {
                 accuracy: acc ?? 5
               });
             }
-            if (val.lat && val.lon) {
+            if (val.easting && val.northing) {
               p.addCoordinate({
                 source: 'manual',
                 epsg: settingStore.getEpsg(),
-                x: val.easting,
-                y: val.northing,
+                x: parseFloat(val.easting),
+                y: parseFloat(val.northing),
                 accuracy: 0
               });
             }

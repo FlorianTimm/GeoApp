@@ -2,7 +2,7 @@ import { useMeasureStore } from "@/store";
 import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry2D } from "./CoordinateEntry";
-import { azimuth, cot, tan, round } from "@/utils";
+import { azimuth, cot, tan, round, gonBetween0And400 } from "@/utils";
 
 
 export class TheodoliteMeasure extends Measurement {
@@ -121,7 +121,7 @@ export class TheodoliteMeasure extends Measurement {
         console.log('xn', xn);
         console.log('yn', yn);
         location.addCoordinate({ x: yn, y: xn, accuracy: 5, source: 'calculation', epsg: pa.target.epsg });
-        return { x: xn, y: yn };
+        return { x: yn, y: xn };
     }
 
     setupOnPoint(location: Point, measures: { target: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
@@ -137,19 +137,25 @@ export class TheodoliteMeasure extends Measurement {
             }
             console.log('angle_v', angle);
             angle -= m.measure.hz;
-            if (angle < 0) {
-                angle += 400;
-            }
-            console.log('angle_n', angle);
-            return angle
+            return gonBetween0And400(angle);
         }).filter(a => a !== null) as number[];
 
-        const cos = angles.reduce((a, b) => a + Math.cos(b / 200 * Math.PI), 0);
-        const sin = angles.reduce((a, b) => a + Math.sin(b / 200 * Math.PI), 0);
-        let avg = azimuth({ x: 0, y: 0 }, { x: cos, y: sin });
-        console.log('avg', avg);
-        this.orientation = avg;
-        return avg;
+
+        let sum = 0
+        for (let i = 0; i < angles.length; i++) {
+            if (i == 0) {
+                sum = angles[i];
+                continue;
+            }
+            let tmpAvg = sum / i;
+            if (tmpAvg - angles[i] > 200) {
+                angles[i] -= 400;
+            } else if (tmpAvg - angles[i] < -200) {
+                angles[i] += 400;
+            }
+            sum += angles[i];
+        }
+        return gonBetween0And400(sum / angles.length);
     }
 
     static fromJson(json: any): TheodoliteMeasure {

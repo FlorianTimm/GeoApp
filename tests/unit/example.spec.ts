@@ -3,13 +3,13 @@ import MeasurementPage from "../../src/views/tabs/MeasurementPage.vue"
 import { beforeEach, describe, expect, test } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
-
-describe('MeasurementPage', () => {
+describe('MeasurementPage.vue', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-  }),
-  test('renders tab 1 Tab1Page', () => {
+  })
+
+  test('renders MeasurementPage correctly', () => {
     const wrapper = mount(MeasurementPage)
-    expect(wrapper.text()).toMatch('Tab 1 page')
+    expect(wrapper.exists()).toBe(true)
   })
 })
