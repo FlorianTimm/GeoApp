@@ -9,16 +9,11 @@ export class Point {
     nr: string;
     description?: string;
     coordinates: CoordinateEntry[];
-    settingStore: ReturnType<typeof useSettingStore>;
-
 
     constructor(nr: string, description?: string) {
         this.nr = nr;
         this.description = description;
         this.coordinates = [];
-
-
-        this.settingStore = useSettingStore();
     }
 
     addCoordinate(e: CoordinateEntry) {
@@ -27,7 +22,7 @@ export class Point {
 
     getCoordinate(epsg?: Projection | string): CoordinateEntry | null {
         if (!epsg) {
-            epsg = this.settingStore.getEpsg();
+            epsg = useSettingStore().getEpsg();
         } else if (typeof epsg !== 'string') {
             epsg = epsg.getCode();
         }

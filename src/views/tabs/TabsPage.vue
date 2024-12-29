@@ -7,10 +7,10 @@
     </ion-header>
     <ion-content class="ion-padding">
       <ion-list>
-        <ion-item button @click="console.log('Export JSON')">
+        <ion-item button @click="exportJSON()">
           <ion-label>Export JSON</ion-label>
         </ion-item>
-        <ion-item button @click="console.log('Import JSON')">
+        <ion-item button @click="importJSON()">
           <ion-label>Import JSON</ion-label>
         </ion-item>
         <ion-item button href="/settings">
@@ -71,5 +71,68 @@ const resetMeasures = () => {
   }).then(alert => {
     alert.present();
   });
+};
+
+const exportJSON = () => {
+  const measureStore = useMeasureStore();
+  const data = measureStore.export();
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'measurements.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const importJSON = () => {
+  if (useMeasureStore().getMeasurements().length > 0
+    || Object.keys(useMeasureStore().getPoints()).length > 0) {
+    alertController.create({
+      header: 'Import data',
+      message: 'Do you really want to import data? This will delete all existing data!',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Export first, then Import',
+          handler: () => {
+            exportJSON();
+            importData();
+          }
+        },
+        {
+          text: 'Import, delete existing data',
+          handler: () => {
+            importData();
+          }
+        }
+      ],
+    }).then(alert => {
+      alert.present();
+    });
+  } else {
+    importData();
+  }
+}
+const importData = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = JSON.parse(e.target?.result as string);
+        const measureStore = useMeasureStore();
+        measureStore.import(data);
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
 };
 </script>

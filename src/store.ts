@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, StateTree } from 'pinia';
 import { Point, PointJSON } from '@/types/Point';
 import { Measurement } from '@/types/Measurement';
 import { MeasurementHelper } from '@/types/MeasurementHelper';
@@ -6,10 +6,51 @@ import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { get, Projection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 
-export interface StateTree {
-    points: { [nr: string]: Point }
-    measurements: Measurement[];
+
+const serializeToJson = (data: StateTree): string => {
+    return JSON.stringify(data)
 }
+
+const deserializeFromJson = (data: string): StateTree => {
+    let n = {
+        points: {} as { [nr: string]: Point; },
+        measurements: [] as Measurement[],
+    };
+    let json: {
+        points: {
+            [nr: string]: PointJSON;
+        };
+        measurements: {
+            type: string;
+            pointNumber?: string;
+            instrumentHeight?: number;
+            description?: string;
+            second?: boolean;
+            measures: {
+                nr?: string;
+                v?: number;
+                hz?: number;
+                targetHeight?: number;
+            }[];
+        }[];
+    } = JSON.parse(data);
+    for (let nr in json.points) {
+        let p = json.points[nr];
+        let point = new Point(p.nr, p.description);
+        for (let coord of p.coordinates) {
+            point.addCoordinate(coord);
+        }
+        n.points[p.nr] = point;
+    }
+    for (let m of json.measurements) {
+        let measure: Measurement | null = MeasurementHelper.fromJson(m);
+        if (measure) {
+            n.measurements.push(measure);
+        }
+    }
+    console.log('deserialized', n);
+    return n;
+};
 
 export const useMeasureStore = defineStore('measure', {
     state: () => ({
@@ -19,6 +60,9 @@ export const useMeasureStore = defineStore('measure', {
     getters: {
         getPoint: (state) => (nr: string) => state.points[nr],
         isTheoSetup: (state) => () => state.measurements.length > 0,
+        getPoints: (state) => () => state.points,
+        getMeasurements: (state) => () => state.measurements,
+        export: (state) => () => serializeToJson(state),
     },
     actions: {
         truncate() {
@@ -30,9 +74,6 @@ export const useMeasureStore = defineStore('measure', {
         },
         addMeasurement(measurement: Measurement) {
             this.measurements.push(measurement);
-        },
-        getMeasurements() {
-            return this.measurements;
         },
         removePoint(nr: string): boolean {
             console.log('remove point', nr);
@@ -49,6 +90,12 @@ export const useMeasureStore = defineStore('measure', {
             delete this.points[nr];
             return true;
         },
+
+        import(value: string) {
+            const v = deserializeFromJson(value);
+            this.measurements = v.measurements;
+            this.points = v.points;
+        },
         removeMeasurement(measurement: Measurement) {
             this.measurements = this.measurements.filter(m => m !== measurement);
         },
@@ -56,47 +103,8 @@ export const useMeasureStore = defineStore('measure', {
 
     persist: {
         serializer: {
-            deserialize: (value: string) => {
-                let n = {
-                    points: {} as { [nr: string]: Point },
-                    measurements: [] as Measurement[],
-                };
-                let json: {
-                    points: {
-                        [nr: string]: PointJSON
-                    },
-                    measurements: {
-                        type: string,
-                        pointNumber?: string,
-                        instrumentHeight?: number,
-                        description?: string,
-                        second?: boolean,
-                        measures: {
-                            nr?: string,
-                            v?: number,
-                            hz?: number,
-                            targetHeight?: number,
-                        }[]
-                    }[],
-                } = JSON.parse(value);
-                for (let nr in json.points) {
-                    let p = json.points[nr];
-                    let point = new Point(p.nr, p.description);
-                    for (let coord of p.coordinates) {
-                        point.addCoordinate(coord);
-                    }
-                    n.points[p.nr] = point;
-                }
-                for (let m of json.measurements) {
-                    let measure: Measurement | null = MeasurementHelper.fromJson(m)
-                    if (measure) {
-                        n.measurements.push(measure);
-                    }
-                }
-                console.log('deserialized', n);
-                return n;
-            },
-            serialize: JSON.stringify,
+            deserialize: deserializeFromJson,
+            serialize: serializeToJson,
         }
     },
 });
@@ -145,3 +153,5 @@ export const useStore = defineStore('store', {
         }
     },
 });
+
+
