@@ -1,0 +1,101 @@
+{
+    "points": {
+        "101": {
+            "nr": "101",
+            "description": "",
+            "coordinates": [
+                {
+                    "source": "manual",
+                    "epsg": "EPSG:25832",
+                    "x": 527647.181,
+                    "y": 6005521.703,
+                    "z": 13.0,
+                    "accuracy": 0
+                }
+            ]
+        },
+        "102": {
+            "nr": "102",
+            "description": "",
+            "coordinates": [
+                {
+                    "source": "manual",
+                    "epsg": "EPSG:25832",
+                    "x": 527649.929,
+                    "y": 6005530.878,
+                    "z": 13.0,
+                    "accuracy": 0
+                }
+            ]
+        },
+        "103": {
+            "nr": "103",
+            "description": "",
+            "coordinates": [
+                {
+                    "source": "manual",
+                    "epsg": "EPSG:25832",
+                    "x": 527662.014,
+                    "y": 6005527.26,
+                    "z": 13.0,
+                    "accuracy": 0
+                }
+            ]
+        },
+        "104": {
+            "nr": "104",
+            "description": "",
+            "coordinates": [
+                {
+                    "source": "manual",
+                    "epsg": "EPSG:25832",
+                    "x": 527659.266,
+                    "y": 6005518.084,
+                    "z": 13.0,
+                    "accuracy": 0
+                }
+            ]
+        },
+        "201": {
+            "nr": "201",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527632.5549,
+                    "y": 6005544.2484,
+                    "z": 15.0,
+                    "accuracy": 5,
+                    "source": "calculation",
+                    "epsg": "EPSG:25832"
+                }
+            ]
+        }
+    },
+    "measurements": [
+        {
+            "type": "theodolite",
+            "pointNumber": "201",
+            "description": "",
+            "accuracy": 3,
+            "orientation": 125.15922000751998,
+            "second": false,
+            "measures": [
+                {
+                    "nr": "101",
+                    "lage": 1,
+                    "hz": "38.204"
+                },
+                {
+                    "nr": "102",
+                    "lage": 1,
+                    "hz": "16.5968"
+                },
+                {
+                    "nr": "103",
+                    "lage": 1,
+                    "hz": "8.142"
+                }
+            ]
+        }
+    ]
+}
