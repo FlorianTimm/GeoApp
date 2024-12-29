@@ -2,7 +2,7 @@
     <ion-list>
         <ion-item>
             <ion-label>Theodolite</ion-label>
-            <ion-button @click="store.setMeasureMethod('theo_setup')">Setup</ion-button>
+            <ion-button @click="store.setActiveMeasurement(); store.setMeasureMethod('theo_setup')">Setup</ion-button>
             <ion-button @click="store.setMeasureMethod('theo_measure')"
                 v-bind:disabled="!measureStore.isTheoSetup()">Measure</ion-button>
             <ion-button @click="store.setMeasureMethod('theo_stakeout')"
@@ -21,7 +21,11 @@
     <ion-title>Measurements</ion-title>
     <ion-list>
         <ion-item v-for="measure in measureStore.getMeasurements()">
-            <ion-label>{{ measure.getName() + ' ' + measure.getShortInfo() }}</ion-label>
+            <ion-label v-bind:style="(store.getActiveMeasurement() == measure) ? 'color: black' : 'color: grey'">{{
+                measure.getName()
+                +
+                ' ' +
+                measure.getShortInfo() }}</ion-label>
             <ion-button @click="reactivateMeasure(measure)"><ion-icon name="hammer-outline"></ion-icon></ion-button>
             <ion-button @click="deleteMeasure(measure)"><ion-icon name="trash-outline"></ion-icon></ion-button>
         </ion-item>

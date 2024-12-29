@@ -131,7 +131,7 @@ export const useStore = defineStore('store', {
         getAccuracy: (state) => () => state.accuracy
     },
     actions: {
-        setActiveMeasurement(measurement: Measurement | null) {
+        setActiveMeasurement(measurement: Measurement | null = null) {
             this.activeMeasurement = measurement;
         },
         setMeasureMethod(method: MeasureMethodType) {
