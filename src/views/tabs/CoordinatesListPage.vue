@@ -26,8 +26,8 @@
             </tr>
             <tr v-for="item in measureStore.points" :key="item.nr">
               <td>{{ item.nr }}</td>
-              <td>{{ round(item.getCoordinateComponents('x'), 3) }}</td>
-              <td>{{ round(item.getCoordinateComponents('y'), 3) }}</td>
+              <td>{{ item.getCoordinateComponents('x')?.toFixed(3) }}</td>
+              <td>{{ item.getCoordinateComponents('y')?.toFixed(3) }}</td>
               <td>
                 <ion-button @click="removePoint(item.nr)">
                   <ion-icon :icon="trash"></ion-icon>
@@ -52,7 +52,6 @@ import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, Io
 import { add } from 'ionicons/icons';
 import { alertController } from '@ionic/vue';
 import { Point } from '@/types/Point';
-import { round } from '@/utils';
 import { trash } from 'ionicons/icons';
 
 

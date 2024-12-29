@@ -72,12 +72,15 @@
                     <td>{{ item.hz }}</td>
                     <td>{{ item.v }}</td>
                     <td>{{
-                        (measure?.headingAngle(measureStore.getPoint(measure?.pointNumber)?.getCoordinate() ?? {
-                            x: 0, y:
-                                0
-                        },
-                            measureStore.getPoint(item.nr).getCoordinate() ?? { x: 0, y: 0 }) ?? 0) -
-                        (measure.orientation ?? 1)
+    (azimuth({
+        x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
+        y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
+    },
+        {
+            x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
+            y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
+        }) ?? 0) -
+    (measure.orientation ?? 1)
                     }}
                     </td>
                 </tr>
@@ -95,6 +98,7 @@ import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import GonInput from '@/components/GonInput.vue';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { useMeasureStore } from '@/store';
+import { azimuth } from "@/utils";
 
 const point = ref<Point>();
 const ih = ref<number>();

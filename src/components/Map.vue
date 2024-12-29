@@ -32,9 +32,7 @@ import { Select } from 'ol/interaction';
 
 import { transform } from 'ol/proj';
 import Text from "ol/style/Text";
-import Icon from "ol/style/Icon";
 import RegularShape from "ol/style/RegularShape";
-import { round } from "@/utils";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();

@@ -2,6 +2,7 @@ import { useSettingStore } from '@/store';
 import { Coordinate } from 'ol/coordinate';
 import { Projection } from 'ol/proj';
 import { transform } from 'ol/proj';
+import { CoordinateEntry } from './CoordinateEntry';
 
 
 export class Point {
@@ -82,14 +83,3 @@ export type PointJSON = {
     description?: string,
     coordinates: CoordinateEntry[],
 }
-
-export type CoordinateEntry = {
-    source: CoordinateSource;
-    epsg: string;
-    x?: number;
-    y?: number;
-    z?: number;
-    accuracy: number;
-};
-
-export type CoordinateSource = 'manual' | 'gps' | 'map' | 'import' | 'calculation' | 'transform';
