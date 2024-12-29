@@ -27,4 +27,16 @@ export class PrismMeasure implements Measurement {
         measure.points = json.points;
         return measure;
     }
+
+    getShortInfo(): string {
+        return 'Prism';
+    }
+
+    getLongInfo(): string {
+        return 'Prism';
+    }
+
+    getName(): string {
+        return 'Prism';
+    }
 };

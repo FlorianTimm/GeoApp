@@ -51,7 +51,7 @@ export const cot = (x: number) => {
     }
 }
 
-export const format = (value: number | null, decimals: number = 3) => {
+export const format = (value: number | null | undefined, decimals: number = 3): string => {
     if (value === null || value === undefined) {
         return '';
     }

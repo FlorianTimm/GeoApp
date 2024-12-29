@@ -48,7 +48,10 @@ export const useMeasureStore = defineStore('measure', {
             }
             delete this.points[nr];
             return true;
-        }
+        },
+        removeMeasurement(measurement: Measurement) {
+            this.measurements = this.measurements.filter(m => m !== measurement);
+        },
     },
 
     persist: {
@@ -116,16 +119,21 @@ export type MeasureMethodType = '' | 'theo_measure' | 'theo_setup' | 'theo_stake
 
 export const useStore = defineStore('store', {
     state: () => ({
+        activeMeasurement: null as Measurement | null,
         measureMethod: '' as MeasureMethodType,
         position: null as Coordinate | null,
         accuracy: null as number | null
     }),
     getters: {
+        getActiveMeasurement: (state) => () => state.activeMeasurement,
         getMeasureMethod: (state) => () => state.measureMethod,
         getPosition: (state) => () => state.position,
         getAccuracy: (state) => () => state.accuracy
     },
     actions: {
+        setActiveMeasurement(measurement: Measurement | null) {
+            this.activeMeasurement = measurement;
+        },
         setMeasureMethod(method: MeasureMethodType) {
             this.measureMethod = method;
         },

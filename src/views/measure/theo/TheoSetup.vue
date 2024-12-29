@@ -43,7 +43,7 @@
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Vertical angle</ion-label>
-                <IonInput v-model="v" type="number" />
+                <GonInput v-model="v" />
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Distance</ion-label>
@@ -56,8 +56,8 @@
                 v-bind:disabled="!point || !hz">Next</ion-button>
         </div>
         <div class="ion-padding">
-            <ion-button expand="block" @click="calc" class="ion-text-wrap ion-no-margin"
-                v-bind:disabled="measure.measures.length < 3">Calculate Position</ion-button>
+            <ion-button expand="block" @click="ready()" class="ion-text-wrap ion-no-margin"
+                v-bind:disabled="!(measure.orientation ?? false)">Ready</ion-button>
         </div>
 
         <table>
@@ -66,39 +66,53 @@
                     <th>Point</th>
                     <th>Hz</th>
                     <th>V</th>
+                    <th>Hz (calc)</th>
                 </tr>
-                <tr v-for="item in measure.measures" :key="item.nr">
+                <tr v-for="item, i in measure.measures" :key="item.nr">
                     <td>{{ item.nr }}</td>
-                    <td>{{ item.hz }}</td>
-                    <td>{{ item.v }}</td>
+                    <td>{{ format(item.hz, 4) }}</td>
+                    <td>{{ format(item.v, 4) }}</td>
                     <td>{{
-    (azimuth({
-        x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
-        y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
-    },
-        {
-            x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
-            y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
-        }) ?? 0) -
-    (measure.orientation ?? 1)
-                    }}
+                        format(gonBetween0And400((azimuth({
+                            x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
+                            y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
+                        },
+                            {
+                                x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
+                                y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
+                        }) ?? 0) -
+                        (measure.orientation ?? 0)), 4)
+                        }}
+                    </td>
+                    <td>
+                        <ion-button @click="removePoint(i)">
+                            <ion-icon :icon="trash"></ion-icon>
+                        </ion-button>
                     </td>
                 </tr>
             </tbody>
         </table>
-        Orientation: {{ measure.orientation }}
+        Orientation: {{ format(measure.orientation ?? 0, 4) }}
     </span>
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonList, IonItem, IonLabel, IonInput, IonToggle } from '@ionic/vue';
+import { IonButton, IonList, IonItem, IonLabel, IonInput, IonToggle, alertController } from '@ionic/vue';
 import { ref } from 'vue';
 import { Point } from "@/types/Point";
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import GonInput from '@/components/GonInput.vue';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
-import { useMeasureStore } from '@/store';
-import { azimuth } from "@/utils";
+import { useMeasureStore, useStore } from '@/store';
+import { azimuth, gonBetween0And400 } from "@/utils";
+import { trash } from 'ionicons/icons';
+import { IonIcon } from '@ionic/vue';
+import { addIcons } from 'ionicons';
+import { format } from '@/utils';
+
+addIcons({
+    'trash': trash
+})
 
 const point = ref<Point>();
 const ih = ref<number>();
@@ -111,8 +125,18 @@ const s = ref<number>();
 const description = ref<string>();
 const second = ref<boolean>();
 
-let measure = ref<TheodoliteMeasure>();
+
 const measureStore = useMeasureStore();
+const store = useStore();
+let measure = ref<TheodoliteMeasure>();
+
+
+const actMeasure = store.getActiveMeasurement()
+if (actMeasure && actMeasure.type === 'theodolite') {
+    measure.value = actMeasure as TheodoliteMeasure;
+    console.log(measure.value);
+}
+
 
 const addPoint = () => {
     if (!measure.value || !point.value || !hz.value) {
@@ -122,9 +146,9 @@ const addPoint = () => {
         nr: point.value.nr,
         lage: 1,
         hz: hz.value,
-        v: v.value,
-        targetHeight: th.value,
-        distance: s.value
+        v: typeof v.value === 'string' ? parseFloat(v.value) : v.value,
+        targetHeight: typeof th.value === 'string' ? parseFloat(th.value) : th.value,
+        distance: typeof s.value === 'string' ? parseFloat(s.value) : s.value,
     });
     point.value = undefined;
     hz.value = undefined;
@@ -141,13 +165,38 @@ const start = () => {
         nr.value.nr,
         description.value,
         second.value,
-        accuracy.value ?? (second.value ? 1 : 3),
-        ih.value ?? 0
+        (typeof accuracy.value === 'string' ? parseFloat(accuracy.value) : accuracy.value) ?? (second.value ? 1 : 3),
+        (typeof ih.value === 'string' ? parseFloat(ih.value) : ih.value) ?? 0
     );
     measureStore.addMeasurement(measure.value);
+    store.setActiveMeasurement(measure.value);
 }
 
-const calc = () => {
-    console.log('calc');
+const removePoint = (i: number) => {
+    if (!measure.value) {
+        return;
+    }
+    alertController.create({
+        header: 'Delete Point',
+        message: 'Do you really want to delete this point?',
+        buttons: [
+            {
+                text: 'Cancel',
+                role: 'cancel'
+            },
+            {
+                text: 'Delete',
+                handler: () => {
+                    measure?.value?.removeMeasure(i);
+                }
+            }
+        ]
+    }).then(alert => {
+        alert.present();
+    });
+}
+
+const ready = () => {
+    store.setMeasureMethod('');
 }
 </script>

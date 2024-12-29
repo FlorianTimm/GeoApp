@@ -58,6 +58,7 @@ export class TheodoliteMeasure extends Measurement {
         } else if (locationCoordinate && measures.length > 0) {
             return this.setupOnPoint(location, measures);
         } else {
+            this.orientation = undefined;
             return null;
         }
     }
@@ -155,13 +156,35 @@ export class TheodoliteMeasure extends Measurement {
             }
             sum += angles[i];
         }
-        return gonBetween0And400(sum / angles.length);
+        let avg = gonBetween0And400(sum / angles.length);
+        this.orientation = avg;
+        return avg;
+    }
+
+    removeMeasure(i: number) {
+        this.measures.splice(i, 1);
+        this.calculate();
     }
 
     static fromJson(json: any): TheodoliteMeasure {
         const measure = new TheodoliteMeasure(json.pointNumber, json.description, json.second, json.accuracy, json.gps);
+        if (json.orientation) {
+            measure.orientation = json.orientation;
+        }
         measure.measures = json.measures;
         return measure;
+    }
+
+    getShortInfo(): string {
+        return 'on Point ' + this.pointNumber
+    }
+
+    getLongInfo(): string {
+        return this.getShortInfo() + ' with ' + this.measures.length + ' measures';
+    }
+
+    getName(): string {
+        return 'Theodolite';
     }
 }
 

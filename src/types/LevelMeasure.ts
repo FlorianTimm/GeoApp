@@ -10,4 +10,16 @@ export class LevelMeasure extends Measurement {
         return measure;
     }
 
+    getShortInfo(): string {
+        return 'Level';
+    }
+
+    getLongInfo(): string {
+        return 'Level';
+    }
+
+    getName(): string {
+        return 'Level';
+    }
+
 }

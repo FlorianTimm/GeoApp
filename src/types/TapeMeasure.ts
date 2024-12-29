@@ -10,4 +10,16 @@ export class TapeMeasure extends Measurement {
         return measure;
     }
 
+    getShortInfo(): string {
+        return 'Tape';
+    }
+
+    getLongInfo(): string {
+        return 'Tape';
+    }
+
+    getName(): string {
+        return 'Tape';
+    }
+
 }
