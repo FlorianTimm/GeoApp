@@ -3,7 +3,7 @@ import { Point, PointJSON } from '@/types/Point';
 import { Measurement } from '@/types/Measurement';
 import { MeasurementHelper } from '@/types/MeasurementHelper';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
-import { get, Projection } from 'ol/proj';
+import { Projection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 
 
@@ -113,12 +113,25 @@ export const useMeasureStore = defineStore('measure', {
 export const useSettingStore = defineStore('settings', {
     state: () => ({
         'epsg': 'EPSG:25832',
-        'geolocation': true
+        'geolocation': true,
+        'showMeasurements': true
     }),
     getters: {
         getEpsg: (state) => () => state.epsg,
         getProjection: (state) => () => new Projection({ code: state.epsg }),
         getGeolocation: (state) => () => state.geolocation,
+        getShowMeasurements: (state) => () => state.showMeasurements,
+    },
+    actions: {
+        setEpsg(epsg: string) {
+            this.epsg = epsg;
+        },
+        setGeolocation(geolocation: boolean) {
+            this.geolocation = geolocation;
+        },
+        setShowMeasurements(show: boolean) {
+            this.showMeasurements = show;
+        },
     },
     persist: true
 });

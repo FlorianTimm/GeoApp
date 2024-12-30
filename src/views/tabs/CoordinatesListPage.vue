@@ -22,12 +22,14 @@
               <th>Name</th>
               <th>Easting</th>
               <th>Northing</th>
+              <th>Height</th>
               <th></th>
             </tr>
             <tr v-for="item in measureStore.points" :key="item.nr">
               <td>{{ item.nr }}</td>
               <td>{{ format(item.getCoordinateComponents('x')) }}</td>
               <td>{{ format(item.getCoordinateComponents('y')) }}</td>
+              <td>{{ format(item.getCoordinateComponents('z')) }}</td>
               <td>
                 <ion-button @click="removePoint(item.nr)">
                   <ion-icon :icon="trash"></ion-icon>
@@ -91,6 +93,12 @@ const addPoint = () => {
         label: 'Northing'
       },
       {
+        name: 'height',
+        type: 'number',
+        placeholder: pos ? pos[2].toFixed(0) : 'Height',
+        label: 'Height'
+      },
+      {
         name: 'local',
         type: 'checkbox',
         label: 'Aktuelle Position verwenden'
@@ -112,6 +120,7 @@ const addPoint = () => {
                 epsg: settingStore.getEpsg(),
                 x: pos[0],
                 y: pos[1],
+                z: pos[2],
                 accuracy: acc ?? 5
               });
             }
@@ -121,6 +130,7 @@ const addPoint = () => {
                 epsg: settingStore.getEpsg(),
                 x: parseFloat(val.easting),
                 y: parseFloat(val.northing),
+                z: parseFloat(val.height),
                 accuracy: 0
               });
             }

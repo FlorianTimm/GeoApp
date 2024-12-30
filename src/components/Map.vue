@@ -11,7 +11,7 @@ import axios from "axios";
 import { Coordinate } from 'ol/coordinate';
 import Feature from "ol/Feature";
 import Geolocation from "ol/Geolocation";
-import { Point } from "ol/geom";
+import { LineString, Point } from "ol/geom";
 import ImageTile from "ol/ImageTile";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
@@ -29,19 +29,21 @@ import TileState from 'ol/TileState';
 import View from "ol/View";
 import { onMounted } from "vue";
 import { Select } from 'ol/interaction';
-
 import { transform } from 'ol/proj';
 import Text from "ol/style/Text";
 import RegularShape from "ol/style/RegularShape";
+import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
 const store = useStore();
 
-const source = new VectorSource<Feature<Point>>();
+const pointSource = new VectorSource<Feature<Point>>();
+const measureSource = new VectorSource<Feature<LineString>>();
+let map: Map;
 
 measureStore.$subscribe(() => {
-    storePoints2LayerSource(measureStore.points);
+    storePoints2LayerSource();
 })
 
 const props = defineProps({
@@ -54,8 +56,7 @@ const props = defineProps({
 
 useGeographic();
 onMounted(() => {
-    console.log(source);
-    const map = new Map({
+    map = new Map({
         layers: [
             new TileLayer({
                 source: new OSM({
@@ -71,11 +72,15 @@ onMounted(() => {
         }),
     });
 
-
+    new VectorLayer({
+        map: map,
+        source: measureSource,
+    });
 
     //this.source.addFeatures([new Feature(new Point(this.initialCoordinates))]);
     const pointLayer = new VectorLayer({
-        source: source,
+        source: pointSource,
+        map: map,
         style: (feature) => new Style({
             image: new RegularShape({
                 fill: new Fill({
@@ -103,9 +108,7 @@ onMounted(() => {
                 }),
             }),
         }),
-
     });
-    map.addLayer(pointLayer);
     const selectInteraction = new Select({
         layers: [pointLayer],
     });
@@ -269,12 +272,12 @@ onMounted(() => {
         trackingOptions: {
             enableHighAccuracy: true,
         },
-        projection: 'EPSG:4326',
+        projection: settingStore.getProjection(),
     });
 
     const accuracyFeature = new Feature();
     geolocation.on('change:accuracyGeometry', function () {
-        const geom = geolocation.getAccuracyGeometry();
+        const geom = geolocation.getAccuracyGeometry()?.transform(settingStore.getProjection(), 'EPSG:4326');
         if (geom) {
             accuracyFeature.setGeometry(geom);
         }
@@ -304,13 +307,14 @@ onMounted(() => {
         if (!coordinates) {
             return;
         }
-        positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
+        const coord4326 = transform(coordinates, settingStore.getProjection(), 'EPSG:4326');
+        positionFeature.setGeometry(new Point(coord4326));
         if (firstGeolocation) {
-            map.getView().setCenter(coordinates);
+            map.getView().setCenter(coord4326);
             firstGeolocation = false;
         }
         if (coordinates) {
-            store.setPosition(transform(coordinates, 'EPSG:4326', settingStore.getProjection()));
+            store.setPosition(coordinates);
             console.log('Position changed', store.position);
         }
     });
@@ -326,26 +330,62 @@ onMounted(() => {
     vl.setVisible(settingStore.geolocation);
 
     settingStore.$subscribe(() => {
+        storePoints2LayerSource();
         geolocation.setTracking(settingStore.geolocation);
         vl.setVisible(settingStore.geolocation);
         map.render();
         firstGeolocation = true;
     });
 
-    storePoints2LayerSource(measureStore.points);
+    storePoints2LayerSource();
 
 });
 
-function storePoints2LayerSource(points: { [nr: string]: StorePoint }) {
-    source.clear();
-    Object.values(points).forEach((pd) => {
+const zoomToExtent = () => {
+    map.getView().fit(pointSource.getExtent(), {
+        padding: [30, 30, 30, 30],
+        duration: 500,
+    });
+}
+const slideToLocation = () => {
+    if (store.position)
+        map.getView().animate({
+            center: transform(store.position, settingStore.getProjection(), 'EPSG:4326'),
+            duration: 500,
+        })
+};
+
+defineExpose({ zoomToExtent, slideToLocation });
+
+function storePoints2LayerSource() {
+    pointSource.clear();
+    measureSource.clear();
+
+    if (settingStore.getShowMeasurements()) {
+        measureStore.getMeasurements().forEach((m) => {
+            if (m.type == 'theodolite') {
+                const t = m as TheodoliteMeasure;
+                const s = measureStore.getPoint(t.pointNumber).get2DCoordinate('EPSG:4326');
+                t.measures.forEach((entry) => {
+                    const e = measureStore.getPoint(entry.nr).get2DCoordinate('EPSG:4326');
+                    if (!s || !e) {
+                        return;
+                    }
+                    const f = new Feature(new LineString([s, e]));
+                    measureSource.addFeature(f);
+                });
+            }
+        });
+    }
+
+    Object.values(measureStore.getPoints()).forEach((pd) => {
         const c = pd.get2DCoordinate('EPSG:4326');
         if (!c) {
             return;
         }
         const p = new Feature(new Point(c));
         p.set('nr', pd.nr);
-        source.addFeature(p);
+        pointSource.addFeature(p);
     });
 }
 
@@ -399,6 +439,8 @@ async function loadTile(imageTile: Tile, src: string) {
     });
 
 }
+
+
 </script>
 
 <style>
