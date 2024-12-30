@@ -1,32 +1,32 @@
 <template>
-  <ion-menu content-id="map-content" menuId="map" side="start">
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Map Menu</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list>
-        <ion-item>
-          <ion-toggle v-model="settingStore.geolocation">Geolocation</ion-toggle>
-        </ion-item>
-        <ion-item>
-          <ion-toggle v-model="settingStore.showMeasurements">Show measurements</ion-toggle>
-        </ion-item>
-        <ion-item button @click="map.zoomToExtent();">
-          <ion-label>Zoom to extent</ion-label>
-        </ion-item>
-        <ion-item button @click="map.slideToLocation();">
-          <ion-label>to last gps position</ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ion-menu>
   <ion-page>
+    <ion-menu content-id="map-content" menuId="mapMenu" side="start">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Map Menu</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item>
+            <ion-toggle v-model="settingStore.geolocation">Geolocation</ion-toggle>
+          </ion-item>
+          <ion-item>
+            <ion-toggle v-model="settingStore.showMeasurements">Show measurements</ion-toggle>
+          </ion-item>
+          <ion-item button @click="map.zoomToExtent();">
+            <ion-label>Zoom to extent</ion-label>
+          </ion-item>
+          <ion-item button @click="map.slideToLocation();">
+            <ion-label>to last gps position</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-menu-button menu="map"><ion-icon name="map-outline"></ion-icon></ion-menu-button>
+          <ion-menu-button menu="mapMenu"><ion-icon name="map-outline"></ion-icon></ion-menu-button>
         </ion-buttons>
         <ion-title>Map</ion-title>
         <ion-buttons slot="secondary">
@@ -37,7 +37,7 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
+    <ion-content :fullscreen="true" id="map-content">
       <ion-header collapse="condense">
         <ion-toolbar>
           <ion-title size="large">Tab 3</ion-title>

@@ -1,35 +1,38 @@
 <template>
-    <ion-list>
-        <ion-item>
-            <ion-label>Theodolite</ion-label>
-            <ion-button @click="store.setActiveMeasurement(); store.setMeasureMethod('theo_setup')">Setup</ion-button>
-            <ion-button @click="store.setMeasureMethod('theo_measure')"
-                v-bind:disabled="!measureStore.isTheoSetup()">Measure</ion-button>
-            <ion-button @click="store.setMeasureMethod('theo_stakeout')"
-                v-bind:disabled="!measureStore.isTheoSetup()">Stake
-                out</ion-button>
-        </ion-item>
-        <ion-item>
-            <ion-label>Level</ion-label>
-            <ion-button @click="store.setMeasureMethod('level')">Level</ion-button>
-        </ion-item>
-        <ion-item>
-            <ion-label>Tape/Prism</ion-label>
-            <ion-button @click="store.setMeasureMethod('prism')">Prism</ion-button>
-        </ion-item>
-    </ion-list>
-    <ion-title>Measurements</ion-title>
-    <ion-list>
-        <ion-item v-for="measure in measureStore.getMeasurements()">
-            <ion-label v-bind:style="(store.getActiveMeasurement() == measure) ? 'color: black' : 'color: grey'">{{
-                measure.getName()
-                +
-                ' ' +
-                measure.getShortInfo() }}</ion-label>
-            <ion-button @click="reactivateMeasure(measure)"><ion-icon name="hammer-outline"></ion-icon></ion-button>
-            <ion-button @click="deleteMeasure(measure)"><ion-icon name="trash-outline"></ion-icon></ion-button>
-        </ion-item>
-    </ion-list>
+    <div>
+        <ion-list>
+            <ion-item>
+                <ion-label>Theodolite</ion-label>
+                <ion-button
+                    @click="store.setActiveMeasurement(); store.setMeasureMethod('theo_setup')">Setup</ion-button>
+                <ion-button @click="store.setMeasureMethod('theo_measure')"
+                    v-bind:disabled="!measureStore.isTheoSetup()">Measure</ion-button>
+                <ion-button @click="store.setMeasureMethod('theo_stakeout')"
+                    v-bind:disabled="!measureStore.isTheoSetup()">Stake
+                    out</ion-button>
+            </ion-item>
+            <ion-item>
+                <ion-label>Level</ion-label>
+                <ion-button @click="store.setMeasureMethod('level')">Level</ion-button>
+            </ion-item>
+            <ion-item>
+                <ion-label>Tape/Prism</ion-label>
+                <ion-button @click="store.setMeasureMethod('prism')">Prism</ion-button>
+            </ion-item>
+        </ion-list>
+        <ion-title>Measurements</ion-title>
+        <ion-list>
+            <ion-item v-for="measure, i in measureStore.getMeasurements()" :key="i">
+                <ion-label v-bind:style="(store.getActiveMeasurement() == measure) ? 'color: black' : 'color: grey'">{{
+                    measure.getName()
+                    +
+                    ' ' +
+                    measure.getShortInfo() }}</ion-label>
+                <ion-button @click="reactivateMeasure(measure)"><ion-icon name="hammer-outline"></ion-icon></ion-button>
+                <ion-button @click="deleteMeasure(measure)"><ion-icon name="trash-outline"></ion-icon></ion-button>
+            </ion-item>
+        </ion-list>
+    </div>
 </template>
 
 

@@ -1,29 +1,29 @@
 <template>
-  <ion-menu content-id="main-content" side="end">
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Menu Content</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list>
-        <ion-item button @click="exportJSON()">
-          <ion-label>Export JSON</ion-label>
-        </ion-item>
-        <ion-item button @click="importJSON()">
-          <ion-label>Import JSON</ion-label>
-        </ion-item>
-        <ion-item button href="/settings">
-          <ion-label>Settings</ion-label>
-        </ion-item>
-        <ion-item button @click="resetMeasures()">
-          <ion-label style="color:red">Delete data</ion-label>
-        </ion-item>
-      </ion-list>
-    </ion-content>
-  </ion-menu>
-  <ion-page id="main-content">
-    <ion-tabs>
+
+  <ion-page> <ion-menu content-id="main-content" side="end">
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Menu Content</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item button @click="exportJSON()">
+            <ion-label>Export JSON</ion-label>
+          </ion-item>
+          <ion-item button @click="importJSON()">
+            <ion-label>Import JSON</ion-label>
+          </ion-item>
+          <ion-item button href="/settings">
+            <ion-label>Settings</ion-label>
+          </ion-item>
+          <ion-item button @click="resetMeasures()">
+            <ion-label style="color:red">Delete data</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-tabs id="main-content">
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="tab1" href="/tabs/tab1">

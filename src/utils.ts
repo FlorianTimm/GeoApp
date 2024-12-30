@@ -65,7 +65,6 @@ export const format = (value: number | null | undefined, decimals: number = 3): 
     if (value === null || value === undefined) {
         return '';
     }
-    console.log(typeof value);
     if (typeof value === 'string') {
         value = parseFloat(value);
     }
