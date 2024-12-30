@@ -1,12 +1,12 @@
 import { Measurement } from "./Measurement";
 
 export class TapeMeasure extends Measurement {
-    constructor() {
-        super('tape');
+    constructor(id?: string) {
+        super('tape', id);
     }
 
     static fromJson(json: any): TapeMeasure {
-        const measure = new TapeMeasure();
+        const measure = new TapeMeasure(json.id);
         return measure;
     }
 

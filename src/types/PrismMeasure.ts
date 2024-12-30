@@ -1,7 +1,7 @@
 import { Point } from "@/types/Point";
 import { Measurement, MeasurementType } from "@/types/Measurement";
 
-export class PrismMeasure implements Measurement {
+export class PrismMeasure extends Measurement {
     type: MeasurementType = 'prism';
     start?: string
     end?: string
@@ -12,7 +12,8 @@ export class PrismMeasure implements Measurement {
         abscissa: number;
     }[] = [];
 
-    constructor(start?: string, end?: string, distance?: number) {
+    constructor(start?: string, end?: string, distance?: number, id?: string) {
+        super('prism', id);
         this.start = start;
         this.end = end;
         this.distance = distance;
@@ -23,7 +24,7 @@ export class PrismMeasure implements Measurement {
     }
 
     static fromJson(json: any): PrismMeasure {
-        const measure = new PrismMeasure(json.start, json.end, json.distance);
+        const measure = new PrismMeasure(json.start, json.end, json.distance, json.id);
         measure.points = json.points;
         return measure;
     }
