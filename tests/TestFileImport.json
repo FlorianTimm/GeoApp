@@ -67,7 +67,8 @@
                     "accuracy": 0.20000000000000004,
                     "source": "resection",
                     "sourceId": "78b6e614-8580-42a4-982b-81a199149e74",
-                    "epsg": "EPSG:25832"
+                    "epsg": "EPSG:25832",
+                    "z": 12.16781170657121
                 },
                 {
                     "source": "map",
@@ -77,16 +78,100 @@
                     "accuracy": 0.3622256828959126
                 }
             ]
+        },
+        "202": {
+            "nr": "202",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527618.2851886665,
+                    "y": 6005496.312238665,
+                    "accuracy": 0.20000000000000004,
+                    "source": "theodolite",
+                    "sourceId": "78b6e614-8580-42a4-982b-81a199149e74",
+                    "epsg": "EPSG:25832"
+                }
+            ]
+        },
+        "203": {
+            "nr": "203",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527605.4006507517,
+                    "y": 6005453.029282635,
+                    "accuracy": 0.20000000000000004,
+                    "source": "theodolite",
+                    "sourceId": "61af6c79-6f62-42e7-b788-e9905b7e6fb7",
+                    "epsg": "EPSG:25832"
+                }
+            ]
+        },
+        "301": {
+            "nr": "301",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527605.4000467081,
+                    "y": 6005462.940282617,
+                    "accuracy": 0.20000000000000004,
+                    "source": "theodolite",
+                    "sourceId": "e0c4aa30-7fab-481d-925e-52517a5964d2",
+                    "epsg": "EPSG:25832"
+                }
+            ]
+        },
+        "302": {
+            "nr": "302",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527605.8900556712,
+                    "y": 6005462.8901452655,
+                    "accuracy": 0.20000000000000004,
+                    "source": "theodolite",
+                    "sourceId": "e0c4aa30-7fab-481d-925e-52517a5964d2",
+                    "epsg": "EPSG:25832"
+                }
+            ]
+        },
+        "303": {
+            "nr": "303",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527603.3800044705,
+                    "y": 6005454.130004946,
+                    "accuracy": 0.20000000000000004,
+                    "source": "theodolite",
+                    "sourceId": "e0c4aa30-7fab-481d-925e-52517a5964d2",
+                    "epsg": "EPSG:25832"
+                }
+            ]
+        },
+        "304": {
+            "nr": "304",
+            "description": "",
+            "coordinates": [
+                {
+                    "x": 527602.8799012665,
+                    "y": 6005454.1800489165,
+                    "accuracy": 0.20000000000000004,
+                    "source": "theodolite",
+                    "sourceId": "e0c4aa30-7fab-481d-925e-52517a5964d2",
+                    "epsg": "EPSG:25832"
+                }
+            ]
         }
     },
     "measurements": [
         {
             "type": "theodolite",
             "id": "78b6e614-8580-42a4-982b-81a199149e74",
-            "instrumentHeight": 1.5,
             "pointNumber": "201",
             "description": "",
             "accuracy": 3,
+            "instrumentHeight": 1.5,
             "orientation": 125.15922000751998,
             "second": false,
             "measures": [
@@ -108,6 +193,76 @@
                     "hz": 8.142,
                     "v": 101.25,
                     "th": 0
+                },
+                {
+                    "nr": "202",
+                    "lage": 1,
+                    "hz": 93.26,
+                    "distance": 50.015
+                }
+            ]
+        },
+        {
+            "type": "theodolite",
+            "id": "61af6c79-6f62-42e7-b788-e9905b7e6fb7",
+            "pointNumber": "202",
+            "description": "",
+            "accuracy": 3,
+            "instrumentHeight": 0,
+            "orientation": 18.419220007356692,
+            "second": false,
+            "measures": [
+                {
+                    "nr": "201",
+                    "lage": 1,
+                    "hz": 0
+                },
+                {
+                    "nr": "203",
+                    "lage": 1,
+                    "hz": 200,
+                    "distance": 45.16
+                }
+            ]
+        },
+        {
+            "type": "theodolite",
+            "id": "e0c4aa30-7fab-481d-925e-52517a5964d2",
+            "pointNumber": "203",
+            "description": "",
+            "accuracy": 3,
+            "instrumentHeight": 0,
+            "orientation": 18.41922000736529,
+            "second": false,
+            "measures": [
+                {
+                    "nr": "201",
+                    "lage": 1,
+                    "hz": 0
+                },
+                {
+                    "nr": "301",
+                    "lage": 1,
+                    "hz": 381.5769,
+                    "distance": 9.911
+                },
+                {
+                    "nr": "303",
+                    "lage": 1,
+                    "hz": 313.335,
+                    "distance": 2.301
+                },
+                {
+                    "nr": "302",
+                    "lage": 1,
+                    "hz": 384.7378,
+                    "distance": 9.873
+                },
+                {
+                    "nr": "304",
+                    "lage": 1,
+                    "hz": 308.8447,
+                    "distance": 2.771
                 }
             ]
         }
