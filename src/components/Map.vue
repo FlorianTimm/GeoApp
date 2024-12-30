@@ -33,6 +33,7 @@ import { transform } from 'ol/proj';
 import Text from "ol/style/Text";
 import RegularShape from "ol/style/RegularShape";
 import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
+import { azi2xy } from "@/utils";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -379,6 +380,22 @@ function storePoints2LayerSource() {
                     const f = new Feature(new LineString([s, e]));
                     measureSource.addFeature(f);
                 });
+
+                let c = measureStore.getPoint(t.pointNumber).get2DCoordinate();
+                if (!c || !t.orientation || !s) {
+                    return;
+                }
+                let p = azi2xy({ x: c[0], y: c[1] }, 5, t.orientation)
+                let pt = transform([p.x, p.y], settingStore.getProjection(), 'EPSG:4326');
+                const f = new Feature(new LineString([s, pt]));
+                f.setStyle(new Style({
+                    stroke: new Stroke({
+                        color: '#f00',
+                        width: 2,
+                    }),
+                }));
+                measureSource.addFeature(f);
+
             }
         });
     }
