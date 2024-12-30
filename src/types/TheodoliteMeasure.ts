@@ -40,13 +40,13 @@ export class TheodoliteMeasure extends Measurement {
             }
             return {
                 target: target,
-                coordinate: target.getCoordinate(),
+                coordinate: target.getCoordinate(undefined, c => c.sourceId !== this.id),
                 measure: measure
             };
         }).filter(m => m !== null) as { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[];
 
         // filter out measures without a coordinate or without a horizontal direction
-        const measures = measuresUsable.filter(m => m.coordinate !== undefined && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
+        const measures = measuresUsable.filter(m => m.coordinate !== undefined && m.coordinate !== null && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
 
         if (locationCoordinate) {
             console.log('setup on point');
@@ -65,6 +65,7 @@ export class TheodoliteMeasure extends Measurement {
 
         this.transferHeight(measuresUsable, location);
 
+        this.calcNewPoints(measuresUsable);
     }
 
     private free_station(location: Point, measures: { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
@@ -233,6 +234,28 @@ export class TheodoliteMeasure extends Measurement {
         return { x: yn, y: xn };
     }
 
+    calcNewPoints(measures: { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[]) {
+        // TODO: calculate new points
+
+        // polares Anhängen
+        measures.filter(m => m.measure.distance !== undefined && m.measure.hz !== undefined && (m.coordinate === undefined || m.coordinate === null)).forEach(m => {
+
+            let c = useMeasureStore().getPoint(this.pointNumber).getCoordinate()
+            if (this.orientation === undefined || m.measure.distance === undefined || m.measure.hz === undefined || c === null || c.x === undefined || c.y === undefined) {
+                return;
+            }
+            let cn = c as CoordinateEntry2D;
+            console.log('cn', cn);
+            console.log('ori', m.measure.hz + this.orientation)
+            let coord = azi2xy(cn, m.measure.distance, m.measure.hz + this.orientation);
+            // TODO: calculate height
+
+            console.log('coord', coord);
+            m.target.addCoordinate({ x: coord.x, y: coord.y, accuracy: c.accuracy, source: 'theodolite', sourceId: this.id, epsg: cn.epsg });
+        });
+        // Vorwärtsschnitt
+    }
+
     setupOnPoint(location: Point, measures: { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
         const locationCoordinate = location.getCoordinate();
         if (locationCoordinate === undefined || locationCoordinate === null || locationCoordinate.x === undefined || locationCoordinate.y === undefined) {
@@ -241,7 +264,7 @@ export class TheodoliteMeasure extends Measurement {
         const locationCoordinateXY = locationCoordinate as CoordinateEntry2D;
         const angles = measures.map(m => {
             let angle = azimuth(locationCoordinateXY, m.coordinate);
-            if (angle === null || !m.measure.hz) {
+            if (angle === null || m.measure.hz === undefined) {
                 return null;
             }
             console.log('angle_v', angle);
@@ -249,6 +272,7 @@ export class TheodoliteMeasure extends Measurement {
             return gonBetween0And400(angle);
         }).filter(a => a !== null) as number[];
 
+        console.log('angles', angles);
 
         let sum = 0
         for (let i = 0; i < angles.length; i++) {
@@ -316,7 +340,7 @@ export class TheodoliteMeasure extends Measurement {
 
         return {
             distance: round(dist),
-            hz: round(angle, 4),
+            hz: round(angle - orientation, 4),
             v: v !== undefined ? round(v, 4) : undefined
         }
     }

@@ -1,6 +1,6 @@
 <template>
     <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-model="model" interface="modal">
-        <ion-select-option v-if="newPoint" value="new">Neuer Punkt</ion-select-option>
+        <ion-select-option v-if="newPoint" value="new">New Point</ion-select-option>
         <ion-select-option v-for="item in points" :value="item">
             {{ item.nr }}
         </ion-select-option>

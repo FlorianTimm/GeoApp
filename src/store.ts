@@ -68,6 +68,8 @@ export const useMeasureStore = defineStore('measure', {
         truncate() {
             this.points = {} as { [nr: string]: Point };
             this.measurements = [];
+            useStore().setActiveMeasurement()
+            useStore().setMeasureMethod('')
         },
         addPoint(point: Point) {
             this.points[point.nr] = point;
@@ -92,6 +94,7 @@ export const useMeasureStore = defineStore('measure', {
         },
 
         import(value: string) {
+            this.truncate();
             const v = deserializeFromJson(value);
             this.measurements = v.measurements;
             this.points = v.points;
