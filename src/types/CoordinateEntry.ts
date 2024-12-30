@@ -17,4 +17,4 @@ export interface CoordinateEntry3D extends CoordinateEntry2D {
     z: number;
 }
 
-export type CoordinateSource = 'manual' | 'gps' | 'map' | 'import' | 'transform' | 'resection' | 'intersection' | 'theodolite' | 'adjustment' | 'unknown';
+export type CoordinateSource = 'manual' | 'gps' | 'map' | 'import' | 'transform' | 'resection' | 'free_station' | 'intersection' | 'theodolite' | 'adjustment' | 'unknown';

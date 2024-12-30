@@ -44,26 +44,53 @@ export class Point {
             const altCoord = coordArray[0];
             if (altCoord.x && altCoord.y) {
                 let nCoord = transform([altCoord.x, altCoord.y], altCoord.epsg, epsg);
-                return { source: 'transform', epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 2 };
+                return { source: 'transform', epsg: epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 2 };
             }
         }
         return null;
     }
 
     get2DCoordinate(epsg?: Projection | string): Coordinate | null {
-        const coord = this.getCoordinate(epsg);
+        const coord = this.getCoordinate(epsg, c => c.x !== undefined && c.y !== undefined);
         if (!coord || !coord.x || !coord.y) {
             return null;
         }
         return [coord.x, coord.y];
     }
 
-    getCoordinateComponents(c: 'x' | 'y' | 'z', epsg?: Projection | string): number | null {
-        const coord = this.getCoordinate(epsg);
-        if (!coord || !coord[c]) {
+    get1DCoordinate(epsg?: Projection | string): Coordinate | null {
+        const coord = this.getCoordinate(epsg, c => c.z !== undefined);
+        if (!coord || !coord.z) {
             return null;
         }
-        return coord[c];
+        return [coord.z];
+    }
+
+    get3DCoordinate(epsg?: Projection | string): Coordinate | null {
+        const coord = this.getCoordinate(epsg, c => c.x !== undefined && c.y !== undefined && c.z !== undefined);
+        if (!coord || !coord.x || !coord.y || !coord.z) {
+            return null;
+        }
+        return [coord.x, coord.y, coord.z];
+    }
+
+    getCoordinateComponents(c: 'x' | 'y' | 'z', epsg?: Projection | string): number | null {
+        let coord: Coordinate | null;
+        let n = 0;
+
+        if (c === 'x') {
+            coord = this.get2DCoordinate(epsg);
+        } else if (c === 'y') {
+            coord = this.get2DCoordinate(epsg);
+            n = 1;
+        } else {
+            coord = this.get1DCoordinate(epsg);
+        }
+
+        if (!coord || !coord[n]) {
+            return null;
+        }
+        return coord[n];
     }
 
 

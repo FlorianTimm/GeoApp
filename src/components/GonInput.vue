@@ -1,5 +1,5 @@
 <template>
-    <ion-input :aria-label v-model="model" type="number" max="400" min="0" />
+    <ion-input :aria-label v-model="model" type="number" max="400" min="0" :placeholder />
 </template>
 
 <script setup lang="ts">
@@ -23,6 +23,7 @@ watch(model, (value) => {
 });
 
 defineProps({
-    ariaLabel: String
+    ariaLabel: String,
+    placeholder: String
 });
 </script>

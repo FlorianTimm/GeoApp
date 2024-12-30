@@ -44,7 +44,7 @@ export const tan = (x: number) => {
     const t = Math.tan(gonToRad(x));
     if (Math.abs(t) < 1E-10) {
         return 0;
-    } else if (t >= 1E10) {
+    } else if (t >= 1E10 || t <= -1E10) {
         return 1E10;
     } else {
         return t;
@@ -63,11 +63,15 @@ export const cot = (x: number) => {
     const c = cos(x) / sin(x);
     if (Math.abs(c) <= 1E-10) {
         return 0;
-    } else if (c >= 1E10) {
+    } else if (c >= 1E10 || c <= -1E10) {
         return 1E10;
     } else {
         return c;
     }
+}
+
+export const azi2xy = (location: xy, distance: number, azimuth: number) => {
+    return { x: location.x + distance * sin(azimuth), y: location.y + distance * cos(azimuth) };
 }
 
 export const format = (value: number | null | undefined, decimals: number = 3): string => {

@@ -13,9 +13,9 @@ describe('TheodoliteMeasure.ts', () => {
       let tm = new TheodoliteMeasure('test');
       let location = new Point('test');
       let measures = [
-        { target: { epsg: 'EPSG:25832', x: 2, y: 0, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '2', lage: 1, hz: 100 } as TheodoliteMeasureEntry },
-        { target: { epsg: 'EPSG:25832', x: 0, y: 2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '1', lage: 1, hz: 0 } as TheodoliteMeasureEntry },
-        { target: { epsg: 'EPSG:25832', x: 0, y: -2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '3', lage: 1, hz: 200 } as TheodoliteMeasureEntry },
+        { coordinate: { epsg: 'EPSG:25832', x: 2, y: 0, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '2', lage: 1, hz: 100 } as TheodoliteMeasureEntry },
+        { coordinate: { epsg: 'EPSG:25832', x: 0, y: 2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '1', lage: 1, hz: 0 } as TheodoliteMeasureEntry },
+        { coordinate: { epsg: 'EPSG:25832', x: 0, y: -2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '3', lage: 1, hz: 200 } as TheodoliteMeasureEntry },
       ]
       const r = tm.resection(location, measures)
       expect(r).not.toBeNull()
@@ -27,7 +27,7 @@ describe('TheodoliteMeasure.ts', () => {
       let location = new Point('test');
       let measures = [
         {
-          target: {
+          coordinate: {
             "source": "manual",
             "epsg": "EPSG:25832",
             "x": 527647.181,
@@ -41,7 +41,7 @@ describe('TheodoliteMeasure.ts', () => {
           }
         },
         {
-          target: {
+          coordinate: {
             "source": "manual",
             "epsg": "EPSG:25832",
             "x": 527649.929,
@@ -56,7 +56,7 @@ describe('TheodoliteMeasure.ts', () => {
 
         },
         {
-          target: {
+          coordinate: {
             "source": "manual",
             "epsg": "EPSG:25832",
             "x": 527662.014,
@@ -69,7 +69,7 @@ describe('TheodoliteMeasure.ts', () => {
             "hz": 8.142
           }
         }
-      ] as { target: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
+      ] as { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
       const r = tm.resection(location, measures)
       expect(r).not.toBeNull()
       expect(r.x).toBeCloseTo(527632.555, 2)
@@ -80,9 +80,9 @@ describe('TheodoliteMeasure.ts', () => {
       let location = new Point('test');
       location.addCoordinate({ epsg: 'EPSG:25832', x: 0, y: 0, accuracy: 0.1, source: 'manual' as CoordinateSource })
       let measures = [
-        { target: { epsg: 'EPSG:25832', x: 2, y: 0, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '2', lage: 1, hz: 100 } as TheodoliteMeasureEntry },
-        { target: { epsg: 'EPSG:25832', x: 0, y: 2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '1', lage: 1, hz: 0 } as TheodoliteMeasureEntry },
-        { target: { epsg: 'EPSG:25832', x: 0, y: -2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '3', lage: 1, hz: 200 } as TheodoliteMeasureEntry },
+        { coordinate: { epsg: 'EPSG:25832', x: 2, y: 0, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '2', lage: 1, hz: 100 } as TheodoliteMeasureEntry },
+        { coordinate: { epsg: 'EPSG:25832', x: 0, y: 2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '1', lage: 1, hz: 0 } as TheodoliteMeasureEntry },
+        { coordinate: { epsg: 'EPSG:25832', x: 0, y: -2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '3', lage: 1, hz: 200 } as TheodoliteMeasureEntry },
       ]
       const r = tm.setupOnPoint(location, measures)
       expect(r).not.toBeNull()
@@ -94,7 +94,7 @@ describe('TheodoliteMeasure.ts', () => {
     location.addCoordinate({ epsg: 'EPSG:25832', x: 527632.555, y: 6005544.248, accuracy: 0.1, source: 'manual' as CoordinateSource })
     let measures = [
       {
-        target: {
+        coordinate: {
           "source": "manual",
           "epsg": "EPSG:25832",
           "x": 527647.181,
@@ -108,7 +108,7 @@ describe('TheodoliteMeasure.ts', () => {
         }
       },
       {
-        target: {
+        coordinate: {
           "source": "manual",
           "epsg": "EPSG:25832",
           "x": 527649.929,
@@ -123,7 +123,7 @@ describe('TheodoliteMeasure.ts', () => {
 
       },
       {
-        target: {
+        coordinate: {
           "source": "manual",
           "epsg": "EPSG:25832",
           "x": 527662.014,
@@ -136,7 +136,7 @@ describe('TheodoliteMeasure.ts', () => {
           "hz": 8.142
         }
       }
-    ] as { target: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
+    ] as { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
     const r = tm.setupOnPoint(location, measures)
     expect(r).not.toBeNull()
     expect(r).toBeCloseTo(125.1587, 3)

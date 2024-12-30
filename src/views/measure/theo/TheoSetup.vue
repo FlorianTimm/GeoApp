@@ -39,15 +39,15 @@
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Horizontal direction</ion-label>
-                <GonInput v-model="hz" />
+                <GonInput v-model="hz" :placeholder="format(placeholder.hz)" />
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Vertical angle</ion-label>
-                <GonInput v-model="v" />
+                <GonInput v-model="v" :placeholder="format(placeholder.v)" />
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Distance</ion-label>
-                <IonInput v-model="s" type="number" />
+                <IonInput v-model="s" type="number" :placeholder="format(placeholder.distance)" />
             </ion-item>
         </ion-list>
 
@@ -109,6 +109,7 @@ import { trash } from 'ionicons/icons';
 import { IonIcon } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { format } from '@/utils';
+import { watch } from 'vue';
 
 addIcons({
     'trash': trash
@@ -125,6 +126,8 @@ const s = ref<number>();
 const description = ref<string>();
 const second = ref<boolean>();
 
+const placeholder = ref<{ v?: number, hz?: number, distance?: number }>({});
+
 
 const measureStore = useMeasureStore();
 const store = useStore();
@@ -136,6 +139,14 @@ if (actMeasure && actMeasure.type === 'theodolite') {
     measure.value = actMeasure as TheodoliteMeasure;
     console.log(measure.value);
 }
+
+
+watch(point, (point) => {
+    if (!point || !measure.value) {
+        return;
+    }
+    placeholder.value = measure.value.stakeOut(point, th.value);
+})
 
 
 const addPoint = () => {
@@ -154,6 +165,7 @@ const addPoint = () => {
     hz.value = undefined;
     v.value = undefined;
     s.value = undefined;
+    placeholder.value = {};
 }
 
 const start = () => {
