@@ -301,8 +301,9 @@ onMounted(() => {
     );
 
     let firstGeolocation = true;
-    geolocation.on('change:position', function () {
+    const positionChanged = () => {
         const coordinates = geolocation.getPosition();
+        const z = geolocation.getAltitude()
         console.log('Position changed', coordinates);
         if (!coordinates) {
             return;
@@ -313,11 +314,15 @@ onMounted(() => {
             map.getView().setCenter(coord4326);
             firstGeolocation = false;
         }
-        if (coordinates) {
+        if (coordinates && z !== undefined) {
+            store.setPosition([...coordinates, z]);
+        } else if (coordinates) {
             store.setPosition(coordinates);
-            console.log('Position changed', store.position);
         }
-    });
+    };
+    geolocation.on('change:position', positionChanged);
+    geolocation.on('change:altitude', positionChanged);
+
 
     const vl = new VectorLayer({
         map: map,

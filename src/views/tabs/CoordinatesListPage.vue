@@ -83,19 +83,19 @@ const addPoint = () => {
       {
         name: 'easting',
         type: 'number',
-        placeholder: pos ? pos[0].toFixed(0) : 'Easting',
+        placeholder: pos ? pos[0].toFixed(3) : 'Easting',
         label: 'Easting'
       },
       {
         name: 'northing',
         type: 'number',
-        placeholder: pos ? pos[1].toFixed(0) : 'Northing',
+        placeholder: pos ? pos[1].toFixed(3) : 'Northing',
         label: 'Northing'
       },
       {
         name: 'height',
         type: 'number',
-        placeholder: pos ? pos[2].toFixed(0) : 'Height',
+        placeholder: pos && 2 in pos ? pos[2].toFixed(3) : 'Height',
         label: 'Height'
       },
       {
