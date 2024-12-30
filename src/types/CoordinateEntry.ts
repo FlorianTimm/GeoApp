@@ -1,5 +1,6 @@
 export interface CoordinateEntry {
     source: CoordinateSource;
+    sourceId?: string;
     epsg: string;
     x?: number;
     y?: number;
@@ -16,4 +17,4 @@ export interface CoordinateEntry3D extends CoordinateEntry2D {
     z: number;
 }
 
-export type CoordinateSource = 'manual' | 'gps' | 'map' | 'import' | 'calculation' | 'transform';
+export type CoordinateSource = 'manual' | 'gps' | 'map' | 'import' | 'transform' | 'resection' | 'intersection' | 'theodolite' | 'adjustment' | 'unknown';

@@ -17,25 +17,34 @@ export class Point {
     }
 
     addCoordinate(e: CoordinateEntry) {
+        if (e.sourceId !== undefined) {
+            const existing = this.coordinates.find(c => c.sourceId === e.sourceId);
+            if (existing) {
+                this.coordinates.splice(this.coordinates.indexOf(existing), 1);
+            }
+        }
         this.coordinates.push(e);
     }
 
-    getCoordinate(epsg?: Projection | string): CoordinateEntry | null {
+    getCoordinate(epsg?: Projection | string, filterFunction?: (ce: CoordinateEntry) => boolean): CoordinateEntry | null {
         if (!epsg) {
             epsg = useSettingStore().getEpsg();
         } else if (typeof epsg !== 'string') {
             epsg = epsg.getCode();
         }
 
-        const coord = this.coordinates.sort((a, b) => a.accuracy - b.accuracy).find(c => c.epsg === epsg);
+        const coordArray = this.coordinates.sort((a, b) => a.accuracy - b.accuracy).filter(c => (!filterFunction || filterFunction(c)))
+
+        const coord = coordArray.find(c => c.epsg === epsg);
         if (coord) {
             return coord;
         }
-        if (!coord && this.coordinates.length > 0) {
-            const altCoord = this.coordinates[0];
+
+        if (coordArray.length > 0) {
+            const altCoord = coordArray[0];
             if (altCoord.x && altCoord.y) {
                 let nCoord = transform([altCoord.x, altCoord.y], altCoord.epsg, epsg);
-                return { source: 'transform', epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 1 };
+                return { source: 'transform', epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 2 };
             }
         }
         return null;

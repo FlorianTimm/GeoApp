@@ -1,7 +1,14 @@
+import { v4 as uuid } from "uuid";
+
 export abstract class Measurement {
     type: MeasurementType;
+    id: string;
 
-    constructor(type: MeasurementType) {
+    constructor(type: MeasurementType, id?: string) {
+        if (id)
+            this.id = id;
+        else
+            this.id = uuid();
         this.type = type;
     }
 

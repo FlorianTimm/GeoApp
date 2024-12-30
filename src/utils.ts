@@ -42,7 +42,7 @@ export const gonBetween0And400 = (angle: number) => {
 
 export const tan = (x: number) => {
     const t = Math.tan(gonToRad(x));
-    if (t < 1E-10) {
+    if (Math.abs(t) < 1E-10) {
         return 0;
     } else if (t >= 1E10) {
         return 1E10;
@@ -50,9 +50,18 @@ export const tan = (x: number) => {
         return t;
     }
 }
+
+export const sin = (x: number) => {
+    return Math.sin(gonToRad(x));
+}
+
+export const cos = (x: number) => {
+    return Math.cos(gonToRad(x));
+}
+
 export const cot = (x: number) => {
-    const c = 1 / tan(x)
-    if (c <= 1E-10) {
+    const c = cos(x) / sin(x);
+    if (Math.abs(c) <= 1E-10) {
         return 0;
     } else if (c >= 1E10) {
         return 1E10;
