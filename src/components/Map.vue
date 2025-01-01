@@ -33,7 +33,7 @@ import { transform } from 'ol/proj';
 import Text from "ol/style/Text";
 import RegularShape from "ol/style/RegularShape";
 import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
-import { azi2xy } from "@/utils";
+import { azi2xy, cos } from "@/utils";
 import { MultiPoint, Polygon } from "ol/geom";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { GeoJSON } from "ol/format";
@@ -45,6 +45,8 @@ const store = useStore();
 const pointSource = new VectorSource<Feature<Point>>();
 const measureSource = new VectorSource<Feature<LineString>>();
 let map: Map;
+
+let mapBewegt = false;
 
 measureStore.$subscribe(() => {
     storePoints2LayerSource();
@@ -438,12 +440,16 @@ onMounted(() => {
 
     storePoints2LayerSource();
 
+    map.on('moveend', () => {
+        mapBewegt = true;
+    });
 });
 
 const zoomToExtent = () => {
     map.getView().fit(pointSource.getExtent(), {
         padding: [30, 30, 30, 30],
         duration: 500,
+        maxZoom: 19,
     });
 }
 const slideToLocation = () => {
@@ -502,6 +508,10 @@ function storePoints2LayerSource() {
         p.set('nr', pd.nr);
         pointSource.addFeature(p);
     });
+
+    if (!settingStore.geolocation && !mapBewegt) {
+        zoomToExtent();
+    }
 }
 
 function tiles(tile: Tile, src: string) {
