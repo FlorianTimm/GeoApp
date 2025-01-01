@@ -34,6 +34,9 @@ import Text from "ol/style/Text";
 import RegularShape from "ol/style/RegularShape";
 import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
 import { azi2xy } from "@/utils";
+import { MultiPoint, Polygon } from "ol/geom";
+import { bbox as bboxStrategy } from "ol/loadingstrategy";
+import { GeoJSON } from "ol/format";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -110,6 +113,96 @@ onMounted(() => {
             }),
         }),
     });
+
+
+
+    /*
+        const vectorSource = new VectorSource({
+            format: new WFS({
+                version: '2.0.0',
+                featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
+                featureType: 'CadastralParcel',
+                gmlFormat: new GML32({
+                    srsName: 'EPSG:4326',
+                    featureType: 'CadastralParcel',
+                    featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
+                }),
+    
+            }),
+            loader: (extent) => {
+                console.log(vectorSource.getFeatures());
+                let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
+                    'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
+                    'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
+                        'urn:ogc:def:crs:EPSG::4326') + '&' +
+                    'bbox=' +
+                    encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
+                        ',urn:ogc:def:crs:EPSG::25832')
+                fetch(url)
+                    .then(response => response.text())
+                    .then(text => {
+                        // Add Features
+                        vectorSource.addFeatures(
+                            // Read WFS collection and do a reprojection of coordinates
+                            // from EPSG 4326 to EPSG 3857
+                            vectorSource.getFormat()?.readFeatures(text, {
+                                dataProjection: 'EPSG:4326',
+                                featureProjection: 'EPSG:3857'
+                            }) ?? []
+                        );
+                    })
+            },
+            strategy: bboxStrategy,
+        });*/
+
+    const vectorSource = new VectorSource({
+        format: new GeoJSON(),
+        url: function (extent) {
+            return (
+                'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
+                'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
+                'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=EPSG:4326&' +
+                'bbox=' +
+                extent.join(',') +
+                ',EPSG:4326'
+            );
+        },
+        strategy: bboxStrategy,
+    });
+
+    const vector = new VectorLayer({
+        source: vectorSource,
+        map: map,
+        minZoom: 19,
+        style: [new Style({
+            stroke: new Stroke({
+                color: 'rgba(0, 0, 0, 1.0)',
+                width: 1,
+            })
+        }),
+        new Style({
+            image: new RegularShape({
+                points: 4,
+                radius: 7,
+                rotation: Math.PI / 4,
+                fill: new Fill({
+                    color: 'white',
+                }),
+                stroke: new Stroke({
+                    color: 'black',
+                    width: 0.75,
+                }),
+            }),
+            geometry: function (feature) {
+                // return the coordinates of the first ring of the polygon
+                const coordinates = (feature?.getGeometry() as Polygon).getCoordinates()[0];
+                return new MultiPoint(coordinates);
+            },
+        }),
+        ]
+
+    });
+
     const selectInteraction = new Select({
         layers: [pointLayer],
     });
