@@ -1,10 +1,9 @@
 import { actionSheetController, alertController } from "@ionic/vue";
-import { Feature } from "ol";
+import { Map, Feature } from "ol";
 import { Point } from "ol/geom";
 import { Select as SelectInteraction } from "ol/interaction";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Map } from "ol";
 import { useMeasureStore } from "@/store";
 
 export function createSelectInteraction(map: Map, pointLayer: VectorLayer<VectorSource<Feature<Point>>, Feature<Point>>): SelectInteraction {

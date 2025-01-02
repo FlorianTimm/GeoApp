@@ -1,10 +1,9 @@
-import Feature from "ol/Feature";
+import { Feature, Map } from "ol";
 import { GeoJSON, WFS } from "ol/format";
 import GML32 from "ol/format/GML32";
 import { Polygon } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import Map from "ol/Map";
 import { transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import { flurstueckStyle } from "./Style";

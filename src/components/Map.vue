@@ -4,32 +4,24 @@
 
 <script lang="ts" setup>
 import { useMeasureStore, useSettingStore, useStore } from "@/store";
-
 import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
 import { azi2xy } from "@/utils";
+import { Feature, Geolocation, Map, View } from "ol";
 import { Coordinate } from 'ol/coordinate';
-import Feature from "ol/Feature";
-import Geolocation from "ol/Geolocation";
 import { LineString, Point } from "ol/geom";
-import TileLayer from "ol/layer/Tile";
-import VectorLayer from "ol/layer/Vector";
-import Map from "ol/Map";
-import "ol/ol.css";
-import { transform, useGeographic } from "ol/proj";
-import OSM from "ol/source/OSM";
-import VectorSource from "ol/source/Vector";
-import CircleStyle from "ol/style/Circle";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Style from "ol/style/Style";
-import View from "ol/View";
-import { onMounted } from "vue";
 import { Snap as SnapInteraction } from 'ol/interaction';
+import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer";
+import { transform, useGeographic } from "ol/proj";
+import { OSM, Vector as VectorSource } from "ol/source";
+import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
+import { onMounted } from "vue";
 import { createAlkisLayer } from "./MapParts/AlkisLayer";
-import { pointStyle } from "./MapParts/Style";
+import { createDrawInteraction } from "./MapParts/DrawInteraction";
 import { tiles } from "./MapParts/OfflineOSM";
 import { createSelectInteraction } from "./MapParts/SelectInteracion";
-import { createDrawInteraction } from "./MapParts/DrawInteraction";
+import { pointStyle } from "./MapParts/Style";
+
+import "ol/ol.css";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();

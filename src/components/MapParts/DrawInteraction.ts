@@ -1,14 +1,13 @@
-import { Draw as DrawInteraction } from 'ol/interaction';
-import { Feature } from 'ol';
-import { Point, Geometry } from 'ol/geom';
-import { Vector as VectorSource } from 'ol/source';
-import { Map } from 'ol';
-import { Ref, watch } from 'vue';
-import { alertController } from '@ionic/vue';
-import { DrawEvent } from 'ol/interaction/Draw';
 import { useMeasureStore, useSettingStore } from '@/store';
-import { transform } from 'ol/proj';
 import { Point as StorePoint } from "@/types/Point";
+import { alertController } from '@ionic/vue';
+import { Feature, Map } from 'ol';
+import { Geometry, Point } from 'ol/geom';
+import { Draw as DrawInteraction } from 'ol/interaction';
+import { DrawEvent } from 'ol/interaction/Draw';
+import { transform } from 'ol/proj';
+import { Vector as VectorSource } from 'ol/source';
+import { Ref, watch } from 'vue';
 
 
 export function createDrawInteraction(map: Map, pointSource: VectorSource<Feature<Point>>, addingPoints: Ref<boolean>) {

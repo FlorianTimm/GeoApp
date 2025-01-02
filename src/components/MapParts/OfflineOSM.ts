@@ -1,7 +1,6 @@
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import axios from "axios";
-import ImageTile from "ol/ImageTile";
-import Tile from "ol/Tile";
+import { ImageTile, Tile } from "ol";
 import TileState from 'ol/TileState';
 
 
