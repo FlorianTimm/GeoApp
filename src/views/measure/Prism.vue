@@ -1,8 +1,8 @@
 <template>
     <PointNumberSelect v-model="point1" />
-    {{ point1?.getLatLon() ?? 'nicht ausgewählt' }}
+    {{ point1?.get2DCoordinate() ?? 'nicht ausgewählt' }}
     <PointNumberSelect v-model="point2" />
-    {{ point2?.getLatLon() ?? 'nicht ausgewählt' }}
+    {{ point2?.get2DCoordinate() ?? 'nicht ausgewählt' }}
     <br /><br />
 
     <ion-input :value="measure?.distance" label="Länge" type="number"
@@ -52,6 +52,8 @@ import { add } from 'ionicons/icons';
 import { IonButton } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { Point } from "@/types/Point";
+import { distance } from '@/utils';
+import { CoordinateEntry2D } from '@/types/CoordinateEntry';
 
 addIcons({
     'add': add
@@ -67,12 +69,13 @@ const abscissa_new = ref<number>();
 const ordinate_new = ref<number>();
 
 const lengthP = (point1: Point, point2: Point): number => {
-    const coords1 = point1?.getLatLon();
-    const coords2 = point2?.getLatLon();
+    const coords1 = point1?.getCoordinate();
+    const coords2 = point2?.getCoordinate();
     if (!coords1 || !coords2) {
         return 0;
     }
-    return getDistance(coords1, coords2);
+
+    return distance(<CoordinateEntry2D>coords1, <CoordinateEntry2D>coords2);
 
 }
 

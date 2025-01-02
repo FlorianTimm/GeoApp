@@ -340,7 +340,7 @@ export class TheodoliteMeasure extends Measurement {
 
         return {
             distance: round(dist),
-            hz: round(angle - orientation, 4),
+            hz: round(gonBetween0And400(angle - orientation), 4),
             v: v !== undefined ? round(v, 4) : undefined
         }
     }

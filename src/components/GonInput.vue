@@ -7,17 +7,14 @@ import { gonBetween0And400 } from '@/utils';
 import { IonInput } from '@ionic/vue';
 import { watch } from 'vue';
 
-const model = defineModel({
-    type: Number
-});
+const model = defineModel<number | string>();
 
 watch(model, (value) => {
-    // @ts-ignore
     if (value === undefined || value === null || value === '') {
         return
     }
     if (typeof value === 'string') {
-        model.value = parseFloat(value);
+        value = parseFloat(value);
     }
     model.value = gonBetween0And400(value);
 });
