@@ -33,6 +33,30 @@ export function pointStyle(feature: FeatureLike) {
     })
 }
 
+export function buildingStyle(feature: FeatureLike) {
+    return new Style({
+        stroke: new Stroke({
+            color: 'rgba(0, 0, 0, 1.0)',
+            width: 1,
+        }),
+        fill: new Fill({
+            color: 'rgba(255, 0, 0, 0.1)',
+        }),
+        text: new Text({
+            text: feature.get('nr'),
+            font: '15px Calibri,sans-serif',
+            textBaseline: 'bottom',
+            textAlign: 'start',
+            offsetX: 3,
+            offsetY: -3,
+            stroke: new Stroke({
+                color: '#fff',
+                width: 2,
+            }),
+        }),
+    });
+}
+
 export function flurstueckStyle() {
     return [new Style({
         stroke: new Stroke({

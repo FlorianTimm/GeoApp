@@ -4,17 +4,15 @@ import GML32 from "ol/format/GML32";
 import { Polygon } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import { transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import { flurstueckStyle } from "./Style";
+import { flurstueckStyle, buildingStyle } from "./Style";
 import { useSettingStore } from "@/store";
 
 
 export function createAlkisLayer(map: Map): VectorSource[] {
-    const flurstueckeStyle = flurstueckStyle();
     const epsg = useSettingStore().getEpsg();
 
-    const vectorSourceNI = new VectorSource({
+    const sourceNiFlurstuecke = new VectorSource({
         format: new WFS({
             version: '2.0.0',
             featureNS: 'http://repository.gdi-de.org/schemas/adv/produkt/alkis-vereinfacht/2.0',
@@ -29,21 +27,21 @@ export function createAlkisLayer(map: Map): VectorSource[] {
     });
 
     new VectorLayer({
-        source: vectorSourceNI,
+        source: sourceNiFlurstuecke,
         map: map,
         minZoom: 19,
-        style: flurstueckeStyle
+        style: flurstueckStyle
     });
 
-    const vectorSourceHH = new VectorSource({
+    const sourceHhFlurstuecke = new VectorSource({
         format: new GeoJSON(
             {
                 dataProjection: 'EPSG:25832'
             }
         ),
         url: (extent) =>
-                'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
-                'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
+            'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
+            'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
             'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=' + epsg + '&' +
             'bbox=' + extent.join(',') + ',' + epsg,
         strategy: bboxStrategy,
@@ -51,14 +49,36 @@ export function createAlkisLayer(map: Map): VectorSource[] {
 
 
     new VectorLayer({
-        source: vectorSourceHH,
+        source: sourceHhFlurstuecke,
         map: map,
         minZoom: 19,
-        style: flurstueckeStyle
+        style: flurstueckStyle
     });
 
-    const vectorSourceSH = new VectorSource({
-        format: new WFS({
+    const sourceHhGebaeude = new VectorSource({
+        format: new GeoJSON(
+            {
+                dataProjection: 'EPSG:25832'
+            }
+        ),
+        url: (extent) =>
+            'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
+            'version=1.1.0&request=GetFeature&typename=ave:GebaeudeBauwerk&' +
+            'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=' + epsg + '&' +
+            'bbox=' + extent.join(',') + ',' + epsg,
+        strategy: bboxStrategy,
+    });
+
+
+    new VectorLayer({
+        source: sourceHhGebaeude,
+        map: map,
+        minZoom: 19,
+        style: buildingStyle
+    });
+
+    const sourceShFlurstuecke = new VectorSource({
+        /*format: new WFS({
             version: '2.0.0',
             featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
             featureType: 'CadastralParcel',
@@ -67,42 +87,82 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         /*url: (extent) => 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
                 'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
                 'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
-                'bbox=' + extent.join(',') + ',' + epsg,*/
+                'bbox=' + extent.join(',') + ',' + epsg,*//*
         loader: (extent) => {
             let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
                 'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
                 'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
                 'bbox=' + extent.join(',') + ',' + epsg;
-            fetch(url)
-                .then((response) => response.text())
-                .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
-                .then((response) => {
-                    let c = response.getElementsByTagName('geometry');
-                    for (let i = 0; i < c.length; i++) {
-                        let g = c[i].getElementsByTagName('gml:Polygon');
-                        for (let j = 0; j < g.length; j++) {
-                            let cs = g[j].getElementsByTagName('gml:posList')[0]?.textContent?.split(' ') ?? [];
-                            let coords = [];
-                            for (let i = 0; i < cs.length; i += 2) {
-                                let ce = [parseFloat(cs[i]), parseFloat(cs[i + 1])];
-                                coords.push(ce);
-                            }
-                            let p = new Polygon([coords]);
-                            let f = new Feature(p);
-                            vectorSourceSH.addFeature(f);
-                            console.log(vectorSourceSH.getFeatures().length);
-                        }
-                    }
-                });
+            loadSHwfs(url, sourceShFlurstuecke);
+        },
+        strategy: bboxStrategy,*/
+    });
+
+    new VectorLayer({
+        source: sourceShFlurstuecke,
+        map: map,
+        minZoom: 19,
+        style: flurstueckStyle
+    });
+
+
+
+    const sourceShGebaeude = new VectorSource({
+        format: new WFS({
+            version: '2.0.0',
+            featureNS: 'http://inspire.ec.europa.eu/schemas/bu-base/4.0',
+            featureType: 'ave:GebaeudeBauwerk',
+            gmlFormat: new GML32(),
+        }),
+        loader: (extent) => {
+            let url = 'https://service.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?service=wfs&version=2.0.0&request=getFeature&' +
+                'typeNames=GebaeudeBauwerk&' +
+                'storedQuery_id=http://repository.gdi-de.org/query/adv/produkt/alkis-vereinfacht/2.0/ave-by-bbox' +
+                '&outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&CRS=' + epsg + '&' +
+                'x1=' + extent[0] + '&y1=' + extent[1] + '&x2=' + extent[2] + '&y2=' + extent[3];
+            loadSHwfs(url, sourceShFlurstuecke, sourceShGebaeude);
         },
         strategy: bboxStrategy,
     });
 
     new VectorLayer({
-        source: vectorSourceSH,
+        source: sourceShGebaeude,
         map: map,
         minZoom: 19,
-        style: flurstueckeStyle
+        style: buildingStyle
     });
-    return [vectorSourceHH, vectorSourceNI, vectorSourceSH];
+
+    return [sourceHhFlurstuecke, sourceNiFlurstuecke, sourceShFlurstuecke, sourceHhGebaeude];
 }
+
+function loadSHwfs(url: string, flstSource: VectorSource, buildingSource: VectorSource) {
+    fetch(url)
+        .then((response) => response.text())
+        .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+        .then((response) => {
+            const flst = response.getElementsByTagName('Flurstueck')
+            for (let i = 0; i < flst.length; i++) {
+                findPolygon(flst[i], flstSource);
+            }
+
+            const geb = response.getElementsByTagName('GebaeudeBauwerk')
+            for (let i = 0; i < geb.length; i++) {
+                findPolygon(geb[i], buildingSource);
+            }
+        });
+}
+function findPolygon(response: Element, vectorSource: VectorSource) {
+    let g = response.getElementsByTagName('gml:Polygon');
+    for (let j = 0; j < g.length; j++) {
+        let cs = g[j].getElementsByTagName('gml:posList')[0]?.textContent?.split(' ') ?? [];
+        let coords = [];
+        for (let i = 0; i < cs.length; i += 2) {
+            let ce = [parseFloat(cs[i]), parseFloat(cs[i + 1])];
+            coords.push(ce);
+        }
+        let p = new Polygon([coords]);
+        let f = new Feature(p);
+        vectorSource.addFeature(f);
+    }
+}
+
