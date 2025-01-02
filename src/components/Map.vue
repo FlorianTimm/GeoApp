@@ -4,40 +4,32 @@
 
 <script lang="ts" setup>
 import { useMeasureStore, useSettingStore, useStore } from "@/store";
-import { Point as StorePoint } from "@/types/Point";
+
 import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
 import { azi2xy } from "@/utils";
-import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
-import { actionSheetController, alertController } from '@ionic/vue';
-import axios from "axios";
 import { Coordinate } from 'ol/coordinate';
 import Feature from "ol/Feature";
-import { GeoJSON, WFS } from "ol/format";
-import GML32 from "ol/format/GML32";
 import Geolocation from "ol/Geolocation";
-import { Geometry, LineString, MultiPoint, MultiPolygon, Point, Polygon } from "ol/geom";
-import ImageTile from "ol/ImageTile";
-import { Draw as DrawInteraction, Select } from 'ol/interaction';
+import { LineString, Point } from "ol/geom";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import Map from "ol/Map";
 import "ol/ol.css";
-import { transform, transformExtent, useGeographic } from "ol/proj";
+import { transform, useGeographic } from "ol/proj";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import CircleStyle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
-import RegularShape from "ol/style/RegularShape";
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
-import Text from "ol/style/Text";
-import Tile from "ol/Tile";
-import TileState from 'ol/TileState';
 import View from "ol/View";
-import { onMounted, watch } from "vue";
+import { onMounted } from "vue";
 import { Snap as SnapInteraction } from 'ol/interaction';
-import { DrawEvent } from "ol/interaction/Draw";
+import { createAlkisLayer } from "./MapParts/AlkisLayer";
+import { pointStyle } from "./MapParts/Style";
+import { tiles } from "./MapParts/OfflineOSM";
+import { createSelectInteraction } from "./MapParts/SelectInteracion";
+import { createDrawInteraction } from "./MapParts/DrawInteraction";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -81,6 +73,8 @@ onMounted(() => {
         }),
     });
 
+    const alkisSources = createAlkisLayer(map);
+
     new VectorLayer({
         map: map,
         source: measureSource,
@@ -90,392 +84,12 @@ onMounted(() => {
     const pointLayer = new VectorLayer({
         source: pointSource,
         map: map,
-        style: (feature) => new Style({
-            image: new RegularShape({
-                fill: new Fill({
-                    color: '#888',
-                }),
-                stroke: new Stroke({
-                    color: '#000',
-                    width: 2,
-                }),
-                points: 3,
-                radius: 7,
-
-                angle: 0,
-            }),
-            text: new Text({
-                text: feature.get('nr'),
-                font: '15px Calibri,sans-serif',
-                textBaseline: 'bottom',
-                textAlign: 'start',
-                offsetX: 3,
-                offsetY: -3,
-                stroke: new Stroke({
-                    color: '#fff',
-                    width: 2,
-                }),
-            }),
-        }),
+        style: pointStyle,
     });
 
+    createSelectInteraction(map, pointLayer);
 
-    let flurstueckeStyle: Style[] = [new Style({
-        stroke: new Stroke({
-            color: 'rgba(0, 0, 0, 1.0)',
-            width: 1,
-        })
-    }),
-        new Style({
-            image: new RegularShape({
-                points: 4,
-                radius: 7,
-                rotation: Math.PI / 4,
-                fill: new Fill({
-                    color: 'white',
-                }),
-                stroke: new Stroke({
-                    color: 'black',
-                    width: 0.75,
-                }),
-            }),
-            geometry: function (feature) {
-                // return the coordinates of the first ring of the polygon
-                try {
-                    const geo = feature?.getGeometry();
-                    console.log(geo?.getType());
-                    if (!geo) {
-                        return;
-                    }
-
-                    switch (geo.getType()) {
-                        case 'Polygon':
-                            return new MultiPoint((geo as Polygon).getCoordinates()[0]);
-                        case 'MultiPolygon':
-                            return new MultiPoint((geo as MultiPolygon).getCoordinates()[0][0]);
-                    }
-                } catch (e) {
-                    return
-                }
-
-            },
-        }),
-    ]
-
-
-
-
-    const vectorSourceNI = new VectorSource({
-        format: new WFS({
-            version: '2.0.0',
-            featureNS: 'http://repository.gdi-de.org/schemas/adv/produkt/alkis-vereinfacht/2.0',
-            featureType: 'Flurstueck',
-            gmlFormat: new GML32(),
-
-        }),
-        url: (extent) => 'https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wfs_einfach?SERVICE=WFS&' +
-            'version=2.0.0&request=GetFeature&typenames=ave:Flurstueck&' +
-            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                'urn:ogc:def:crs:EPSG::4326') + '&' +
-            'bbox=' +
-            encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                ',urn:ogc:def:crs:EPSG::25832'),
-        strategy: bboxStrategy,
-    });
-
-    new VectorLayer({
-        source: vectorSourceNI,
-        map: map,
-        minZoom: 19,
-        style: flurstueckeStyle
-    });
-
-    const vectorSourceHH = new VectorSource({
-        format: new GeoJSON(),
-        url: function (extent) {
-            return (
-                'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
-                'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
-                'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=EPSG:4326&' +
-                'bbox=' +
-                extent.join(',') +
-                ',EPSG:4326'
-            );
-        },
-        strategy: bboxStrategy,
-    });
-
-
-    new VectorLayer({
-        source: vectorSourceHH,
-        map: map,
-        minZoom: 19,
-        style: flurstueckeStyle
-    });
-
-    const vectorSourceSH = new VectorSource({
-        format: new WFS({
-            version: '2.0.0',
-            featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
-            featureType: 'CadastralParcel',
-            gmlFormat: new GML32(),
-
-        }),
-        /*url: (extent) => 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
-            'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
-            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                'urn:ogc:def:crs:EPSG::25832') + '&' +
-            'bbox=' +
-            encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                ',urn:ogc:def:crs:EPSG::25832'),*/
-        loader: (extent) => {
-
-            let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
-                'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
-                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                    'urn:ogc:def:crs:EPSG::4326') + '&' +
-                'bbox=' +
-                encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                    ',urn:ogc:def:crs:EPSG::25832');
-            fetch(url)
-                .then((response) => response.text())
-                .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
-                .then((response) => {
-                    let c = response.getElementsByTagName('geometry');
-                    for (let i = 0; i < c.length; i++) {
-                        let g = c[i].getElementsByTagName('gml:Polygon');
-                        for (let j = 0; j < g.length; j++) {
-                            let cs = g[j].getElementsByTagName('gml:posList')[0]?.textContent?.split(' ') ?? [];
-                            let coords = [];
-                            for (let i = 0; i < cs.length; i += 2) {
-                                let ce = [parseFloat(cs[i + 1]), parseFloat(cs[i])];
-                                coords.push(ce);
-                            }
-                            let p = new Polygon([coords]);
-                            let f = new Feature(p);
-                            vectorSourceSH.addFeature(f);
-                        }
-                    }
-                });
-        },
-        strategy: bboxStrategy,
-    });
-
-
-/*
-    const vectorSourceSH2 = new VectorSource({
-        format: new WFS({
-            version: '2.0.0',
-            featureNS: 'http://repository.gdi-de.org/schemas/adv/produkt/alkis-vereinfacht/2.0',
-            featureType: 'Flurstueck',
-            gmlFormat: new GML32()
-        }),
-        loader: (extent) => {
-            extent = transformExtent(extent, 'EPSG:4326', 'EPSG:25832');
-            let url = 'https://service.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?service=wfs&version=2.0.0&storedquery_id=http://repository.gdi-de.org/query/adv/produkt/alkis-vereinfacht/2.0/ave-by-bbox&' +
-                'version=2.0.0&request=GetFeature&typenames=ave:Flurstueck&' +
-                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&CRS=' + encodeURIComponent(
-                    'urn:ogc:def:crs:EPSG::25832') + '&' +
-                'x1=' + extent[0] + '&y1=' + extent[1] + '&x2=' + extent[2] + '&y2=' + extent[3] + '&srsname=' + encodeURIComponent(
-                    ',urn:ogc:def:crs:EPSG::25832')
-            fetch(url).then((response) => {
-                return response.text();
-            }).then((response) => {
-                const features = new GML32().readFeatures(response);
-                console.log(features);
-                vectorSourceSH2.addFeatures(features);
-                //vectorSourceSH2.addFeatures(features);
-            });
-        },
-        strategy: bboxStrategy,
-    });*/
-
-    new VectorLayer({
-        source: vectorSourceSH,
-        map: map,
-        minZoom: 19,
-        style: flurstueckeStyle
-    });
-
-
-    const selectInteraction = new Select({
-        layers: [pointLayer],
-    });
-    map.addInteraction(selectInteraction);
-    selectInteraction.on('select', (e) => {
-        console.log(e);
-    });
-    selectInteraction.setActive(true);
-    selectInteraction.on('select', (e) => {
-        console.log(e);
-        if (e.selected.length === 0) {
-            return;
-        }
-        const f = e.selected[0];
-        console.log(f);
-        const nr = f.get('nr');
-        console.log(nr);
-        const point = measureStore.getPoint(nr);
-        console.log(point);
-        const coord = point.getCoordinate();
-        let text = ''
-        if (measureStore.points[nr].description)
-            text += 'Description: ' + measureStore.points[nr].description + '; ';
-        if (coord) {
-            text += 'X: ' + coord.x?.toFixed(3) + '; ' +
-                'Y: ' + coord.y?.toFixed(3) + ';\n' +
-                'Accuracy: ' + coord.accuracy.toFixed(3) + 'm';
-        }
-        actionSheetController.create({
-            header: 'Point ' + nr,
-            subHeader: text,
-            buttons: [
-                {
-                    text: 'Edit',
-                    handler: () => {
-                        alertController.create({
-                            header: 'Edit Point',
-                            message: 'Please enter the new information for the point.',
-                            inputs: [
-                                {
-                                    name: 'description',
-                                    type: 'text',
-                                    placeholder: 'Description',
-                                    value: point.description
-                                }
-                            ],
-                            buttons: [
-                                {
-                                    text: 'Cancel',
-                                    role: 'cancel'
-                                },
-                                {
-                                    text: 'Save',
-                                    handler: (val) => {
-                                        point.description = val.description;
-                                    }
-                                }
-                            ]
-                        }).then(alert => {
-                            alert.present();
-                        });
-                    }
-                },
-                {
-                    text: 'Delete',
-                    role: 'destructive',
-                    handler: () => {
-
-                        alertController.create({
-                            header: 'Point ' + nr,
-                            message: 'Do you really want to delete point ' + nr + '?',
-                            buttons: [
-                                {
-                                    text: 'Close',
-                                    role: 'cancel'
-                                },
-                                {
-                                    text: 'Delete',
-                                    handler: () => {
-                                        measureStore.removePoint(nr);
-                                    }
-                                }
-                            ]
-                        }).then(alert => {
-                            alert.present();
-                        });
-
-                    }
-                },
-                {
-                    text: 'Cancel',
-                    role: 'cancel'
-                }
-            ]
-        }).then(actionSheet => {
-            actionSheet.present();
-        });
-    });
-
-
-    const draw = new DrawInteraction({
-        source: pointSource as unknown as VectorSource<Feature<Geometry>>,
-        type: 'Point',
-    });
-    map.addInteraction(draw);
-    draw.setActive(addingPoints.value);
-
-    watch(addingPoints, () => {
-        console.log('Adding points', addingPoints.value);
-        if (addingPoints.value) {
-            draw.setActive(true);
-        } else {
-            draw.setActive(false);
-        }
-    });
-
-    draw.on("drawend", (e: DrawEvent) => {
-        const geo: Point = e.feature.getGeometry() as Point;
-        addingPoints.value = false;
-        if (!geo) {
-            return;
-        }
-        const lonLat = geo.getCoordinates();
-        alertController.create({
-            header: 'Neuer Punkt',
-            message: 'Bitte geben Sie die Informationen für den neuen Punkt ein.',
-            inputs: [
-                {
-                    name: 'nr',
-                    type: 'number',
-                    placeholder: 'Punktnummer'
-                },
-                {
-                    name: 'description',
-                    type: 'text',
-                    placeholder: 'Beschreibung'
-                }
-            ],
-            buttons: [
-                {
-                    text: 'Abbrechen',
-                    role: 'cancel',
-                    handler: () => {
-                        pointSource.removeFeature(e.feature as Feature<Point>);
-                    }
-                },
-                {
-                    text: 'Speichern',
-                    handler: (val) => {
-                        if (val.nr && !(val.nr in measureStore.points)) {
-                            const p = new StorePoint(val.nr, val.description);
-                            const coord = transform(lonLat, 'EPSG:4326', settingStore.getProjection());
-                            p.addCoordinate({
-                                source: 'map',
-                                epsg: settingStore.getProjection().getCode(),
-                                x: coord[0],
-                                y: coord[1],
-                                accuracy: (map.getView().getResolution() ?? 1) * 5
-                            });
-                            measureStore.addPoint(p);
-                            return true;
-                        }
-
-                        alertController.create({
-                            header: 'Fehler',
-                            message: 'Punktnummer leer oder bereits vergeben.',
-                            buttons: ['OK']
-                        }).then(alert => {
-                            alert.present();
-                        });
-                        return false;
-                    }
-                }
-            ],
-        }).then(alert => {
-            alert.present();
-        });
-    });
+    createDrawInteraction(map, pointSource, addingPoints);
 
     const geolocation = new Geolocation({
         // enableHighAccuracy must be set to true to have the heading value.
@@ -558,7 +172,7 @@ onMounted(() => {
         mapBewegt = true;
     });
 
-    [vectorSourceHH, vectorSourceNI, vectorSourceSH].forEach((vs) => {
+    alkisSources.forEach((vs) => {
         let snap = new SnapInteraction({
             source: vs,
             pixelTolerance: 20,
@@ -588,6 +202,8 @@ const slideToLocation = () => {
 };
 
 defineExpose({ zoomToExtent, slideToLocation });
+
+
 
 function storePoints2LayerSource() {
     pointSource.clear();
@@ -640,59 +256,6 @@ function storePoints2LayerSource() {
         zoomToExtent();
     }
 }
-
-function tiles(tile: Tile, src: string) {
-    axios({
-        url: src, //your url
-        method: 'GET',
-        responseType: 'blob', // important
-    }).then((response) => {
-        const data = response.data;
-        if (data !== undefined) {
-            (<HTMLImageElement>(<ImageTile>tile).getImage()).src = URL.createObjectURL(data);
-            saveImage(tile, data);
-        } else {
-            tile.setState(TileState.ERROR);
-        }
-    }).catch((err) => {
-        return loadTile(tile, src);
-    });
-}
-async function saveImage(imageTile: Tile, data: Blob) {
-    const imagePath = `osm/${imageTile.tileCoord[0]}/${imageTile.tileCoord[1]}/${imageTile.tileCoord[2]}.png`;
-    await Filesystem.mkdir({
-        path: `osm/${imageTile.tileCoord[0]}/${imageTile.tileCoord[1]}/`,
-        directory: Directory.Data,
-        recursive: true,
-    }).then((result) => {
-        console.log('Directory created', result);
-    }).catch((err) => {
-        console.log('Unable to create directory', err);
-    });
-    Filesystem.writeFile({
-        path: imagePath,
-        data: data,
-        directory: Directory.Data,
-        encoding: Encoding.UTF8
-    })
-}
-
-async function loadTile(imageTile: Tile, src: string) {
-    const imagePath = `osm/${imageTile.tileCoord[0]}/${imageTile.tileCoord[1]}/${imageTile.tileCoord[2]}.png`;
-    await Filesystem.readFile({
-        path: imagePath,
-        directory: Directory.Data
-    }).then((result) => {
-        console.log('Read file', result);
-        //imageTile.getImage().src = result.data;
-        (<HTMLImageElement>(<ImageTile>imageTile).getImage()).src = URL.createObjectURL(<Blob>result.data);
-    }).catch((err) => {
-        console.error('Unable to read file', err);
-    });
-
-}
-
-
 </script>
 
 <style>
