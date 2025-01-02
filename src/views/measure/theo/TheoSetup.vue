@@ -14,8 +14,7 @@
                         type="number"></ion-input>
                 </ion-item>
                 <ion-item>
-                    <ion-label>2. Lage</ion-label>
-                    <ion-toggle v-model="second" position="end"></ion-toggle>
+                    <ion-toggle v-model="second">2. Lage</ion-toggle>
                 </ion-item>
                 <ion-item>
                     <ion-input label-placement="stacked" label='angle accuracy ["]' v-model="accuracy" type="number"

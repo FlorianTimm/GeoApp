@@ -117,7 +117,8 @@ export const useSettingStore = defineStore('settings', {
     state: () => ({
         'epsg': 'EPSG:25832',
         'geolocation': true,
-        'showMeasurements': true
+        'showMeasurements': true,
+        'orderPointsBy': 'nr' as OrderByPointType,
     }),
     getters: {
         getEpsg: (state) => () => state.epsg,
@@ -140,6 +141,8 @@ export const useSettingStore = defineStore('settings', {
 });
 
 export type MeasureMethodType = '' | 'theo_measure' | 'theo_setup' | 'theo_stakeout' | 'prism' | 'level';
+
+export type OrderByPointType = 'no_order' | 'nr' | 'distance' | 'direction' | 'accuracy';
 
 export const useStore = defineStore('store', {
     state: () => ({

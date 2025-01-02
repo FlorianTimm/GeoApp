@@ -23,7 +23,7 @@
                     <ion-input label="description" type="text" v-model="desc" label-placement="stacked"></ion-input>
                 </ion-item>
                 <ion-item>
-                    <ion-toggle aligment="start" slot="start" v-model="gnss">use GNSS</ion-toggle>
+                    <ion-toggle v-model="gnss">Use GNSS</ion-toggle>
                     <br>
                 </ion-item>
                 <ion-item>
