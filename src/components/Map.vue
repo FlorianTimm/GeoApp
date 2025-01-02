@@ -11,7 +11,7 @@ import { Coordinate } from 'ol/coordinate';
 import { LineString, Point } from "ol/geom";
 import { Snap as SnapInteraction } from 'ol/interaction';
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer";
-import { transform, useGeographic } from "ol/proj";
+import { fromLonLat, transform, useGeographic } from "ol/proj";
 import { OSM, Vector as VectorSource } from "ol/source";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 import { onMounted } from "vue";
@@ -47,7 +47,6 @@ const props = defineProps({
 });
 
 
-useGeographic();
 onMounted(() => {
     map = new Map({
         layers: [
@@ -59,8 +58,8 @@ onMounted(() => {
         ],
         target: "map",
         view: new View({
-            center: props.initialCoordinates,
-            projection: 'EPSG:3857',
+            center: fromLonLat(props.initialCoordinates, 'EPSG:25832'),
+            projection: 'EPSG:25832',
             zoom: 12,
         }),
     });
@@ -76,7 +75,7 @@ onMounted(() => {
     const pointLayer = new VectorLayer({
         source: pointSource,
         map: map,
-        style: pointStyle,
+        style: pointStyle
     });
 
     createSelectInteraction(map, pointLayer);
@@ -93,7 +92,7 @@ onMounted(() => {
 
     const accuracyFeature = new Feature();
     geolocation.on('change:accuracyGeometry', function () {
-        const geom = geolocation.getAccuracyGeometry()?.transform(settingStore.getProjection(), 'EPSG:4326');
+        const geom = geolocation.getAccuracyGeometry();
         if (geom) {
             accuracyFeature.setGeometry(geom);
         }
@@ -124,10 +123,10 @@ onMounted(() => {
         if (!coordinates) {
             return;
         }
-        const coord4326 = transform(coordinates, settingStore.getProjection(), 'EPSG:4326');
-        positionFeature.setGeometry(new Point(coord4326));
+
+        positionFeature.setGeometry(new Point(coordinates));
         if (firstGeolocation) {
-            map.getView().setCenter(coord4326);
+            map.getView().setCenter(coordinates);
             firstGeolocation = false;
         }
         if (coordinates && z !== undefined) {
@@ -188,7 +187,7 @@ const zoomToExtent = () => {
 const slideToLocation = () => {
     if (store.position)
         map.getView().animate({
-            center: transform(store.position, settingStore.getProjection(), 'EPSG:4326'),
+            center: store.position,
             duration: 500,
         })
 };
@@ -205,9 +204,9 @@ function storePoints2LayerSource() {
         measureStore.getMeasurements().forEach((m) => {
             if (m.type == 'theodolite') {
                 const t = m as TheodoliteMeasure;
-                const s = measureStore.getPoint(t.pointNumber).get2DCoordinate('EPSG:4326');
+                const s = measureStore.getPoint(t.pointNumber).get2DCoordinate();
                 t.measures.forEach((entry) => {
-                    const e = measureStore.getPoint(entry.nr).get2DCoordinate('EPSG:4326');
+                    const e = measureStore.getPoint(entry.nr).get2DCoordinate();
                     if (!s || !e) {
                         return;
                     }
@@ -220,7 +219,7 @@ function storePoints2LayerSource() {
                     return;
                 }
                 let p = azi2xy({ x: c[0], y: c[1] }, 5, t.orientation)
-                let pt = transform([p.x, p.y], settingStore.getProjection(), 'EPSG:4326');
+                let pt = [p.x, p.y];
                 const f = new Feature(new LineString([s, pt]));
                 f.setStyle(new Style({
                     stroke: new Stroke({
@@ -235,7 +234,7 @@ function storePoints2LayerSource() {
     }
 
     Object.values(measureStore.getPoints()).forEach((pd) => {
-        const c = pd.get2DCoordinate('EPSG:4326');
+        const c = pd.get2DCoordinate();
         if (!c) {
             return;
         }

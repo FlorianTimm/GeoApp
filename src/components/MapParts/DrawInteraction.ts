@@ -35,6 +35,7 @@ export function createDrawInteraction(map: Map, pointSource: VectorSource<Featur
         if (!geo) {
             return;
         }
+
         const lonLat = geo.getCoordinates();
         alertController.create({
             header: 'Neuer Punkt',
@@ -64,7 +65,7 @@ export function createDrawInteraction(map: Map, pointSource: VectorSource<Featur
                     handler: (val) => {
                         if (val.nr && !(val.nr in measureStore.points)) {
                             const p = new StorePoint(val.nr, val.description);
-                            const coord = transform(lonLat, 'EPSG:4326', settingStore.getProjection());
+                            const coord = lonLat;
                             p.addCoordinate({
                                 source: 'map',
                                 epsg: settingStore.getProjection().getCode(),

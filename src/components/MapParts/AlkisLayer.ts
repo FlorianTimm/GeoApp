@@ -7,10 +7,12 @@ import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import { transformExtent } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import { flurstueckStyle } from "./Style";
+import { useSettingStore } from "@/store";
 
 
 export function createAlkisLayer(map: Map): VectorSource[] {
-    let flurstueckeStyle = flurstueckStyle();
+    const flurstueckeStyle = flurstueckStyle();
+    const epsg = useSettingStore().getEpsg();
 
     const vectorSourceNI = new VectorSource({
         format: new WFS({
@@ -21,11 +23,8 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         }),
         url: (extent) => 'https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wfs_einfach?SERVICE=WFS&' +
             'version=2.0.0&request=GetFeature&typenames=ave:Flurstueck&' +
-            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                'urn:ogc:def:crs:EPSG::4326') + '&' +
-            'bbox=' +
-            encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                ',urn:ogc:def:crs:EPSG::25832'),
+            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
+            'bbox=' + extent.join(',') + ',' + epsg,
         strategy: bboxStrategy,
     });
 
@@ -37,17 +36,16 @@ export function createAlkisLayer(map: Map): VectorSource[] {
     });
 
     const vectorSourceHH = new VectorSource({
-        format: new GeoJSON(),
-        url: function (extent) {
-            return (
+        format: new GeoJSON(
+            {
+                dataProjection: 'EPSG:25832'
+            }
+        ),
+        url: (extent) =>
                 'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
                 'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
-                'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=EPSG:4326&' +
-                'bbox=' +
-                extent.join(',') +
-                ',EPSG:4326'
-            );
-        },
+            'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=' + epsg + '&' +
+            'bbox=' + extent.join(',') + ',' + epsg,
         strategy: bboxStrategy,
     });
 
@@ -67,21 +65,14 @@ export function createAlkisLayer(map: Map): VectorSource[] {
             gmlFormat: new GML32(),
         }),
         /*url: (extent) => 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
-            'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
-            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                'urn:ogc:def:crs:EPSG::25832') + '&' +
-            'bbox=' +
-            encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                ',urn:ogc:def:crs:EPSG::25832'),*/
+                'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
+                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
+                'bbox=' + extent.join(',') + ',' + epsg,*/
         loader: (extent) => {
-
             let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
                 'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
-                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                    'urn:ogc:def:crs:EPSG::4326') + '&' +
-                'bbox=' +
-                encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                    ',urn:ogc:def:crs:EPSG::25832');
+                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
+                'bbox=' + extent.join(',') + ',' + epsg;
             fetch(url)
                 .then((response) => response.text())
                 .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
@@ -93,12 +84,13 @@ export function createAlkisLayer(map: Map): VectorSource[] {
                             let cs = g[j].getElementsByTagName('gml:posList')[0]?.textContent?.split(' ') ?? [];
                             let coords = [];
                             for (let i = 0; i < cs.length; i += 2) {
-                                let ce = [parseFloat(cs[i + 1]), parseFloat(cs[i])];
+                                let ce = [parseFloat(cs[i]), parseFloat(cs[i + 1])];
                                 coords.push(ce);
                             }
                             let p = new Polygon([coords]);
                             let f = new Feature(p);
                             vectorSourceSH.addFeature(f);
+                            console.log(vectorSourceSH.getFeatures().length);
                         }
                     }
                 });
