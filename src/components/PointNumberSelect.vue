@@ -1,93 +1,46 @@
 <template>
-    <ion-select @ionChange="optionSelected($event)" v-bind:placeholder="placeholder" v-model="model" interface="modal">
-        <ion-select-option v-if="newPoint" value="new">New Point</ion-select-option>
-        <ion-select-option v-for="item in points" :value="item">
-            {{ item.nr }}
-        </ion-select-option>
-    </ion-select>
+    <ion-input :label :labelPlacement id="select_point" :value=model?.nr :placeholder readonly></ion-input>
+
+    <PointSelectDialog trigger='select_point' v-model="model" :newPoint />
 </template>
 
 <script setup lang="ts">
-import { IonSelect, IonSelectOption } from '@ionic/vue';
-import { alertController } from '@ionic/vue';
-import { useMeasureStore } from '@/store';
 import { Point } from "@/types/Point";
-import { storeToRefs } from 'pinia';
+import PointSelectDialog from './PointSelectDialog.vue';
+import { IonInput } from "@ionic/vue";
+import { PropType, watch } from "vue";
+import { useMeasureStore } from "@/store";
 
-const model = defineModel();
-
-const store = useMeasureStore();
-const { points, measurements } = storeToRefs(store);
+const model = defineModel<Point>();
 
 defineProps({
     newPoint: Boolean,
     placeholder: {
         type: String,
-        default: 'Punkt auswählen'
+        default: 'select point'
+    },
+    label: {
+        type: String,
+        default: 'Point'
+    },
+    labelPlacement: {
+        type: String as PropType<'stacked' | 'fixed' | 'start' | 'end' | 'floating'>,
+        default: 'stacked'
     }
 })
 
-const emit = defineEmits(['input']);
 
-const optionSelected = (e: CustomEvent) => {
+const store = useMeasureStore();
 
-    if (e.detail.value == 'new') {
-        alertController.create({
-            header: 'Neuer Punkt',
-            message: 'Bitte geben Sie die Informationen für den neuen Punkt ein.',
-            inputs: [
-                {
-                    name: 'nr',
-                    type: 'number',
-                    placeholder: 'Punktnummer'
-                },
-                {
-                    name: 'description',
-                    type: 'text',
-                    placeholder: 'Beschreibung'
-                },
-                {
-                    name: 'local',
-                    type: 'checkbox',
-                    label: 'Aktuelle Position verwenden'
-                }
-            ],
-            buttons: [
-                {
-                    text: 'Abbrechen',
-                    role: 'cancel'
-                },
-                {
-                    text: 'Speichern',
-                    handler: (val) => {
-                        if (val.nr && !(val.nr in store.points)) {
-                            let p = new Point(val.nr, val.description)
-                            if (val.local) {
-                                //TODO: get current position
-                            }
-                            store.addPoint(p); 
-                            model.value = p;
-                            emit('input', p);
-                            return true;
-                        }
-                        alertController.create({
-                            header: 'Fehler',
-                            message: 'Punktnummer leer oder bereits vergeben.',
-                            buttons: ['OK']
-                        }).then(alert => {
-                            alert.present();
-                        });
-                        return false;
-                    }
-                }
-            ],
-        }).then(alert => {
-            alert.present();
-        });
-    } else {
-        emit('input', e.detail.value);
-        console.log(e.detail.value);
+watch(store.points, (points) => {
+    if (!model.value) {
+        return;
     }
-}
+    if (!(model.value?.nr in points)) {
+        model.value = undefined;
+    }
+});
 
+
+const emit = defineEmits(['input']);
 </script>

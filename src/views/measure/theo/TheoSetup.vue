@@ -3,8 +3,7 @@
         <span v-if="!measure">
             <ion-list>
                 <ion-item>
-                    <ion-label label-placement="stacked">Point</ion-label>
-                    <PointNumberSelect v-model="nr" newPoint />
+                    <PointNumberSelect label='Point' label-placement="stacked" v-model="nr" newPoint />
                 </ion-item>
                 <ion-item>
                     <ion-input label-placement="stacked" label='Description' v-model="description"
