@@ -31,6 +31,9 @@
               <td>{{ format(item.getCoordinateComponents('y')) }}</td>
               <td>{{ format(item.getCoordinateComponents('z')) }}</td>
               <td>
+                <ion-button @click="editPoint(item)">
+                  <ion-icon :icon="pencil"></ion-icon>
+                </ion-button>
                 <ion-button @click="removePoint(item.nr)">
                   <ion-icon :icon="trash"></ion-icon>
                 </ion-button>
@@ -40,119 +43,35 @@
         </table>
       </div>
       <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-        <ion-fab-button @click="addPoint()">
+        <ion-fab-button id="new_point">
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
       </ion-fab>
+      <PointDialog ref="point_dialog" trigger="new_point" />
     </ion-content>
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { useMeasureStore, useSettingStore, useStore } from '@/store';
+import { useMeasureStore } from '@/store';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon, IonButton } from '@ionic/vue';
-import { add } from 'ionicons/icons';
 import { alertController } from '@ionic/vue';
-import { Point } from '@/types/Point';
-import { trash } from 'ionicons/icons';
+import { trash, pencil, add } from 'ionicons/icons';
 import { format } from '@/utils';
+import PointDialog from '@/components/PointDialog.vue';
+import { addIcons } from 'ionicons';
+import { Point } from '@/types/Point';
+import { ref } from 'vue';
 
+addIcons({
+  "add": add,
+  "trash": trash,
+  "pencil": pencil,
+});
 
 const measureStore = useMeasureStore();
-const settingStore = useSettingStore();
-const store = useStore();
 
-const addPoint = () => {
-  const pos = store.getPosition()
-  const acc = store.getAccuracy()
-  console.log(pos, acc)
-  alertController.create({
-    header: 'Neuer Punkt',
-    message: 'Bitte geben Sie die Informationen für den neuen Punkt ein.',
-    inputs: [
-      {
-        name: 'nr',
-        type: 'number',
-        placeholder: 'Punktnummer'
-      },
-      {
-        name: 'description',
-        type: 'text',
-        placeholder: 'Beschreibung'
-      },
-      {
-        name: 'easting',
-        type: 'number',
-        placeholder: pos ? pos[0].toFixed(3) : 'Easting',
-        label: 'Easting'
-      },
-      {
-        name: 'northing',
-        type: 'number',
-        placeholder: pos ? pos[1].toFixed(3) : 'Northing',
-        label: 'Northing'
-      },
-      {
-        name: 'height',
-        type: 'number',
-        placeholder: pos && 2 in pos ? pos[2].toFixed(3) : 'Height',
-        label: 'Height'
-      },
-      {
-        name: 'local',
-        type: 'checkbox',
-        label: 'Aktuelle Position verwenden'
-      }
-    ],
-    buttons: [
-      {
-        text: 'Abbrechen',
-        role: 'cancel'
-      },
-      {
-        text: 'Speichern',
-        handler: (val) => {
-          if (val.nr && !(val.nr in measureStore.points)) {
-            let p = new Point(val.nr, val.description)
-            if (val.local && pos) {
-              p.addCoordinate({
-                source: 'gps',
-                epsg: settingStore.getEpsg(),
-                x: pos[0],
-                y: pos[1],
-                z: pos[2],
-                accuracy: acc ?? 5
-              });
-            }
-            if (val.easting && val.northing) {
-              p.addCoordinate({
-                source: 'manual',
-                epsg: settingStore.getEpsg(),
-                x: parseFloat(val.easting),
-                y: parseFloat(val.northing),
-                z: parseFloat(val.height),
-                accuracy: 0
-              });
-            }
-            measureStore.addPoint(p);
-            return true;
-          }
-          alertController.create({
-            header: 'Fehler',
-            message: 'Punktnummer leer oder bereits vergeben.',
-            buttons: ['OK']
-          }).then(alert => {
-            alert.present();
-          });
-          return false;
-        }
-      }
-    ],
-  }).then(alert => {
-    alert.present();
-  });
-};
-
+const point_dialog = ref<InstanceType<typeof PointDialog>>()
 
 const removePoint = (nr: string) => {
   alertController.create({
@@ -181,6 +100,11 @@ const removePoint = (nr: string) => {
   }).then(alert => {
     alert.present();
   });
+}
+
+const editPoint = (point: Point) => {
+  console.log('edit point', point);
+  point_dialog.value?.editPoint(point);
 }
 </script>
 

@@ -5,7 +5,7 @@
                 <ion-buttons slot="start">
                     <ion-button @click="cancel()">Cancel</ion-button>
                 </ion-buttons>
-                <ion-title>Welcome</ion-title>
+                <ion-title>{{ (model === undefined ? 'New Point ' : 'Edit Point ') + (nr ?? '') }}</ion-title>
                 <ion-buttons slot="end">
                     <ion-button :strong="true" @click="confirm()">Confirm</ion-button>
                 </ion-buttons>
@@ -14,17 +14,17 @@
         <ion-content class="ion-padding">
             <ion-list>
                 <ion-item v-if="message">
-                    <ion-label>{{ message }}</ion-label>
+                    <ion-text color="warning">{{ message }}</ion-text>
                 </ion-item>
                 <ion-item>
-                    <ion-input label="point number" type="text" v-model="nr" label-placement="stacked"></ion-input>
+                    <ion-input label="point number" type="text" v-model="nr" label-placement="stacked"
+                        v-bind:disabled="model !== undefined"></ion-input>
                 </ion-item>
                 <ion-item>
                     <ion-input label="description" type="text" v-model="desc" label-placement="stacked"></ion-input>
                 </ion-item>
                 <ion-item>
                     <ion-toggle v-model="gnss">Use GNSS</ion-toggle>
-                    <br>
                 </ion-item>
                 <ion-item>
                     <ion-input label="easting" type="number" v-model="easting" label-placement="stacked"
@@ -68,11 +68,11 @@ import { Point } from '@/types/Point';
 import { useMeasureStore, useSettingStore } from '@/store';
 import { alertController } from '@ionic/vue';
 
-const message = ref('This modal example uses triggers to automatically open a modal when the button is clicked.');
+const message = ref('');
 
 const modal = ref<InstanceType<typeof IonModal>>()
 
-const model = defineModel<Point>();
+const model = defineModel<Point | undefined>(undefined);
 
 
 const measureStore = useMeasureStore();
@@ -120,7 +120,24 @@ const emit = defineEmits(['confirm', 'cancel']);
 
 const openModal = () => modal.value?.$el.present();
 
+const editPoint = (point: Point) => {
+    console.log('edit point', point);
+    model.value = point;
+    nr.value = point.nr;
+    desc.value = point.description
+    let c = point.getCoordinate();
+    if (c) {
+        easting.value = c.x;
+        northing.value = c.y;
+        altitude.value = c.z;
+        accuracy.value = c.accuracy;
+    }
+    openModal();
+};
 
+defineExpose({
+    editPoint
+});
 
 const selectPoint = (point: Point) => {
     model.value = point;
@@ -128,33 +145,49 @@ const selectPoint = (point: Point) => {
 };
 
 const confirm = () => {
+    if (model.value) {
+        model.value.description = desc.value;
+        let c = model.value.getCoordinate();
+        if (c) {
+            c.x = easting.value;
+            c.y = northing.value;
+            c.z = altitude.value;
+            c.accuracy = accuracy.value;
+        } else if ((easting.value && northing.value) || altitude.value) {
+            model.value.addCoordinate({
+                source: gnss.value ? 'gps' : 'manual',
+                epsg: settingStore.getEpsg(),
+                x: easting.value,
+                y: northing.value,
+                z: altitude.value,
+                accuracy: accuracy.value
+            });
+        }
 
-    if (!nr.value || (nr.value in measureStore.points)) {
-        alertController.create({
-            header: 'Fehler',
-            message: 'Punktnummer leer oder bereits vergeben.',
-            buttons: ['OK']
-        }).then(alert => {
-            alert.present();
-        });
-        return false;
+        modal.value?.$el.dismiss(model.value, 'confirm');
+    } else {
+
+        if (!nr.value || (nr.value in measureStore.points)) {
+            message.value = 'Point number must be unique';
+            return false;
+        }
+        let p = new Point(nr.value, desc.value)
+        measureStore.addPoint(p);
+
+        if ((easting.value && northing.value) || altitude.value) {
+            p.addCoordinate({
+                source: gnss.value ? 'gps' : 'manual',
+                epsg: settingStore.getEpsg(),
+                x: easting.value,
+                y: northing.value,
+                z: altitude.value,
+                accuracy: accuracy.value
+            });
+        }
+
+        modal.value?.$el.dismiss(p, 'confirm');
+        emit('confirm', p);
     }
-    let p = new Point(nr.value, desc.value)
-    measureStore.addPoint(p);
-
-    if ((easting.value && northing.value) || altitude.value) {
-        p.addCoordinate({
-            source: 'manual',
-            epsg: settingStore.getEpsg(),
-            x: easting.value,
-            y: northing.value,
-            z: altitude.value,
-            accuracy: accuracy.value
-        });
-    }
-
-    modal.value?.$el.dismiss(p, 'confirm');
-    emit('confirm', p);
 };
 
 const cancel = () => {
@@ -171,5 +204,14 @@ const onWillDismiss = (ev: CustomEvent<OverlayEventDetail>) => {
     } else {
         // TODO Nachfragen ob wirklich abbrechen
     }
+    model.value = undefined;
+    message.value = '';
+    nr.value = undefined;
+    desc.value = undefined;
+    easting.value = undefined;
+    northing.value = undefined;
+    altitude.value = undefined;
+    accuracy.value = 0.05;
+    gnss.value = false;
 };
 </script>
