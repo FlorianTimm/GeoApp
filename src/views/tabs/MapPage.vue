@@ -44,24 +44,31 @@
         </ion-toolbar>
       </ion-header>
 
-      <Map ref="map" />
+      <Map ref="map" v-model=addingPoints />
+      <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+        <ion-fab-button @click="addPoint()" :color="addingPoints ? 'success' : 'light'">
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonToggle, IonMenu, IonList, IonItem, IonIcon, IonLabel } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonToggle, IonMenu, IonList, IonItem, IonIcon, IonLabel, IonFab, IonFabButton } from '@ionic/vue';
 import Map from '@/components/Map.vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { useSettingStore } from '@/store';
 import { addIcons } from 'ionicons';
-import { mapOutline } from 'ionicons/icons';
+import { mapOutline, add } from 'ionicons/icons';
 import { ref } from 'vue';
 
+
 addIcons({
-  "map-outline": mapOutline
+  "map-outline": mapOutline,
+  "add": add,
 });
 
 defineProps({
@@ -70,7 +77,11 @@ defineProps({
 
 const settingStore = useSettingStore();
 const map = ref()
+const addingPoints = ref<boolean>(false);
 
-
+const addPoint = () => {
+  console.log('add point')
+  addingPoints.value = !addingPoints.value;
+}
 
 </script>

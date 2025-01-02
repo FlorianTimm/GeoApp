@@ -5,40 +5,39 @@
 <script lang="ts" setup>
 import { useMeasureStore, useSettingStore, useStore } from "@/store";
 import { Point as StorePoint } from "@/types/Point";
+import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
+import { azi2xy } from "@/utils";
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
-import { actionSheetController, alertController, IonIcon } from '@ionic/vue';
+import { actionSheetController, alertController } from '@ionic/vue';
 import axios from "axios";
 import { Coordinate } from 'ol/coordinate';
 import Feature from "ol/Feature";
+import { GeoJSON, WFS } from "ol/format";
+import GML32 from "ol/format/GML32";
 import Geolocation from "ol/Geolocation";
-import { LineString, MultiPolygon, Point } from "ol/geom";
+import { Geometry, LineString, MultiPoint, MultiPolygon, Point, Polygon } from "ol/geom";
 import ImageTile from "ol/ImageTile";
+import { Draw as DrawInteraction, Select } from 'ol/interaction';
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
+import { bbox as bboxStrategy } from "ol/loadingstrategy";
 import Map from "ol/Map";
 import "ol/ol.css";
-import { useGeographic } from "ol/proj";
+import { transform, transformExtent, useGeographic } from "ol/proj";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import CircleStyle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
+import RegularShape from "ol/style/RegularShape";
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
+import Text from "ol/style/Text";
 import Tile from "ol/Tile";
 import TileState from 'ol/TileState';
 import View from "ol/View";
-import { onMounted } from "vue";
-import { Select } from 'ol/interaction';
-import { transform } from 'ol/proj';
-import Text from "ol/style/Text";
-import RegularShape from "ol/style/RegularShape";
-import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
-import { azi2xy, cos } from "@/utils";
-import { MultiPoint, Polygon } from "ol/geom";
-import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import { GeoJSON, WFS, GML } from "ol/format";
-import { transformExtent } from "ol/proj";
-import GML32 from "ol/format/GML32";
+import { onMounted, watch } from "vue";
+import { Snap as SnapInteraction } from 'ol/interaction';
+import { DrawEvent } from "ol/interaction/Draw";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -54,11 +53,13 @@ measureStore.$subscribe(() => {
     storePoints2LayerSource();
 })
 
+const addingPoints = defineModel<boolean>({ required: true, default: false })
+
 const props = defineProps({
     initialCoordinates: {
         default: [10, 53.5],
         type: Array as () => Coordinate
-    },
+    }
 });
 
 
@@ -395,13 +396,31 @@ onMounted(() => {
             actionSheet.present();
         });
     });
-    map.on("click", (e) => {
-        const lonLat = e.coordinate;
-        if (map.getFeaturesAtPixel(e.pixel, {
-            layerFilter: (layer) => layer === pointLayer,
-        }).length > 0) {
+
+
+    const draw = new DrawInteraction({
+        source: pointSource as unknown as VectorSource<Feature<Geometry>>,
+        type: 'Point',
+    });
+    map.addInteraction(draw);
+    draw.setActive(addingPoints.value);
+
+    watch(addingPoints, () => {
+        console.log('Adding points', addingPoints.value);
+        if (addingPoints.value) {
+            draw.setActive(true);
+        } else {
+            draw.setActive(false);
+        }
+    });
+
+    draw.on("drawend", (e: DrawEvent) => {
+        const geo: Point = e.feature.getGeometry() as Point;
+        addingPoints.value = false;
+        if (!geo) {
             return;
         }
+        const lonLat = geo.getCoordinates();
         alertController.create({
             header: 'Neuer Punkt',
             message: 'Bitte geben Sie die Informationen für den neuen Punkt ein.',
@@ -420,7 +439,10 @@ onMounted(() => {
             buttons: [
                 {
                     text: 'Abbrechen',
-                    role: 'cancel'
+                    role: 'cancel',
+                    handler: () => {
+                        pointSource.removeFeature(e.feature as Feature<Point>);
+                    }
                 },
                 {
                     text: 'Speichern',
@@ -535,6 +557,19 @@ onMounted(() => {
     map.on('moveend', () => {
         mapBewegt = true;
     });
+
+    [vectorSourceHH, vectorSourceNI, vectorSourceSH].forEach((vs) => {
+        let snap = new SnapInteraction({
+            source: vs,
+            pixelTolerance: 20,
+            edge: false,
+            vertex: true
+        });
+        map.addInteraction(snap);
+        snap.setActive(true);
+    });
+
+
 });
 
 const zoomToExtent = () => {
