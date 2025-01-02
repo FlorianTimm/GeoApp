@@ -19,7 +19,7 @@
     "axios": "1.7.9",
     "ionicons": "^7.4.0",
     "math.js": "^1.1.46",
-    "ol": "10.3.1",
+    "ol": "^10.3.1",
     "pinia": "^2.3.0",
     "pinia-plugin-persistedstate": "^4.2.0",
     "proj4": "^2.15.0",

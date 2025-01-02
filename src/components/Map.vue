@@ -11,7 +11,7 @@ import axios from "axios";
 import { Coordinate } from 'ol/coordinate';
 import Feature from "ol/Feature";
 import Geolocation from "ol/Geolocation";
-import { LineString, Point } from "ol/geom";
+import { LineString, MultiPolygon, Point } from "ol/geom";
 import ImageTile from "ol/ImageTile";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
@@ -36,7 +36,9 @@ import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
 import { azi2xy, cos } from "@/utils";
 import { MultiPoint, Polygon } from "ol/geom";
 import { bbox as bboxStrategy } from "ol/loadingstrategy";
-import { GeoJSON } from "ol/format";
+import { GeoJSON, WFS, GML } from "ol/format";
+import { transformExtent } from "ol/proj";
+import GML32 from "ol/format/GML32";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -117,71 +119,12 @@ onMounted(() => {
     });
 
 
-
-    /*
-        const vectorSource = new VectorSource({
-            format: new WFS({
-                version: '2.0.0',
-                featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
-                featureType: 'CadastralParcel',
-                gmlFormat: new GML32({
-                    srsName: 'EPSG:4326',
-                    featureType: 'CadastralParcel',
-                    featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
-                }),
-    
-            }),
-            loader: (extent) => {
-                console.log(vectorSource.getFeatures());
-                let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
-                    'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
-                    'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
-                        'urn:ogc:def:crs:EPSG::4326') + '&' +
-                    'bbox=' +
-                    encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
-                        ',urn:ogc:def:crs:EPSG::25832')
-                fetch(url)
-                    .then(response => response.text())
-                    .then(text => {
-                        // Add Features
-                        vectorSource.addFeatures(
-                            // Read WFS collection and do a reprojection of coordinates
-                            // from EPSG 4326 to EPSG 3857
-                            vectorSource.getFormat()?.readFeatures(text, {
-                                dataProjection: 'EPSG:4326',
-                                featureProjection: 'EPSG:3857'
-                            }) ?? []
-                        );
-                    })
-            },
-            strategy: bboxStrategy,
-        });*/
-
-    const vectorSource = new VectorSource({
-        format: new GeoJSON(),
-        url: function (extent) {
-            return (
-                'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
-                'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
-                'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=EPSG:4326&' +
-                'bbox=' +
-                extent.join(',') +
-                ',EPSG:4326'
-            );
-        },
-        strategy: bboxStrategy,
-    });
-
-    const vector = new VectorLayer({
-        source: vectorSource,
-        map: map,
-        minZoom: 19,
-        style: [new Style({
-            stroke: new Stroke({
-                color: 'rgba(0, 0, 0, 1.0)',
-                width: 1,
-            })
-        }),
+    let flurstueckeStyle: Style[] = [new Style({
+        stroke: new Stroke({
+            color: 'rgba(0, 0, 0, 1.0)',
+            width: 1,
+        })
+    }),
         new Style({
             image: new RegularShape({
                 points: 4,
@@ -197,13 +140,162 @@ onMounted(() => {
             }),
             geometry: function (feature) {
                 // return the coordinates of the first ring of the polygon
-                const coordinates = (feature?.getGeometry() as Polygon).getCoordinates()[0];
-                return new MultiPoint(coordinates);
+                try {
+                    const geo = feature?.getGeometry();
+                    console.log(geo?.getType());
+                    if (!geo) {
+                        return;
+                    }
+
+                    switch (geo.getType()) {
+                        case 'Polygon':
+                            return new MultiPoint((geo as Polygon).getCoordinates()[0]);
+                        case 'MultiPolygon':
+                            return new MultiPoint((geo as MultiPolygon).getCoordinates()[0][0]);
+                    }
+                } catch (e) {
+                    return
+                }
+
             },
         }),
-        ]
+    ]
 
+
+
+
+    const vectorSourceNI = new VectorSource({
+        format: new WFS({
+            version: '2.0.0',
+            featureNS: 'http://repository.gdi-de.org/schemas/adv/produkt/alkis-vereinfacht/2.0',
+            featureType: 'Flurstueck',
+            gmlFormat: new GML32(),
+
+        }),
+        url: (extent) => 'https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wfs_einfach?SERVICE=WFS&' +
+            'version=2.0.0&request=GetFeature&typenames=ave:Flurstueck&' +
+            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
+                'urn:ogc:def:crs:EPSG::4326') + '&' +
+            'bbox=' +
+            encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
+                ',urn:ogc:def:crs:EPSG::25832'),
+        strategy: bboxStrategy,
     });
+
+    new VectorLayer({
+        source: vectorSourceNI,
+        map: map,
+        minZoom: 19,
+        style: flurstueckeStyle
+    });
+
+    const vectorSourceHH = new VectorSource({
+        format: new GeoJSON(),
+        url: function (extent) {
+            return (
+                'https://geodienste.hamburg.de/WFS_HH_ALKIS_vereinfacht?SERVICE=WFS&' +
+                'version=1.1.0&request=GetFeature&typename=ave:Flurstueck&' +
+                'outputFormat=' + encodeURIComponent('application/geo+json') + '&srsname=EPSG:4326&' +
+                'bbox=' +
+                extent.join(',') +
+                ',EPSG:4326'
+            );
+        },
+        strategy: bboxStrategy,
+    });
+
+
+    new VectorLayer({
+        source: vectorSourceHH,
+        map: map,
+        minZoom: 19,
+        style: flurstueckeStyle
+    });
+
+    const vectorSourceSH = new VectorSource({
+        format: new WFS({
+            version: '2.0.0',
+            featureNS: 'https://inspire.ec.europa.eu/schemas/cp/4.0',
+            featureType: 'CadastralParcel',
+            gmlFormat: new GML32(),
+
+        }),
+        /*url: (extent) => 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
+            'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
+            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
+                'urn:ogc:def:crs:EPSG::25832') + '&' +
+            'bbox=' +
+            encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
+                ',urn:ogc:def:crs:EPSG::25832'),*/
+        loader: (extent) => {
+
+            let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
+                'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
+                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + encodeURIComponent(
+                    'urn:ogc:def:crs:EPSG::4326') + '&' +
+                'bbox=' +
+                encodeURIComponent(transformExtent(extent, 'EPSG:4326', 'EPSG:25832').join(',') +
+                    ',urn:ogc:def:crs:EPSG::25832');
+            fetch(url)
+                .then((response) => response.text())
+                .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+                .then((response) => {
+                    let c = response.getElementsByTagName('geometry');
+                    for (let i = 0; i < c.length; i++) {
+                        let g = c[i].getElementsByTagName('gml:Polygon');
+                        for (let j = 0; j < g.length; j++) {
+                            let cs = g[j].getElementsByTagName('gml:posList')[0]?.textContent?.split(' ') ?? [];
+                            let coords = [];
+                            for (let i = 0; i < cs.length; i += 2) {
+                                let ce = [parseFloat(cs[i + 1]), parseFloat(cs[i])];
+                                coords.push(ce);
+                            }
+                            let p = new Polygon([coords]);
+                            let f = new Feature(p);
+                            vectorSourceSH.addFeature(f);
+                        }
+                    }
+                });
+        },
+        strategy: bboxStrategy,
+    });
+
+
+/*
+    const vectorSourceSH2 = new VectorSource({
+        format: new WFS({
+            version: '2.0.0',
+            featureNS: 'http://repository.gdi-de.org/schemas/adv/produkt/alkis-vereinfacht/2.0',
+            featureType: 'Flurstueck',
+            gmlFormat: new GML32()
+        }),
+        loader: (extent) => {
+            extent = transformExtent(extent, 'EPSG:4326', 'EPSG:25832');
+            let url = 'https://service.gdi-sh.de/WFS_SH_ALKIS_vereinf_OpenGBD?service=wfs&version=2.0.0&storedquery_id=http://repository.gdi-de.org/query/adv/produkt/alkis-vereinfacht/2.0/ave-by-bbox&' +
+                'version=2.0.0&request=GetFeature&typenames=ave:Flurstueck&' +
+                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&CRS=' + encodeURIComponent(
+                    'urn:ogc:def:crs:EPSG::25832') + '&' +
+                'x1=' + extent[0] + '&y1=' + extent[1] + '&x2=' + extent[2] + '&y2=' + extent[3] + '&srsname=' + encodeURIComponent(
+                    ',urn:ogc:def:crs:EPSG::25832')
+            fetch(url).then((response) => {
+                return response.text();
+            }).then((response) => {
+                const features = new GML32().readFeatures(response);
+                console.log(features);
+                vectorSourceSH2.addFeatures(features);
+                //vectorSourceSH2.addFeatures(features);
+            });
+        },
+        strategy: bboxStrategy,
+    });*/
+
+    new VectorLayer({
+        source: vectorSourceSH,
+        map: map,
+        minZoom: 19,
+        style: flurstueckeStyle
+    });
+
 
     const selectInteraction = new Select({
         layers: [pointLayer],
