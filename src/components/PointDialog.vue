@@ -60,7 +60,8 @@ import {
     IonInput,
     IonToggle,
     IonList,
-    IonLabel
+    IonLabel,
+    IonText
 } from '@ionic/vue';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { ref } from 'vue';
@@ -120,6 +121,12 @@ const emit = defineEmits(['confirm', 'cancel']);
 
 const openModal = () => modal.value?.$el.present();
 
+const newPoint = () => {
+    console.log('new point');
+    model.value = undefined;
+    openModal();
+};
+
 const editPoint = (point: Point) => {
     console.log('edit point', point);
     model.value = point;
@@ -136,7 +143,8 @@ const editPoint = (point: Point) => {
 };
 
 defineExpose({
-    editPoint
+    editPoint,
+    newPoint
 });
 
 const selectPoint = (point: Point) => {

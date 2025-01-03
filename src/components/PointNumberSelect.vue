@@ -1,17 +1,29 @@
 <template>
     <ion-input :label :labelPlacement id="select_point" :value=model?.nr :placeholder readonly></ion-input>
-
-    <PointSelectDialog trigger='select_point' v-model="model" :newPoint />
+    <ion-button id="new_point" slot="end" v-if="newPoint">
+        <ion-icon :icon="add"></ion-icon>
+    </ion-button>
+    <PointDialog v-if="newPoint" ref="newPointDialog" trigger="new_point" @confirm="addPointClose" />
+    <PointSelectDialog trigger='select_point' v-model="model" :newPoint @new="newPointOpen" />
 </template>
 
 <script setup lang="ts">
 import { Point } from "@/types/Point";
 import PointSelectDialog from './PointSelectDialog.vue';
-import { IonInput } from "@ionic/vue";
-import { PropType, watch } from "vue";
+import { IonInput, IonIcon, IonButton } from "@ionic/vue";
+import { PropType, watch, ref } from "vue";
 import { useMeasureStore } from "@/store";
+import PointDialog from "./PointDialog.vue";
+import { add } from 'ionicons/icons';
+import { addIcons } from 'ionicons';
+
+addIcons({
+    'add': add
+})
 
 const model = defineModel<Point>();
+
+const newPointDialog = ref<InstanceType<typeof PointDialog>>();
 
 defineProps({
     newPoint: Boolean,
@@ -41,6 +53,15 @@ watch(store.points, (points) => {
     }
 });
 
+const newPointOpen = () => {
+    model.value = undefined;
+    newPointDialog.value?.newPoint();
+}
+
+const addPointClose = (point: Point) => {
+    model.value = point;
+    emit('input', point);
+}
 
 const emit = defineEmits(['input']);
 </script>

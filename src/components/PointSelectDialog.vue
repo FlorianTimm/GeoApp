@@ -20,13 +20,13 @@
         </ion-header>
         <ion-content class="ion-padding">
             <ion-list>
-                <ion-item v-if="newPoint" id="new_point">New Point</ion-item>
+                <ion-item v-if="newPoint" @click="addPoint">New Point</ion-item>
                 <ion-item v-for="item in test" :value="item" @click="selectPoint(item)"
                     :color="item.nr == model?.nr ? 'primary' : undefined">
                     {{ item.nr }}
                 </ion-item>
             </ion-list>
-            <PointDialog ref="new_point_dialog" trigger="new_point" @confirm="addPoint" />
+
         </ion-content>
     </ion-modal>
 
@@ -65,6 +65,8 @@ let oldValue: Point | undefined;
 
 let test = computed(() => orderBy(points.value));
 
+const emit = defineEmits(['confirm', 'cancel', 'new']);
+
 defineProps({
     trigger: {
         type: String,
@@ -92,8 +94,9 @@ const onOpened = () => {
     oldValue = model.value;
 };
 const addPoint = (point: Point) => {
-    selectPoint(point);
-    console.log('add point', point);
+    model.value = oldValue;
+    modal.value?.$el.dismiss(null, 'new');
+    emit('new');
 };
 
 const onWillDismiss = (ev: CustomEvent<OverlayEventDetail>) => {
