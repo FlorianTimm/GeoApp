@@ -16,31 +16,37 @@
       </ion-header>
 
       <div>
-        <table>
-          <tbody>
-            <tr>
-              <th>Name</th>
-              <th>Easting</th>
-              <th>Northing</th>
-              <th>Height</th>
-              <th></th>
-            </tr>
-            <tr v-for="item in measureStore.points" :key="item.nr">
-              <td>{{ item.nr }}</td>
-              <td>{{ format(item.getCoordinateComponents('x')) }}</td>
-              <td>{{ format(item.getCoordinateComponents('y')) }}</td>
-              <td>{{ format(item.getCoordinateComponents('z')) }}</td>
-              <td>
-                <ion-button @click="editPoint(item)">
-                  <ion-icon :icon="pencil"></ion-icon>
-                </ion-button>
-                <ion-button @click="removePoint(item.nr)">
-                  <ion-icon :icon="trash"></ion-icon>
-                </ion-button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <ion-list>
+          <ion-item v-for="item in measureStore.points" :key="item.nr">
+            <ion-grid>
+              <ion-row>
+                <ion-col size="2">{{ item.nr }}</ion-col>
+                <ion-col>
+                  <ion-row v-if="item.getCoordinateComponents('x') !== null">
+                    <ion-col>Y:</ion-col>
+                    <ion-col class="right">{{ format(item.getCoordinateComponents('x')) }}</ion-col>
+                  </ion-row>
+                  <ion-row v-if="item.getCoordinateComponents('y') !== null">
+                    <ion-col>X:</ion-col>
+                    <ion-col class="right">{{ format(item.getCoordinateComponents('y')) }}</ion-col>
+                  </ion-row>
+                  <ion-row v-if="item.getCoordinateComponents('z') !== null">
+                    <ion-col>Z:</ion-col>
+                    <ion-col class="right">{{ format(item.getCoordinateComponents('z')) }}</ion-col>
+                  </ion-row>
+                </ion-col>
+                <ion-col>
+                  <ion-button @click="editPoint(item)">
+                    <ion-icon :icon="pencil"></ion-icon>
+                  </ion-button>
+                  <ion-button @click="removePoint(item.nr)">
+                    <ion-icon :icon="trash"></ion-icon>
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-item>
+        </ion-list>
       </div>
       <ion-fab slot="fixed" vertical="bottom" horizontal="end">
         <ion-fab-button id="new_point">
@@ -54,7 +60,10 @@
 
 <script setup lang="ts">
 import { useMeasureStore } from '@/store';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon, IonButton } from '@ionic/vue';
+import {
+  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon, IonButton,
+  IonGrid, IonRow, IonCol
+} from '@ionic/vue';
 import { alertController } from '@ionic/vue';
 import { trash, pencil, add } from 'ionicons/icons';
 import { format } from '@/utils';
@@ -109,16 +118,7 @@ const editPoint = (point: Point) => {
 </script>
 
 <style scoped>
-table {
-  width: 100%;
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  border: 1px solid black;
-  padding: 8px;
-  text-align: center;
+.right {
+  text-align: right;
 }
 </style>

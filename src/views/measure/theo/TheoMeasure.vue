@@ -5,7 +5,6 @@
                 <ion-label>Point {{ measure.measures.length + 1 }}</ion-label>
             </ion-item>
             <ion-item>
-                <ion-label position="stacked">Point</ion-label>
                 <PointNumberSelect v-model="point" :newPoint="store.getMeasureMethod() !== 'theo_setup'" />
             </ion-item>
             <ion-item>
@@ -25,7 +24,7 @@
         <div class="ion-padding">
             <ion-button expand="block" @click="addPoint" class="ion-text-wrap ion-no-margin"
                 v-bind:disabled="!point || !hz">{{ store.getMeasureMethod() === 'theo_setup' ?
-                    'Next' : 'Save' }}</ion-button>
+                'Next' : 'Save' }}</ion-button>
         </div>
         <div class="ion-padding" v-if="store.getMeasureMethod() === 'theo_setup'">
             <ion-button expand="block" @click="ready()" class="ion-text-wrap ion-no-margin"
@@ -46,15 +45,15 @@
                     <td>{{ format(item.v, 4) }}</td>
                     <td>{{
                         format(gonBetween0And400((azimuth({
-                            x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
-                            y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
+                        x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
+                        y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
                         },
-                            {
-                                x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
-                                y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
-                            }) ?? 0) -
-                            (measure.orientation ?? 0)), 4)
-                    }}
+                        {
+                        x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
+                        y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
+                        }) ?? 0) -
+                        (measure.orientation ?? 0)), 4)
+                        }}
                     </td>
                     <td>
                         <ion-button @click="removePoint(i)">
