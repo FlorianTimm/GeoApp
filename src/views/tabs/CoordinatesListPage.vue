@@ -62,7 +62,7 @@
 import { useMeasureStore } from '@/store';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonFab, IonFabButton, IonIcon, IonButton,
-  IonGrid, IonRow, IonCol
+  IonGrid, IonRow, IonCol, IonList, IonItem
 } from '@ionic/vue';
 import { alertController } from '@ionic/vue';
 import { trash, pencil, add } from 'ionicons/icons';
