@@ -2,12 +2,14 @@
 
 * [X] keine Neuberechnung des  Standortes bei Rückwärtsschnitt, wenn die Messung verändert wird
 * [ ] Geolocation erst nach einmaligen Öffnen der Karte
+* [ ] SH: ID der Häuser mit einlesen (doppelte Vermeiden)
+* [ ] Freie Stationierung
 
 ### **Fehlende Funktionen**
 
 * [ ] Vorwärtsschnitt
 * [ ] Bogenschlag
-* [ ] Theo-Messung
+* [X] Theo-Messung
 * [ ] Ausgleichung
 
 ### Ideen
@@ -15,7 +17,7 @@
 * [ ] Automatisches Hochzählen der Punkte
 * [ ] Grob-Orientierung mit Kompass
 * [ ] Lokale Messung
-* [ ] WFS mit Snap-Funktion
-* [ ] Punktanlege-Fenster
-  * [ ] Fenster selbst
+* [X] WFS mit Snap-Funktion
+* [X] Punktanlege-Fenster
+  * [X] Fenster selbst
   * [ ] mit kleiner Kartenansicht

@@ -40,6 +40,16 @@ export const gonBetween0And400 = (angle: number) => {
     return angle;
 }
 
+export const gonBetweenMinus200And200 = (angle: number) => {
+    while (angle < -200) {
+        angle += 400;
+    }
+    while (angle >= 200) {
+        angle -= 400;
+    }
+    return angle;
+}
+
 export const tan = (x: number) => {
     const t = Math.tan(gonToRad(x));
     if (Math.abs(t) < 1E-10) {
@@ -70,7 +80,7 @@ export const cot = (x: number) => {
     }
 }
 
-export const azi2xy = (location: xy, distance: number, azimuth: number) => {
+export const azimuth2xy = (location: xy, distance: number, azimuth: number) => {
     return { x: location.x + distance * sin(azimuth), y: location.y + distance * cos(azimuth) };
 }
 
@@ -82,6 +92,10 @@ export const format = (value: number | null | undefined, decimals: number = 3): 
         value = parseFloat(value);
     }
     return value.toFixed(decimals);
+}
+
+export const vertical2height = (v: number, dist: number): number => {
+    return cot(v) * dist
 }
 
 type xy = { x: number, y: number } | CoordinateEntry2D;

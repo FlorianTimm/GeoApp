@@ -5,7 +5,7 @@
 <script lang="ts" setup>
 import { useMeasureStore, useSettingStore, useStore } from "@/store";
 import { TheodoliteMeasure } from "@/types/TheodoliteMeasure";
-import { azi2xy } from "@/utils";
+import { azimuth2xy } from "@/utils";
 import { Feature, Geolocation, Map, View } from "ol";
 import { Coordinate } from 'ol/coordinate';
 import { LineString, Point } from "ol/geom";
@@ -218,7 +218,7 @@ function storePoints2LayerSource() {
                 if (!c || !t.orientation || !s) {
                     return;
                 }
-                let p = azi2xy({ x: c[0], y: c[1] }, 5, t.orientation)
+                let p = azimuth2xy({ x: c[0], y: c[1] }, 5, t.orientation)
                 let pt = [p.x, p.y];
                 const f = new Feature(new LineString([s, pt]));
                 f.setStyle(new Style({

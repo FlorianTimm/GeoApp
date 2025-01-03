@@ -2,7 +2,7 @@ import { useMeasureStore } from "@/store";
 import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry, CoordinateEntry2D } from "./CoordinateEntry";
-import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance, azi2xy } from "@/utils";
+import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance, azimuth2xy, vertical2height } from "@/utils";
 
 
 export class TheodoliteMeasure extends Measurement {
@@ -74,7 +74,7 @@ export class TheodoliteMeasure extends Measurement {
                 return null;
             }
             return {
-                local: azi2xy({ x: 0, y: 0 }, m.measure.distance, m.measure.hz),
+                local: azimuth2xy({ x: 0, y: 0 }, m.measure.distance, m.measure.hz),
                 world: m.coordinate
             }
         }).filter(m => m !== null)
@@ -149,7 +149,7 @@ export class TheodoliteMeasure extends Measurement {
             console.log('dist', dist);
             console.log('cot(v)', cot(m.measure.v));
 
-            let h_diff = cot(m.measure.v) * dist;
+            let h_diff = vertical2height(m.measure.v, dist);
             return z + (m.measure.targetHeight ?? 0) - h_diff - (this.instrumentHeight ?? 0);
             /*
             Ziel    = 10 m
@@ -247,7 +247,7 @@ export class TheodoliteMeasure extends Measurement {
             let cn = c as CoordinateEntry2D;
             console.log('cn', cn);
             console.log('ori', m.measure.hz + this.orientation)
-            let coord = azi2xy(cn, m.measure.distance, m.measure.hz + this.orientation);
+            let coord = azimuth2xy(cn, m.measure.distance, m.measure.hz + this.orientation);
             // TODO: calculate height
 
             console.log('coord', coord);

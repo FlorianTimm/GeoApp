@@ -7,8 +7,8 @@ import { gonBetween0And400 } from '@/utils';
 import { IonInput } from '@ionic/vue';
 import { watch } from 'vue';
 
-const model = defineModel<number | string>();
-
+const model = defineModel<string>();
+/*
 watch(model, (value) => {
     if (value === undefined || value === null || value === '') {
         return
@@ -17,7 +17,7 @@ watch(model, (value) => {
         value = parseFloat(value);
     }
     model.value = gonBetween0And400(value);
-});
+});*/
 
 defineProps({
     ariaLabel: String,

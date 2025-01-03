@@ -35,7 +35,7 @@
                     <ion-col class="right">{{ format(item.getCoordinateComponents('z')) }}</ion-col>
                   </ion-row>
                 </ion-col>
-                <ion-col>
+                <ion-col size="auto">
                   <ion-button @click="editPoint(item)">
                     <ion-icon :icon="pencil"></ion-icon>
                   </ion-button>

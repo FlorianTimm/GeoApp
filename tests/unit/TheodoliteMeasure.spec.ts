@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { TheodoliteMeasure, TheodoliteMeasureEntry } from "../../src/types/TheodoliteMeasure";
 import { Point } from '../../src/types/Point';
-import { useMeasureStore } from '../../src/store';
 import { setActivePinia, createPinia } from 'pinia'
 import { CoordinateEntry2D, CoordinateSource } from '../../src/types/CoordinateEntry';
 
