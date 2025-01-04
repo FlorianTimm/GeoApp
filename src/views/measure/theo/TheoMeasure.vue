@@ -31,51 +31,63 @@
                 v-bind:disabled="!(measure.orientation ?? false)">Ready</ion-button>
         </div>
 
-        <table>
-            <tbody>
-                <tr>
-                    <th>Point</th>
-                    <th>Hz</th>
-                    <th>V</th>
-                    <th>Hz (calc)</th>
-                </tr>
-                <tr v-for="item, i in measure.measures" :key="item.nr">
-                    <td>{{ item.nr }}</td>
-                    <td>{{ format(item.hz, 4) }}</td>
-                    <td>{{ format(item.v, 4) }}</td>
-                    <td>{{
-                        format(gonBetween0And400((azimuth({
-                        x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
-                        y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
-                        },
-                        {
-                        x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
-                        y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
-                        }) ?? 0) -
-                        (measure.orientation ?? 0)), 4)
-                        }}
-                    </td>
-                    <td>
-                        <ion-button @click="removePoint(i)">
-                            <ion-icon :icon="trash"></ion-icon>
-                        </ion-button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <ion-list>
+            <ion-item v-for="item, i in measure.measures" :key="item.nr">
+                <ion-grid>
+                    <ion-row>
+                        <ion-col>
+                            <ion-row>
+                                <ion-toggle @ionChange="coordToggled" v-model="item.active">Point {{ item.nr
+                                    }}</ion-toggle>
+                            </ion-row>
+                            <ion-row>
+                                <ion-col v-if="item.hz">Hz: {{ format(item.hz, 4) }}</ion-col>
+                                <ion-col v-if="item.v">V: {{ format(item.v, 4) }}</ion-col>
+                                <ion-col v-if="item.distance">S: {{ format(item.distance, 3) }}</ion-col>
+                                <!--
+                                <ion-col>
+                                </ion-col>
+                                -->
+                            </ion-row>
+                            <ion-row v-if="measure.orientation">
+                                <ion-col v-if="item.hz">{{
+                                    format(gonBetweenMinus200And200((azimuth({
+                                    x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
+                                    y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
+                                    },
+                                    {
+                                    x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
+                                    y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
+                                    }) ?? 0) -
+                                    (measure.orientation ?? 0) - item.hz), 4)
+                                    }}</ion-col>
+                                <ion-col v-if="item.v">V: {{ format(0, 4) }}</ion-col>
+                                <ion-col v-if="item.distance">S: {{ format(0, 3) }}</ion-col>
+                            </ion-row>
+                        </ion-col>
+                        <ion-col size="auto">
+                            <ion-button @click="removePoint(i)">
+                                <ion-icon :icon="trash"></ion-icon>
+                            </ion-button>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </ion-item>
+        </ion-list>
+
         Orientation: {{ format(measure.orientation ?? 0, 4) }}
     </span>
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonList, IonItem, IonLabel, IonInput, alertController } from '@ionic/vue';
+import { IonButton, IonList, IonItem, IonLabel, IonInput, alertController, IonGrid, IonCol, IonToggle, IonRow } from '@ionic/vue';
 import { ref } from 'vue';
 import { Point } from "@/types/Point";
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import GonInput from '@/components/GonInput.vue';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { useMeasureStore, useStore } from '@/store';
-import { azimuth, gonBetween0And400 } from "@/utils";
+import { azimuth, gonBetween0And400, gonBetweenMinus200And200 } from "@/utils";
 import { trash } from 'ionicons/icons';
 import { IonIcon } from '@ionic/vue';
 import { addIcons } from 'ionicons';
@@ -118,6 +130,7 @@ const addPoint = () => {
     }
     measure.value.addMeasure({
         nr: point.value.nr,
+        active: true,
         lage: 1,
         hz: typeof hz.value === 'string' ? parseFloat(hz.value) : v.value,
         v: typeof v.value === 'string' ? parseFloat(v.value) : v.value,
@@ -129,9 +142,17 @@ const addPoint = () => {
     v.value = undefined;
     s.value = undefined;
     placeholder.value = {};
+
+    if (store.getMeasureMethod() === 'theo_setup') {
+        // adjust
+
+    }
 }
 
 
+const coordToggled = (e: CustomEvent) => {
+    measure.value?.calculate()
+}
 
 const removePoint = (i: number) => {
     if (!measure.value) {

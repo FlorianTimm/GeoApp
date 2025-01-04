@@ -1,3 +1,5 @@
+import { Adjustment } from "@/services/Adjustment";
+import { useMeasureStore } from "@/store";
 import { v4 as uuid } from "uuid";
 
 export abstract class Measurement {
@@ -10,6 +12,11 @@ export abstract class Measurement {
         else
             this.id = uuid();
         this.type = type;
+    }
+
+    adjust() {
+        let adj = new Adjustment(useMeasureStore().measurements, useMeasureStore().points)
+        return adj.adjust();
     }
 
     abstract getShortInfo(): string;

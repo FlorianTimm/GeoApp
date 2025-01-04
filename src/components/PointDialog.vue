@@ -157,18 +157,18 @@ const confirm = () => {
         model.value.description = desc.value;
         let c = model.value.getCoordinate();
         if (c) {
-            c.x = easting.value;
-            c.y = northing.value;
-            c.z = altitude.value;
-            c.accuracy = accuracy.value;
+            c.x = parseFloat(easting.value);
+            c.y = parseFloat(northing.value);
+            c.z = parseFloat(altitude.value);
+            c.accuracy = parseFloat(accuracy.value);
         } else if ((easting.value && northing.value) || altitude.value) {
             model.value.addCoordinate({
                 source: gnss.value ? 'gps' : 'manual',
                 epsg: settingStore.getEpsg(),
-                x: easting.value,
-                y: northing.value,
-                z: altitude.value,
-                accuracy: accuracy.value
+                x: parseFloat(easting.value),
+                y: parseFloat(northing.value),
+                z: parseFloat(altitude.value),
+                accuracy: parseFloat(accuracy.value)
             });
         }
 
@@ -186,10 +186,10 @@ const confirm = () => {
             p.addCoordinate({
                 source: gnss.value ? 'gps' : 'manual',
                 epsg: settingStore.getEpsg(),
-                x: easting.value,
-                y: northing.value,
-                z: altitude.value,
-                accuracy: accuracy.value
+                x: parseFloat(easting.value),
+                y: parseFloat(northing.value),
+                z: parseFloat(altitude.value),
+                accuracy: parseFloat(accuracy.value)
             });
         }
 

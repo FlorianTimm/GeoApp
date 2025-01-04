@@ -14,9 +14,12 @@
 
 ### Ideen
 
+* [ ] Caching mit VitePWA prüfen, ggf. auch WFS
+* [ ] WFS-Tiles einrichten (<https://stackoverflow.com/questions/54784210/openlayers-geoserver-wfs-caching-tiles-or-any-optimization>)
 * [ ] Automatisches Hochzählen der Punkte
 * [ ] Grob-Orientierung mit Kompass
 * [ ] Lokale Messung
+* [ ] Display anlassen Im Messmodus
 * [X] WFS mit Snap-Funktion
 * [X] Punktanlege-Fenster
   * [X] Fenster selbst

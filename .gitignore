@@ -32,3 +32,4 @@ npm-debug.log*
 /www
 data/*.gpkg
 data/afis_xml/*.xml
+dev-dist/*

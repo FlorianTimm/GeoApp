@@ -139,5 +139,49 @@ describe('TheodoliteMeasure.ts', () => {
     const r = tm.setupOnPoint(location, measures)
     expect(r).not.toBeNull()
     expect(r).toBeCloseTo(125.1587, 3)
-  })
+  }),
+    test('free_station_niemeier', () => {
+      let tm = new TheodoliteMeasure('test');
+      let location = new Point('test');
+      let measures = [
+        {
+          coordinate: {
+            "source": "manual",
+            "epsg": "EPSG:25832",
+            "x": 40686.792,
+            "y": 26816.143,
+            "accuracy": 0.05
+          },
+          measure: {
+            "nr": "104",
+            "lage": 1,
+            "hz": 199.5131,
+            "distance": 1002.598
+          }
+        },
+        {
+          coordinate: {
+            "x": 40350.846,
+            "y": 28835.979,
+            "accuracy": 0.05,
+            "source": "free_station",
+            "sourceId": "83982efb-7daf-45f8-982c-c8d407f57d21",
+            "epsg": "EPSG:25832"
+          },
+          measure: {
+            "nr": "280",
+            "lage": 1,
+            "hz": 370.6444,
+            "distance": 1098.643
+          }
+        }
+
+      ] as { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
+      const r = tm.free_station(location, measures)
+      console.log(r)
+      expect(r).not.toBeNull()
+      expect(r.x).toBeCloseTo(40759.4, 1)
+      expect(r.y).toBeCloseTo(27816.1, 1)
+      expect(r.accuracy).toBeCloseTo(0.05, 1)
+    })
 })

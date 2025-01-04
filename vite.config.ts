@@ -14,7 +14,9 @@ export default defineConfig({
   plugins: [
     vue(),
     legacy(),
-    VitePWA({ registerType: 'autoUpdate' }),
+    VitePWA({
+      registerType: 'autoUpdate'
+    }),
     basicSsl()
   ],
   resolve: {
