@@ -10,7 +10,7 @@ K = [ 104 40686.792 26816.143
 Kn = [ 108 40759.4 27816.1
        110 41373.0 27904.0 ];
 
-% Kn = [ 108 40759.37489 27816.11019
+%Kn = [ 108 40759.37489 27816.11019
 %       110 41373.01826 27904.00689 ];
 
 L = [  370.6444
@@ -44,8 +44,8 @@ ql = [ 0.5
       5.0 ];
 
 for i = 1:2:14
-  ql(i)= ql(i)/200*pi/1000;
-  L(i) = L(i) / 200 * pi;
+  ql(i)= ql(i)/1000;
+  L(i) = L(i);
 end
 
 for i = 2:2:14
@@ -63,22 +63,24 @@ X = [ Kn(1,2)
       Kn(1,3)
       Kn(2,2)
       Kn(2,3)
-      -0.0801185
-      0.03220586
+      0 % -0.0801185*rho
+      0 %0.03220586*rho
 ];
 
 function [r] = difrx (a, b)
+  rho = 200/pi;
     dx = b(2)-a(2);
     dy = b(1)-a(1);
     d = dx^2 + dy^2;
-    r = dy/d;
+    r = dy/d * rho;
 end
 
 function [r] = difry (a, b)
+  rho = 200/pi;
     dx = b(2)-a(2);
     dy = b(1)-a(1);
     d = dx^2 + dy^2;
-    r = -dx/d;
+    r = -dx/d * rho;
 end
 
 function [r] = difdx (a, b)
@@ -95,7 +97,7 @@ function [r] = difdy (a, b)
     r = -dy/d;
 end
 
-for j = 1:1
+for j = 1:5
 
       % Y108     X108       Y110    X110    O108    0110
   A = [ difry(Kn(1,2:3),K(4,2:3))   difrx(Kn(1,2:3),K(4,2:3))                           0                          0  1 0 % 108 -> 280
@@ -121,9 +123,10 @@ for j = 1:1
   end
 
   function [d] = richtung (a,b)
+    rho = 200/pi;
     dx = b(2)-a(2);
     dy = b(1)-a(1);
-    d = atan2(dy,dx);
+    d = atan2(dy,dx)*rho;
   end
 
   L0 = [
@@ -146,10 +149,10 @@ for j = 1:1
   dl = L-L0;
 
   for i = 1:2:14
-    if dl(i) < -pi
-      dl(i)  = dl(i) + 2*pi;
-    elseif dl(i) >= pi
-      dl(i) = dl(i)-2*pi;
+    if dl(i) < -200
+      dl(i)  = dl(i) + 400;
+    elseif dl(i) >= 200
+      dl(i) = dl(i)-400;
     endif
   endfor
 
