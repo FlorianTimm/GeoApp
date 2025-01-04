@@ -235,12 +235,19 @@ export class TheodoliteMeasure extends Measurement {
     }
 
     calcNewPoints(measures: { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[]) {
+        //setup?
+        if (this.orientation === undefined || this.pointNumber === '' || this.pointNumber === undefined) {
+            return;
+        }
+        let c = useMeasureStore().getPoint(this.pointNumber).getCoordinate()
+        if (c === undefined || c === null || c.x === undefined || c.y === undefined) {
+            return;
+        }
+
         // TODO: calculate new points
 
         // polares Anhängen
         measures.filter(m => m.measure.distance !== undefined && m.measure.hz !== undefined && (m.coordinate === undefined || m.coordinate === null)).forEach(m => {
-
-            let c = useMeasureStore().getPoint(this.pointNumber).getCoordinate()
             if (this.orientation === undefined || m.measure.distance === undefined || m.measure.hz === undefined || c === null || c.x === undefined || c.y === undefined) {
                 return;
             }

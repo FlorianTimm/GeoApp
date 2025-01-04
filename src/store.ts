@@ -48,7 +48,7 @@ const deserializeFromJson = (data: string): StateTree => {
             n.measurements.push(measure);
         }
     }
-    console.log('deserialized', n);
+    //console.log('deserialized', n);
     return n;
 };
 

@@ -24,5 +24,12 @@ describe('TheodoliteMeasure.ts', () => {
             let a = new Adjustment(measureStore.measurements, measureStore.points,);
             expect(a.adjust()).toBe(0);
 
+        }),
+        test('adjust_Niemeier', () => {
+            const measureStore = useMeasureStore();
+            // @ts-ignore
+            measureStore.import('{"points":{"104":{"nr":"104","coordinates":[{"source":"manual","epsg":"EPSG:25832","x":40686.792,"y":26816.143,"accuracy":0.05}]},"106":{"nr":"106","coordinates":[{"source":"manual","epsg":"EPSG:25832","x":41932.838,"y":28872.552,"accuracy":0.05}]},"108":{"nr":"108","coordinates":[{"x":40759.4,"y":27816.1,"accuracy":0.5,"source":"free_station","sourceId":"83982efb-7daf-45f8-982c-c8d407f57d21","epsg":"EPSG:25832"}]},"110":{"nr":"110","coordinates":[{"x":41373.0,"y":27904.0,"accuracy":0.5,"source":"free_station","sourceId":"eaa9c51b-4efc-41f6-93cd-d6f1d26acf7a","epsg":"EPSG:25832"}]},"113":{"nr":"113","coordinates":[{"source":"manual","epsg":"EPSG:25832","x":42242.231,"y":27492.007,"accuracy":0.05}]},"280":{"nr":"280","coordinates":[{"source":"manual","epsg":"EPSG:25832","x":40350.846,"y":28835.979,"accuracy":0.05}]}},"measurements":[{"type":"theodolite","id":"83982efb-7daf-45f8-982c-c8d407f57d21","pointNumber":"108","description":"","accuracy":3,"instrumentHeight":0,"orientation":0,"second":false,"measures":[{"nr":"280","lage":1,"hz":370.6444,"distance":1098.643},{"nr":"104","lage":1,"hz":199.5131,"distance":1002.598},{"nr":"113","lage":1,"hz":108.5994,"distance":1517.862}]},{"type":"theodolite","id":"eaa9c51b-4efc-41f6-93cd-d6f1d26acf7a","pointNumber":"110","description":"","accuracy":3,"instrumentHeight":0,"orientation":0,"second":false,"measures":[{"nr":"106","lage":1,"hz":35.4146,"distance":1118.689},{"nr":"108","lage":1,"hz":292.9943,"distance":1118.689},{"nr":"104","lage":1,"hz":237.8763,"distance":1286.215},{"nr":"113","lage":1,"hz":130.2278,"distance":961.911}]}]}');
+            let a = new Adjustment(measureStore.measurements, measureStore.points,);
+            expect(a.adjust()).toBe(0);
         })
 })
