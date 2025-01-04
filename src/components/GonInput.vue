@@ -7,7 +7,7 @@ import { gonBetween0And400 } from '@/utils';
 import { IonInput } from '@ionic/vue';
 import { watch } from 'vue';
 
-const model = defineModel<string>();
+const model = defineModel<string | number>();
 /*
 watch(model, (value) => {
     if (value === undefined || value === null || value === '') {

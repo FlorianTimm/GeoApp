@@ -13,7 +13,7 @@ import { UserConfig } from 'vite'
 export default defineConfig({
   plugins: [
     vue(),
-    legacy(),
+    //legacy(),
     VitePWA({
       registerType: 'autoUpdate'
     }),
@@ -23,6 +23,20 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: "esnext",
+      define: {
+        global: 'globalThis'
+      },
+      supported: {
+        bigint: true
+      },
+    }
+  },
+  build: {
+    target: ["esnext"],
   },
   test: {
     globals: true,

@@ -111,10 +111,10 @@ const props = defineProps({
 
 let nr = ref<string | undefined>(props.nr);
 let desc = ref<string | undefined>(props.desc);
-let easting = ref<number | undefined>(props.easting);
-let northing = ref<number | undefined>(props.northing);
-let altitude = ref<number | undefined>(props.altitude);
-let accuracy = ref<number>(props.accuracy ?? 0.05);
+let easting = ref<number | string | undefined>(props.easting);
+let northing = ref<number | string | undefined>(props.northing);
+let altitude = ref<number | string | undefined>(props.altitude);
+let accuracy = ref<number | string>(props.accuracy ?? 0.05);
 let gnss = ref<boolean>(props.gnss);
 
 const emit = defineEmits(['confirm', 'cancel']);
@@ -157,18 +157,18 @@ const confirm = () => {
         model.value.description = desc.value;
         let c = model.value.getCoordinate();
         if (c) {
-            c.x = parseFloat(easting.value);
-            c.y = parseFloat(northing.value);
-            c.z = parseFloat(altitude.value);
-            c.accuracy = parseFloat(accuracy.value);
+            c.x = typeof easting.value === 'string' ? parseFloat(easting.value) : easting.value;
+            c.y = typeof northing.value === 'string' ? parseFloat(northing.value) : northing.value;
+            c.z = typeof altitude.value === 'string' ? parseFloat(altitude.value) : altitude.value;
+            c.accuracy = typeof accuracy.value === 'string' ? parseFloat(accuracy.value) : accuracy.value;
         } else if ((easting.value && northing.value) || altitude.value) {
             model.value.addCoordinate({
                 source: gnss.value ? 'gps' : 'manual',
                 epsg: settingStore.getEpsg(),
-                x: parseFloat(easting.value),
-                y: parseFloat(northing.value),
-                z: parseFloat(altitude.value),
-                accuracy: parseFloat(accuracy.value)
+                x: typeof easting.value === 'string' ? parseFloat(easting.value) : easting.value,
+                y: typeof northing.value === 'string' ? parseFloat(northing.value) : northing.value,
+                z: typeof altitude.value === 'string' ? parseFloat(altitude.value) : altitude.value,
+                accuracy: typeof accuracy.value === 'string' ? parseFloat(accuracy.value) : accuracy.value
             });
         }
 
@@ -186,10 +186,10 @@ const confirm = () => {
             p.addCoordinate({
                 source: gnss.value ? 'gps' : 'manual',
                 epsg: settingStore.getEpsg(),
-                x: parseFloat(easting.value),
-                y: parseFloat(northing.value),
-                z: parseFloat(altitude.value),
-                accuracy: parseFloat(accuracy.value)
+                x: typeof easting.value === 'string' ? parseFloat(easting.value) : easting.value,
+                y: typeof northing.value === 'string' ? parseFloat(northing.value) : northing.value,
+                z: typeof altitude.value === 'string' ? parseFloat(altitude.value) : altitude.value,
+                accuracy: typeof accuracy.value === 'string' ? parseFloat(accuracy.value) : accuracy.value
             });
         }
 

@@ -269,7 +269,7 @@ export class Adjustment {
         for (let i = 0; i < this.x0.length; i++) {
             console.log(i, this.x0[i], this.Sx[i]);
         }
-
+        /*
         // Redundanzanteile
         let Re = subtract(this.P, multiply(multiply(multiply(this.A, this.Qx), transpose(this.A)), this.P)) as number[][];
         let r = diag(Re);
