@@ -2,7 +2,7 @@ import { Measurement } from '@/types/Measurement';
 import { Point } from '@/types/Point';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { azimuth, gonBetween0And400, gonBetweenMinus200And200, gonToRad, zenithDistance } from '@/utils';
-import { inv, transpose, multiply, subtract, diag, add, norm, ones, MathNumericType, Matrix, i } from 'mathjs';
+import { inv, transpose, multiply, subtract, diag, add, norm, ones, MathNumericType, Matrix, i, size, sqrt, divide } from 'mathjs';
 
 export class Adjustment {
     private measurements: Measurement[];
@@ -15,6 +15,10 @@ export class Adjustment {
     private p: number[] = [];
     private dl: number[] = [];
     private dx: number[] = [];
+    private P: number[][] = [];
+    private s0: number = 0;
+    private Sx: number[] = [];
+    private Qx: number[][] = [];
 
     private RHO = 200 / Math.PI;
 
@@ -88,7 +92,7 @@ export class Adjustment {
 
 
 
-    private createA() {
+    private createA_l0_dl_l() {
         this.A = [];
         this.l = [];
         this.l0 = [];
@@ -206,6 +210,13 @@ export class Adjustment {
                 this.A.push(row);
             }
         }
+
+        this.dl = subtract(this.l, this.l0);
+
+        this.l_angles.forEach((x) => {
+            this.dl[x] = gonBetweenMinus200And200(this.dl[x]);
+        });
+
         return this.A;
     }
 
@@ -216,20 +227,15 @@ export class Adjustment {
         let x0_old = [...this.x0];
 
         for (let i = 0; i < 10; i++) {
-            this.createA();
-            this.dl = subtract(this.l, this.l0);
+            this.createA_l0_dl_l();
 
-            this.l_angles.forEach((x) => {
-                this.dl[x] = gonBetweenMinus200And200(this.dl[x]);
-            });
-
-            const P = inv(diag(this.p.map((x) => x * x)));
+            this.P = inv(diag(this.p.map((x) => x * x))) as unknown as number[][];
             const At = transpose(this.A);
-            const N = multiply(multiply(At, P), this.A);
+            const N = multiply(multiply(At, this.P), this.A);
             //console.log(N);
-            const Qx = inv(N);
-            const n = multiply(multiply(At, P), this.dl);
-            this.dx = multiply(Qx, n) as unknown as number[];
+            this.Qx = inv(N) as unknown as number[][];
+            const n = multiply(multiply(At, this.P), this.dl);
+            this.dx = multiply(this.Qx, n) as unknown as number[];
             this.x0 = add(this.x0, this.dx) as number[]
 
             this.x_angles.forEach((id) => {
@@ -245,12 +251,62 @@ export class Adjustment {
             }
         }
 
-        //        this.createA();
-        console.log('diff', subtract(this.l, this.l0));
-        console.log('diff_x0', subtract(this.x0, x0_old).map((x, i) => this.x_angles.includes(i) ? gonBetweenMinus200And200(x) : x));
-        console.log('x0', this.x0);
+        this.createA_l0_dl_l();
+        //console.log('diff', subtract(this.l, this.l0));
+        //console.log('diff_x0', subtract(this.x0, x0_old).map((x, i) => this.x_angles.includes(i) ? gonBetweenMinus200And200(x) : x));
+        //console.log('x0', this.x0);
+
+        // Genauigkeit
+        let zs = size(this.A) as number[];
+        let s = zs[1];
+        let z = zs[0];
+        let Va = subtract(multiply(this.A, this.dx), this.dl) as number[];
+        this.s0 = sqrt(divide(multiply(multiply(transpose(Va), this.P), Va) as number, (z - s))) as number;
+        this.Sx = multiply(this.s0, diag(this.Qx).map((x) => sqrt(x)) as unknown as number[]) as number[];
+        console.log('s0', this.s0);
+        //console.log('Sx', this.Sx);
+
+        for (let i = 0; i < this.x0.length; i++) {
+            console.log(i, this.x0[i], this.Sx[i]);
+        }
+
+        // Redundanzanteile
+        let Re = subtract(this.P, multiply(multiply(multiply(this.A, this.Qx), transpose(this.A)), this.P)) as number[][];
+        let r = diag(Re);
+
+        // Datasnooping
+        let k = 1.96;
+
+        let Ql = inv(this.P);
+        let Qv = multiply(multiply(Re, Ql), transpose(Re));
+        let SVi = multiply(this.s0, diag(Qv).map((x) => sqrt(x)));
+        //let NVi = divide(norm(Va), SVi);
+        let GF = divide(-Va, norm(Va));
+        let GRZW = multiply(divide(SVi, norm(Va)), k);
+
+        console.log('GRZW', GRZW);
+
+        // Konfidenzellipse
+        /* aus Matlab
+        w100 = sqrt((Qx(1, 1) - Qx(2, 2)) ^ 2 + 4 * Qx(1, 2) ^ 2);
+        a100 = S0 * sqrt((1 / 2) * (Qx(1, 1) + Qx(2, 2) + w100) * 5.99);
+        b100 = S0 * sqrt((1 / 2) * (Qx(1, 1) + Qx(2, 2) - w100) * 5.99);
+        tk100 = 0.5 * atan(2 * Qx(2, 1) / (Qx(1, 1) - Qx(2, 2))) * rho;
+
+        w101 = sqrt((Qx(3, 3) - Qx(4, 4)) ^ 2 + 4 * Qx(3, 4) ^ 2);
+        a101 = S0 * sqrt((1 / 2) * (Qx(3, 3) + Qx(4, 4) + w101) * 5.99);
+        b101 = S0 * sqrt((1 / 2) * (Qx(3, 3) + Qx(4, 4) - w101) * 5.99);
+        tk101 = 0.5 * atan(2 * Qx(4, 3) / (Qx(3, 3) - Qx(4, 4))) * rho;
+
+        plot(y100, x100, 'ro')
+
+        plot(y101, x101, 'ro')
+        plot(Dpkt(:, 2), Dpkt(:, 3), 'bo')
+
+        ellipse(a100 * 5000, b100 * 5000, tk100 / rho, y100, x100);
+        ellipse(a101 * 5000, b101 * 5000, tk101 / rho, y101, x101);
+        */
+
         return this.dx === undefined ? '' : norm(this.dx)
     }
-
-
 }
