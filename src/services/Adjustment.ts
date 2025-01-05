@@ -32,7 +32,11 @@ export class Adjustment {
 
     private l_isAngle: boolean[] = [];
     private l_filter: boolean[] = [];  // true: adjustment for value is impossible
-    private l_measurements: { measure: { v?: number, hz?: number, dist?: number }[], ih?: number }[] = [];
+    private l_measurements: {
+        [index: number]: {
+            measure: { [index: number]: { v?: number, hz?: number, dist?: number } }, ih?: number
+        }
+    } = {};
     private l_points: { [nr: string]: { x?: number, y?: number, z?: number } } = {};
 
     private x_points: { [nr: string]: { x?: number, y?: number, z?: number } } = {};
@@ -117,7 +121,7 @@ export class Adjustment {
         this.l_points = {};
 
         this.measurements.forEach((m, i) => {
-            let entry: { measure: { v?: number, hz?: number, dist?: number }[], ih?: number } = { measure: [] };
+            let entry: { measure: { [index: number]: { v?: number, hz?: number, dist?: number } }, ih?: number } = { measure: {} };
             if (m.type == 'theodolite' && m instanceof TheodoliteMeasure) {
                 const s = this.x_points[m.pointNumber];
                 const sx = s.x;
@@ -195,10 +199,10 @@ export class Adjustment {
                         this.p.push(0.005);
                         this.A.push(row);
                     }
-                    entry.measure.push(subentry);
+                    entry.measure[n] = subentry;
                 });
             }
-            this.l_measurements.push(entry);
+            this.l_measurements[i] = entry;
         });
 
         for (let nr in this.points) {
@@ -473,7 +477,8 @@ export class Adjustment {
                                 }
                 }*/
 
-        this.measurements.forEach((m, i) => {
+        for (let i in this.x_measurements) {
+            let m = this.measurements[i];
             if (m.type == 'theodolite' && m instanceof TheodoliteMeasure) {
                 if (this.x_measurements[i].o !== undefined) {
                     m.orientation = this.x0_org[this.x_measurements[i].o];
@@ -481,11 +486,27 @@ export class Adjustment {
                 if (this.x_measurements[i].ih !== undefined) {
                     m.instrumentHeight = this.x0_org[this.x_measurements[i].ih];
                 }
+            }
+        }
 
-                m.measures.forEach((measure, n) => {
-                    if (measure.active === false) return;
+        this.measurements.forEach((m) => {
+            if (m.type == 'theodolite' && m instanceof TheodoliteMeasure) {
+                m.measures.forEach((measure) => {
+                    measure.hz_v = undefined;
+                    measure.v_v = undefined;
+                    measure.distance_v = undefined;
+                });
+            }
+        });
+
+        for (let i in this.l_measurements) {
+            let m = this.l_measurements[i];
+            for (let n in m.measure) {
+                let m = this.measurements[i]
+                if (m.type == 'theodolite' && m instanceof TheodoliteMeasure) {
                     const entry = this.l_measurements[i].measure[n];
-                    if (entry == undefined) {
+                    const measure = m.measures[n];
+                    if (measure.active === false || entry == undefined) {
                         measure.hz_v = undefined;
                         measure.v_v = undefined;
                         measure.distance_v = undefined;
@@ -510,9 +531,9 @@ export class Adjustment {
                             measure.distance_v = this.dl[di];
                         }
                     }
-                });
+                };
             }
-        });
+        };
         return true
     }
 }
