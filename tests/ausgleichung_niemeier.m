@@ -178,3 +178,19 @@ for j = 1:1
 dl;
  X
  dx;
+
+
+
+%% 4. Proben
+Va = A * dx - dl
+
+% Hauptprobe
+Vd = L0-L;
+
+hpro = Va - Vd
+
+%% 5. Genauigkeiten
+
+[z s] = size(A);
+s0 = sqrt((Va' * P * Va) / (z - s))
+Sx = s0 * sqrt(diag(Qx));

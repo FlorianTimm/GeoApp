@@ -18,6 +18,7 @@ export abstract class Measurement {
         console.log("Adjusting measurement " + this.id);
         let adj = new Adjustment([this], useMeasureStore().points)
         adj.adjust();
+        adj.writeResults();
     }
 
     abstract getShortInfo(): string;
