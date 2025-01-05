@@ -33,6 +33,27 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         style: flurstueckStyle
     });
 
+    const sourceNiGebaeude = new VectorSource({
+        format: new WFS({
+            version: '2.0.0',
+            featureNS: 'http://repository.gdi-de.org/schemas/adv/produkt/alkis-vereinfacht/2.0',
+            featureType: 'GebaeudeBauwerk',
+            gmlFormat: new GML32(),
+        }),
+        url: (extent) => 'https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wfs_einfach?SERVICE=WFS&' +
+            'version=2.0.0&request=GetFeature&typenames=ave:GebaeudeBauwerk&' +
+            'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
+            'bbox=' + extent.join(',') + ',' + epsg,
+        strategy: bboxStrategy,
+    });
+
+    new VectorLayer({
+        source: sourceNiGebaeude,
+        map: map,
+        minZoom: 19,
+        style: buildingStyle
+    });
+
     const sourceHhFlurstuecke = new VectorSource({
         format: new GeoJSON(
             {
@@ -132,7 +153,7 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         style: buildingStyle
     });
 
-    return [sourceHhFlurstuecke, sourceNiFlurstuecke, sourceShFlurstuecke, sourceHhGebaeude];
+    return [sourceHhFlurstuecke, sourceNiFlurstuecke, sourceShFlurstuecke, sourceHhGebaeude, sourceShGebaeude, sourceNiGebaeude];
 }
 
 function loadSHwfs(url: string, flstSource: VectorSource, buildingSource: VectorSource) {
@@ -152,6 +173,7 @@ function loadSHwfs(url: string, flstSource: VectorSource, buildingSource: Vector
         });
 }
 function findPolygon(response: Element, vectorSource: VectorSource) {
+    let id = response.getAttribute('gml:id');
     let g = response.getElementsByTagName('gml:Polygon');
     for (let j = 0; j < g.length; j++) {
         let cs = g[j].getElementsByTagName('gml:posList')[0]?.textContent?.split(' ') ?? [];
@@ -162,6 +184,7 @@ function findPolygon(response: Element, vectorSource: VectorSource) {
         }
         let p = new Polygon([coords]);
         let f = new Feature(p);
+        if (id) f.setId(id);
         vectorSource.addFeature(f);
     }
 }
