@@ -94,6 +94,24 @@ export const format = (value: number | null | undefined, decimals: number = 3): 
     return value.toFixed(decimals);
 }
 
+export const formatWithSign = (value: number | null | undefined, decimals: number = 3): string => {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    if (typeof value === 'string') {
+        value = parseFloat(value);
+    }
+    if (value < 0) {
+        return '-' + format(-value, decimals);;
+    } else if (value > 0) {
+        return '+' + format(value, decimals);
+    } else {
+        // &pm;
+        return '±' + format(value, decimals);;
+    }
+
+}
+
 export const vertical2height = (v: number, dist: number): number => {
     return cot(v) * dist
 }

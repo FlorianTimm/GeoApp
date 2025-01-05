@@ -3,7 +3,6 @@ import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry, CoordinateEntry2D } from "./CoordinateEntry";
 import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance, azimuth2xy, vertical2height } from "@/utils";
-import { boolean } from "mathjs";
 import { Adjustment } from "@/services/Adjustment";
 
 
@@ -65,6 +64,8 @@ export class TheodoliteMeasure extends Measurement {
         this.transferHeight(measuresUsable, location);
 
         this.calcNewPoints(measuresUsable);
+
+        this.adjust();
     }
 
     public free_station(location: Point, measures: { target?: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
@@ -262,7 +263,7 @@ export class TheodoliteMeasure extends Measurement {
             console.log('polares Anhängen');
             let cn = c as CoordinateEntry2D;
             console.log('cn', cn);
-            console.log('ori', m.measure.hz + this.orientation)
+            console.log('ori', gonBetween0And400(m.measure.hz + this.orientation))
             let coord = azimuth2xy(cn, m.measure.distance, m.measure.hz + this.orientation);
             // TODO: calculate height
 
@@ -383,5 +384,8 @@ export type TheodoliteMeasureEntry = {
     v?: number,
     hz?: number,
     distance?: number,
+    v_v?: number,
+    hz_v?: number,
+    distance_v?: number,
     targetHeight?: number
 }

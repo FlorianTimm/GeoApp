@@ -109,6 +109,7 @@ export class Adjustment {
                 if (sx === undefined || sy === undefined) return;
                 m.measures.forEach((measure, n) => {
                     this.l_measurements[i][n] = {};
+                    if (measure.active === false) return;
                     const t = this.x_points[measure.nr];
                     const tx = t.x;
                     const ty = t.y;
@@ -132,9 +133,9 @@ export class Adjustment {
                         row[tx] = -dy / (dist * dist);
                         row[ty] = dx / (dist * dist);
                         */
-                        row[this.x_measurements[i].o] = 1;
+                        row[this.x_measurements[i].o] = -1;
                         let azi = azimuth({ x: this.x0[sx], y: this.x0[sy] }, { x: this.x0[tx], y: this.x0[ty] });
-                        azi += this.x0[this.x_measurements[i].o];
+                        azi -= this.x0[this.x_measurements[i].o];
                         azi = gonBetween0And400(azi);
                         this.l0.push(azi);
                         this.l.push(measure.hz);

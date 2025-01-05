@@ -31,49 +31,31 @@
                 v-bind:disabled="!(measure.orientation ?? false)">Ready</ion-button>
         </div>
 
-        <ion-list>
-            <ion-item v-for="item, i in measure.measures" :key="item.nr">
-                <ion-grid>
-                    <ion-row>
-                        <ion-col>
-                            <ion-row>
-                                <ion-toggle @ionChange="coordToggled" v-model="item.active">Point {{ item.nr
-                                    }}</ion-toggle>
-                            </ion-row>
-                            <ion-row>
-                                <ion-col v-if="item.hz">Hz: {{ format(item.hz, 4) }}</ion-col>
-                                <ion-col v-if="item.v">V: {{ format(item.v, 4) }}</ion-col>
-                                <ion-col v-if="item.distance">S: {{ format(item.distance, 3) }}</ion-col>
-                                <!--
-                                <ion-col>
-                                </ion-col>
-                                -->
-                            </ion-row>
-                            <ion-row v-if="measure.orientation">
-                                <ion-col v-if="item.hz">{{
-                                    format(gonBetweenMinus200And200((azimuth({
-                                    x: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.x ?? 0,
-                                    y: measureStore.getPoint(measure?.pointNumber)?.getCoordinate()?.y ?? 0
-                                    },
-                                    {
-                                    x: measureStore.getPoint(item.nr)?.getCoordinate()?.x ?? 0,
-                                    y: measureStore.getPoint(item.nr)?.getCoordinate()?.y ?? 0
-                                    }) ?? 0) -
-                                    (measure.orientation ?? 0) - item.hz), 4)
-                                    }}</ion-col>
-                                <ion-col v-if="item.v">V: {{ format(0, 4) }}</ion-col>
-                                <ion-col v-if="item.distance">S: {{ format(0, 3) }}</ion-col>
-                            </ion-row>
-                        </ion-col>
-                        <ion-col size="auto">
-                            <ion-button @click="removePoint(i)">
-                                <ion-icon :icon="trash"></ion-icon>
-                            </ion-button>
-                        </ion-col>
-                    </ion-row>
-                </ion-grid>
-            </ion-item>
-        </ion-list>
+
+        <ion-grid :fixed="true">
+            <ion-row v-for="item, i in measure.measures" :key="item.nr">
+                <ion-col>
+                    <ion-toggle @ionChange="coordToggled" v-model="item.active">Point {{ item.nr }}</ion-toggle>
+                </ion-col>
+                <ion-col>
+
+                    <ion-row v-if="item.hz !== undefined">Hz: {{ format(item.hz, 4) }}</ion-row>
+                    <ion-row v-if="item.v !== undefined">V: {{ format(item.v, 4) }}</ion-row>
+                    <ion-row v-if="item.distance !== undefined">S: {{ format(item.distance, 3) }} </ion-row>
+
+                </ion-col>
+                <ion-col v-if="measure.orientation">
+                    <ion-row v-if="item.hz_v !== undefined">{{ formatWithSign(item.hz_v, 4) }}</ion-row>
+                    <ion-row v-if="item.v_v !== undefined">{{ formatWithSign(item.v_v, 4) }}</ion-row>
+                    <ion-row v-if="item.distance_v !== undefined">{{ formatWithSign(item.distance_v, 3) }}</ion-row>
+                </ion-col>
+                <ion-col size="auto">
+                    <ion-button @click="removePoint(i)">
+                        <ion-icon :icon="trash"></ion-icon>
+                    </ion-button>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
 
         Orientation: {{ format(measure.orientation ?? 0, 4) }}
     </span>
@@ -91,7 +73,7 @@ import { azimuth, gonBetween0And400, gonBetweenMinus200And200 } from "@/utils";
 import { trash } from 'ionicons/icons';
 import { IonIcon } from '@ionic/vue';
 import { addIcons } from 'ionicons';
-import { format } from '@/utils';
+import { format, formatWithSign } from '@/utils';
 import { watch } from 'vue';
 
 
@@ -182,3 +164,9 @@ const ready = () => {
     store.setMeasureMethod('');
 }
 </script>
+
+<style scoped>
+ion-grid>ion-row {
+    border-bottom: 1px solid black;
+}
+</style>
