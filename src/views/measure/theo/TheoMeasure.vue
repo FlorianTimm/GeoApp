@@ -45,9 +45,15 @@
 
                 </ion-col>
                 <ion-col v-if="measure.orientation">
-                    <ion-row v-if="item.hz_v !== undefined">{{ formatWithSign(item.hz_v, 4) }}</ion-row>
-                    <ion-row v-if="item.v_v !== undefined">{{ formatWithSign(item.v_v, 4) }}</ion-row>
-                    <ion-row v-if="item.distance_v !== undefined">{{ formatWithSign(item.distance_v, 3) }}</ion-row>
+                    <ion-row v-if="item.hz !== undefined">
+                        {{ item.hz_v !== undefined ? formatWithSign(item.hz_v, 4) : '-' }}
+                    </ion-row>
+                    <ion-row v-if="item.v !== undefined">
+                        {{ item.v_v !== undefined ? formatWithSign(item.v_v, 4) : '-' }}
+                    </ion-row>
+                    <ion-row v-if="item.distance !== undefined">
+                        {{ item.distance_v !== undefined ? formatWithSign(item.distance_v, 3) : '-' }}
+                    </ion-row>
                 </ion-col>
                 <ion-col size="auto">
                     <ion-button @click="removePoint(i)">
