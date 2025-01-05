@@ -3,7 +3,7 @@
 * [X] keine Neuberechnung des  Standortes bei Rückwärtsschnitt, wenn die Messung verändert wird
 * [ ] Geolocation erst nach einmaligen Öffnen der Karte
 * [ ] SH: ID der Häuser mit einlesen (doppelte Vermeiden)
-* [ ] Freie Stationierung
+* [X] Freie Stationierung
 
 ### **Fehlende Funktionen**
 
@@ -14,6 +14,10 @@
 
 ### Ideen
 
+* [ ] V/Hz Feld farblich an Theo anpassen
+* [ ] Genauigkeit der Winkel auch in cm am Punkt angeben
+* [ ] Genauigkeit für Strecken änderbar machen
+* [ ] auf breiten Display Karten dauerhaft anzeigen, ggf inkl Möglichkeit die Punkte in Messung zu übernehmen
 * [ ] Caching mit VitePWA prüfen, ggf. auch WFS
 * [ ] WFS-Tiles einrichten (<https://stackoverflow.com/questions/54784210/openlayers-geoserver-wfs-caching-tiles-or-any-optimization>)
 * [ ] Automatisches Hochzählen der Punkte
