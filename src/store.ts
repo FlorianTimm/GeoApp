@@ -26,6 +26,8 @@ const deserializeFromJson = (data: string): StateTree => {
             instrumentHeight?: number;
             description?: string;
             second?: boolean;
+            orientation?: number;
+            orientationAccuracy?: number;
             measures: {
                 nr?: string;
                 v?: number;

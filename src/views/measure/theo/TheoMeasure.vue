@@ -31,8 +31,65 @@
                 v-bind:disabled="!(measure.orientation ?? false)">Ready</ion-button>
         </div>
 
-
-        <ion-grid :fixed="true">
+        <ion-grid :fixed="true" v-if="store.getMeasureMethod() === 'theo_setup'">
+            {{
+            }}
+            <ion-row
+                v-if="measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId == measure?.id)?.x">
+                <ion-col>
+                    X:
+                </ion-col>
+                <ion-col>
+                    {{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId ==
+                        measure?.id)?.x, 3) }}
+                </ion-col>
+                <ion-col>
+                    &pm;{{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) =>
+                        v.sourceId == measure?.id)?.x_s, 3) }}
+                </ion-col>
+            </ion-row>
+            <ion-row
+                v-if="measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId == measure?.id)?.y">
+                <ion-col>
+                    Y:
+                </ion-col>
+                <ion-col>
+                    {{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId ==
+                        measure?.id)?.y, 3) }}
+                </ion-col>
+                <ion-col>
+                    &pm;{{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) =>
+                        v.sourceId == measure?.id)?.y_s, 3) }}
+                </ion-col>
+            </ion-row>
+            <ion-row
+                v-if="measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId == measure?.id)?.z">
+                <ion-col>
+                    Z:
+                </ion-col>
+                <ion-col>
+                    {{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId ==
+                        measure?.id)?.z, 3) }}
+                </ion-col>
+                <ion-col>
+                    &pm;{{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) =>
+                        v.sourceId == measure?.id)?.z_s, 3) }}
+                </ion-col>
+            </ion-row>
+            <ion-row v-if="measure.orientation">
+                <ion-col>
+                    Ori:
+                </ion-col>
+                <ion-col>
+                    {{ format(measure.orientation, 4) }}
+                </ion-col>
+                <ion-col>
+                    &pm;{{ format(measure.orientationAccuracy, 4) }}
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <p />
+        <ion-grid :fixed="true" class="measures">
             <ion-row v-for="item, i in measure.measures" :key="item.nr">
                 <ion-col>
                     <ion-toggle @ionChange="coordToggled" v-model="item.active">Point {{ item.nr }}</ion-toggle>
@@ -63,7 +120,7 @@
             </ion-row>
         </ion-grid>
 
-        Orientation: {{ format(measure.orientation ?? 0, 4) }}
+
     </span>
 </template>
 
@@ -89,6 +146,7 @@ const th = ref<number>();
 const s = ref<number>();
 const point = ref<Point>();
 const placeholder = ref<{ v?: number, hz?: number, distance?: number }>({});
+const coord = ref<{}>({});
 
 
 addIcons({
@@ -105,11 +163,13 @@ if (actMeasure && actMeasure.type === 'theodolite') {
     console.log(measure.value);
 }
 
+
 watch(point, (point) => {
     if (!point || !measure.value) {
         return;
     }
     placeholder.value = measure.value.stakeOut(point, th.value);
+    coord.value = measureStore.getPoint(measure.value?.pointNumber)?.getCoordinate() ?? {}
 })
 
 const addPoint = () => {
@@ -172,7 +232,7 @@ const ready = () => {
 </script>
 
 <style scoped>
-ion-grid>ion-row {
+ion-grid.measures>ion-row {
     border-bottom: 1px solid black;
 }
 </style>

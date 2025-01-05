@@ -13,6 +13,7 @@ export class TheodoliteMeasure extends Measurement {
     accuracy: number = 3;
     instrumentHeight?: number;
     orientation?: number;
+    orientationAccuracy?: number;
     second = false;
     measures: TheodoliteMeasureEntry[] = [];
 
@@ -320,6 +321,9 @@ export class TheodoliteMeasure extends Measurement {
         const measure = new TheodoliteMeasure(json.pointNumber, json.description, json.second, json.accuracy, json.instrumentHeight, json.id);
         if (json.orientation) {
             measure.orientation = json.orientation;
+        }
+        if (json.orientationAccuracy) {
+            measure.orientationAccuracy = json.orientationAccuracy;
         }
         measure.measures = json.measures;
         return measure;

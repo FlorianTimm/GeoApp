@@ -140,8 +140,9 @@ export class Adjustment {
                 }
 
                 m.measures.forEach((measure, n) => {
-                    let subentry = { v: measure.v, hz: measure.hz, dist: measure.distance };
                     if (measure.active === false) return;
+                    if (this.points[measure.nr].getCoordinate()?.sourceId == m.id) return;
+                    let subentry = { v: measure.v, hz: measure.hz, dist: measure.distance };
                     const t = this.x_points[measure.nr];
                     const tx = t.x;
                     const ty = t.y;
@@ -451,37 +452,46 @@ export class Adjustment {
         if (this.successful === false) return false
         let epsg = useSettingStore().epsg
         let sourceId = undefined;
-        if (this.measurements.length === 1)
+        if (this.measurements.length === 1) {
             sourceId = this.measurements[0].id;
-        /*
-                for (let nr in this.points) {
-                    let p = this.x_points[nr];
-                    let entry = this.points[nr].getCoordinate(undefined, (ce: CoordinateEntry) => ce.source === 'adjustment' && ce.sourceId === sourceId && ce.epsg === epsg);
-                    if (entry === undefined || entry === null) {
-                        entry = { source: 'adjustment', sourceId: sourceId, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
-                        this.points[nr].addCoordinate(entry);
-                    }
-                    entry.source = 'adjustment';
-                    entry.sourceId = sourceId;
-                    entry.accuracy = this.Sx[p.x ?? 0];
-                    entry.epsg = epsg;
-                    
-                                if (p.x !== undefined) {
-                                    entry['x'] = this.x0_org[p.x];
-                                }
-                                if (p.y !== undefined) {
-                                    entry['y'] = this.x0_org[p.y];
-                                }
-                                if (p.z !== undefined) {
-                                    entry['z'] = this.x0_org[p.z];
-                                }
-                }*/
+        }
+
+        for (let nr in this.points) {
+            let p = this.x_points[nr];
+            if (p === undefined) continue;
+
+            if ((p.x === undefined || this.x_filter[p.x]) && (p.y === undefined || this.x_filter[p.y]) && (p.z === undefined || this.x_filter[p.z])) continue;
+
+            let entry = this.points[nr].getCoordinate(epsg, (ce: CoordinateEntry) => ce.source == 'adjustment' && ce.sourceId == sourceId && ce.epsg == epsg);
+            if (entry === undefined || entry === null) {
+                entry = { source: 'adjustment', sourceId: sourceId, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
+                this.points[nr].addCoordinate(entry);
+            }
+            entry.source = 'adjustment';
+            entry.sourceId = sourceId;
+            entry.accuracy = this.Sx[this.x_filter2org.findIndex((x) => x === p.x)];
+            entry.epsg = epsg;
+
+            if (p.x !== undefined && !this.x_filter[p.x]) {
+                entry['x'] = this.x0_org[p.x];
+                entry['x_s'] = this.Sx[this.x_filter2org.findIndex((x) => x === p.x)];
+            }
+            if (p.y !== undefined && !this.x_filter[p.y]) {
+                entry['y'] = this.x0_org[p.y];
+                entry['y_s'] = this.Sx[this.x_filter2org.findIndex((x) => x === p.y)];
+            }
+            if (p.z !== undefined && !this.x_filter[p.z]) {
+                entry['z'] = this.x0_org[p.z];
+                entry['z_s'] = this.Sx[this.x_filter2org.findIndex((x) => x === p.z)];
+            }
+        }
 
         for (let i in this.x_measurements) {
             let m = this.measurements[i];
             if (m.type == 'theodolite' && m instanceof TheodoliteMeasure) {
                 if (this.x_measurements[i].o !== undefined) {
                     m.orientation = this.x0_org[this.x_measurements[i].o];
+                    m.orientationAccuracy = this.Sx[this.x_filter2org.findIndex((x) => x === this.x_measurements[i].o)];
                 }
                 if (this.x_measurements[i].ih !== undefined) {
                     m.instrumentHeight = this.x0_org[this.x_measurements[i].ih];

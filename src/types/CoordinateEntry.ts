@@ -6,6 +6,9 @@ export interface CoordinateEntry {
     y?: number;
     z?: number;
     accuracy: number;
+    x_s?: number;
+    y_s?: number;
+    z_s?: number;
 };
 
 export interface CoordinateEntry2D extends CoordinateEntry {
