@@ -2,8 +2,7 @@ import { useMeasureStore } from "@/store";
 import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry, CoordinateEntry2D } from "./CoordinateEntry";
-import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance, azimuth2xy, vertical2height } from "@/utils";
-import { Adjustment } from "@/services/Adjustment";
+import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance, azimuth2xy, vertical2height, gonBetweenMinus200And200, sin } from "@/utils";
 
 
 export class TheodoliteMeasure extends Measurement {
@@ -47,6 +46,8 @@ export class TheodoliteMeasure extends Measurement {
             };
         }).filter(m => m !== null && m.measure.active) as { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[];
 
+        location.removeCoordinatesByFilter(c => c.sourceId == this.id);
+
         // filter out measures without a coordinate or without a horizontal direction
         const measures = measuresUsable.filter(m => m.coordinate !== undefined && m.coordinate !== null && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
 
@@ -66,7 +67,41 @@ export class TheodoliteMeasure extends Measurement {
 
         this.calcNewPoints(measuresUsable);
 
-        this.adjust();
+        if (location.getCoordinate(undefined, (e) => e.sourceId == this.id) !== null) {
+            this.adjust();
+        }
+    }
+
+    getHzErrorInCm(id: number): number | null {
+        let m = this.measures[id];
+        if (m === undefined || m.hz === undefined || m.hz_v === undefined) {
+            return null;
+        }
+        let d = m.distance
+        if (d === undefined) {
+            let p = useMeasureStore().getPoint(m.nr)
+            d = this.stakeOut(p).distance;
+        }
+        if (d === undefined) {
+            return null;
+        }
+        return sin(m.hz_v) * d * 100;
+    }
+
+    getVErrorInCm(id: number): number | null {
+        let m = this.measures[id];
+        if (m === undefined || m.v === undefined || m.v_v === undefined) {
+            return null;
+        }
+        let d = m.distance
+        if (d === undefined) {
+            let p = useMeasureStore().getPoint(m.nr)
+            d = this.stakeOut(p).distance;
+        }
+        if (d === undefined) {
+            return null;
+        }
+        return sin(m.v_v) * d * 100;
     }
 
     public free_station(location: Point, measures: { target?: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
@@ -112,7 +147,7 @@ export class TheodoliteMeasure extends Measurement {
             o_top += ly * wx - lx * wy;
             a_top += ly * wy + lx * wx;
             ao_bottom += lx * lx + ly * ly;
-        } 
+        }
 
         const a = a_top / ao_bottom;
         const o = o_top / ao_bottom;
@@ -191,7 +226,7 @@ export class TheodoliteMeasure extends Measurement {
     resection(location: Point, measures: { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
         if (measures.length < 3) {
             return null;
-        }  
+        }
         console.log('resection');
 
         const filtered = measures.
@@ -203,45 +238,46 @@ export class TheodoliteMeasure extends Measurement {
         const pm = filtered[1];
         const pb = filtered[2];
 
-        const ya = pa.coordinate.x;
-        const xa = pa.coordinate.y;
-        const yb = pb.coordinate.x;
-        const xb = pb.coordinate.y;
-        const ym = pm.coordinate.x;
-        const xm = pm.coordinate.y;
+        const xa = pa.coordinate.x;
+        const ya = pa.coordinate.y;
+        const xb = pb.coordinate.x;
+        const yb = pb.coordinate.y;
+        const xm = pm.coordinate.x;
+        const ym = pm.coordinate.y;
 
         if (pm.measure.hz === undefined || pa.measure.hz === undefined || pb.measure.hz === undefined) {
             return null;
         }
-        const alpha = pm.measure.hz - pa.measure.hz;
-        const beta = pb.measure.hz - pm.measure.hz;
+        const alpha = gonBetween0And400(pm.measure.hz - pa.measure.hz);
+        const beta = gonBetween0And400(pb.measure.hz - pm.measure.hz);
 
-        const yc = ya + (xm - xa) * cot(alpha)
-        const xc = xa - (ym - ya) * cot(alpha)
+        const xc = xa + (ym - ya) * cot(alpha)
+        const yc = ya - (xm - xa) * cot(alpha)
 
-        const yd = yb + (xb - xm) * cot(beta)
-        const xd = xb - (yb - ym) * cot(beta)
+        const xd = xb + (yb - ym) * cot(beta)
+        const yd = yb - (xb - xm) * cot(beta)
 
-        const tcd = azimuth({ x: yc, y: xc }, { x: yd, y: xd });
+        const tcd = azimuth({ x: xc, y: yc }, { x: xd, y: yd });
 
         if (tcd === null) {
             return null;
         }
 
-        let xn = xc + ((ym - yc + (xm - xc) * cot(tcd)) / (tan(tcd) + cot(tcd)));
-        let yn;
-        if (tan(tcd) < cot(tcd)) {
-            yn = yc + (xn - xc) * tan(tcd);
+        let yn = yc + ((xm - xc + (ym - yc) * cot(tcd)) / (tan(tcd) + cot(tcd)));
+        let xn;
+        if (tan(tcd) > cot(tcd)) {
+            xn = xc + (yn - yc) * tan(tcd);
         } else {
-            yn = ym + (xn - xm) * cot(tcd);
+            xn = xm + (yn - ym) * cot(tcd);
         }
 
-        yn = round(yn, 4);
         xn = round(xn, 4);
+        yn = round(yn, 4);
 
         let accuracy = (pa.coordinate.accuracy + pb.coordinate.accuracy + pm.coordinate.accuracy) / 3;
-        location.addCoordinate({ x: yn, y: xn, accuracy: accuracy, source: 'resection', sourceId: this.id, epsg: pa.coordinate.epsg });
-        return { x: yn, y: xn };
+        location.addCoordinate({ x: xn, y: yn, accuracy: accuracy, source: 'resection', sourceId: this.id, epsg: pa.coordinate.epsg });
+        console.log('location', { x: xn, y: yn });
+        return { x: xn, y: yn };
     }
 
     calcNewPoints(measures: { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[]) {
@@ -278,18 +314,18 @@ export class TheodoliteMeasure extends Measurement {
         const locationCoordinate = location.getCoordinate();
         if (locationCoordinate === undefined || locationCoordinate === null || locationCoordinate.x === undefined || locationCoordinate.y === undefined) {
             return null;
-        } 
+        }
         console.log('setup on point');
         const locationCoordinateXY = locationCoordinate as CoordinateEntry2D;
-        const angles = measures.map(m => {
+        const angles_org = measures.map(m => {
             let angle = azimuth(locationCoordinateXY, m.coordinate);
             if (angle === null || m.measure.hz === undefined) {
                 return null;
             }
-            console.log('angle_v', angle);
             angle -= m.measure.hz;
             return gonBetween0And400(angle);
-        }).filter(a => a !== null) as number[];
+        })
+        let angles = angles_org.filter(a => a !== null) as number[];
 
         console.log('angles', angles);
 
@@ -297,18 +333,27 @@ export class TheodoliteMeasure extends Measurement {
         for (let i = 0; i < angles.length; i++) {
             if (i == 0) {
                 sum = angles[i];
-                continue;
+            } else {
+                let tmpAvg = sum / i;
+                if (tmpAvg - angles[i] > 200) {
+                    angles[i] += 400;
+                } else if (tmpAvg - angles[i] < -200) {
+                    angles[i] -= 400;
+                }
+                sum += angles[i];
             }
-            let tmpAvg = sum / i;
-            if (tmpAvg - angles[i] > 200) {
-                angles[i] -= 400;
-            } else if (tmpAvg - angles[i] < -200) {
-                angles[i] += 400;
-            }
-            sum += angles[i];
         }
         let avg = gonBetween0And400(sum / angles.length);
+        console.log('avg', avg);
         this.orientation = avg;
+
+        measures.forEach((m, i) => {
+            if (angles_org[i] === null) {
+                return;
+            }
+            m.measure.hz_v = round(gonBetweenMinus200And200(angles_org[i] - avg), 4);
+            console.log('hz_v', m.measure.hz_v);
+        })
         return avg;
     }
 

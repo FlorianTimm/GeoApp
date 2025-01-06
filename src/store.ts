@@ -121,6 +121,7 @@ export const useSettingStore = defineStore('settings', {
         'geolocation': true,
         'showMeasurements': true,
         'orderPointsBy': 'nr' as OrderByPointType,
+        'errorInCm': true
     }),
     getters: {
         getEpsg: (state) => () => state.epsg,

@@ -4,7 +4,7 @@ import { Measurement } from '@/types/Measurement';
 import { Point } from '@/types/Point';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { azimuth, gonBetween0And400, gonBetweenMinus200And200, gonToRad, zenithDistance } from '@/utils';
-import { inv, transpose, multiply, subtract, diag, add, norm, ones, MathNumericType, Matrix, i, size, sqrt, divide, string, sum, boolean, re } from 'mathjs';
+import { inv, transpose, multiply, subtract, diag, add, norm, size, sqrt, divide } from 'mathjs';
 
 export class Adjustment {
     private measurements: Measurement[];
@@ -343,12 +343,17 @@ export class Adjustment {
     private calculate() {
         this.dl = []
         this.dx = [];
-
+        this.successful === false
         for (let i = 0; i < 15; i++) {
             try {
                 this.createA_l0_dl_l();
                 this.P = inv(diag(this.p.map((x) => x * x))) as unknown as number[][];
                 //console.log("A: ", this.A);
+                if (this.l0.length < this.x0_filtered.length) {
+                    console.log('zu wenig Messungen für die Anzahl der Unbekannten');
+                    return false;
+                }
+
                 const At = transpose(this.A);
                 const N = multiply(multiply(At, this.P), this.A);
                 // console.log(N);
@@ -373,7 +378,6 @@ export class Adjustment {
                 //console.log(dx);
             } catch (e) {
                 console.error(e);
-                this.successful === false
                 return false;
             }
 
@@ -449,7 +453,10 @@ export class Adjustment {
 
 
     public writeResults() {
-        if (this.successful === false) return false
+        if (this.successful === false) {
+            //TODO: Delete adjustement coordinates
+            return false
+        }
         let epsg = useSettingStore().epsg
         let sourceId = undefined;
         if (this.measurements.length === 1) {
@@ -462,7 +469,8 @@ export class Adjustment {
 
             if ((p.x === undefined || this.x_filter[p.x]) && (p.y === undefined || this.x_filter[p.y]) && (p.z === undefined || this.x_filter[p.z])) continue;
 
-            let entry = this.points[nr].getCoordinate(epsg, (ce: CoordinateEntry) => ce.source == 'adjustment' && ce.sourceId == sourceId && ce.epsg == epsg);
+            let entry = this.points[nr]
+                .getCoordinate(epsg, (ce: CoordinateEntry) => ['adjustment', 'resection'].includes(ce.source) && ce.sourceId == sourceId && ce.epsg == epsg);
             if (entry === undefined || entry === null) {
                 entry = { source: 'adjustment', sourceId: sourceId, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
                 this.points[nr].addCoordinate(entry);
@@ -470,19 +478,25 @@ export class Adjustment {
             entry.source = 'adjustment';
             entry.sourceId = sourceId;
             entry.accuracy = this.Sx[this.x_filter2org.findIndex((x) => x === p.x)];
+            if (entry.accuracy > 1E10) {
+                entry.accuracy = -99999;
+            }
             entry.epsg = epsg;
 
             if (p.x !== undefined && !this.x_filter[p.x]) {
                 entry['x'] = this.x0_org[p.x];
                 entry['x_s'] = this.Sx[this.x_filter2org.findIndex((x) => x === p.x)];
+                if (entry['x_s'] > 1E10) entry['x_s'] = undefined;
             }
             if (p.y !== undefined && !this.x_filter[p.y]) {
                 entry['y'] = this.x0_org[p.y];
                 entry['y_s'] = this.Sx[this.x_filter2org.findIndex((x) => x === p.y)];
+                if (entry['y_s'] > 1E10) entry['y_s'] = undefined;
             }
             if (p.z !== undefined && !this.x_filter[p.z]) {
                 entry['z'] = this.x0_org[p.z];
                 entry['z_s'] = this.Sx[this.x_filter2org.findIndex((x) => x === p.z)];
+                if (entry['z_s'] > 1E10) entry['z_s'] = undefined;
             }
         }
 
@@ -492,6 +506,7 @@ export class Adjustment {
                 if (this.x_measurements[i].o !== undefined) {
                     m.orientation = this.x0_org[this.x_measurements[i].o];
                     m.orientationAccuracy = this.Sx[this.x_filter2org.findIndex((x) => x === this.x_measurements[i].o)];
+                    if (m.orientationAccuracy > 1E10) m.orientationAccuracy = undefined;
                 }
                 if (this.x_measurements[i].ih !== undefined) {
                     m.instrumentHeight = this.x0_org[this.x_measurements[i].ih];

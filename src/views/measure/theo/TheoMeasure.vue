@@ -24,7 +24,7 @@
         <div class="ion-padding">
             <ion-button expand="block" @click="addPoint" class="ion-text-wrap ion-no-margin"
                 v-bind:disabled="!point || !hz">{{ store.getMeasureMethod() === 'theo_setup' ?
-                'Next' : 'Save' }}</ion-button>
+                    'Next' : 'Save' }}</ion-button>
         </div>
         <div class="ion-padding" v-if="store.getMeasureMethod() === 'theo_setup'">
             <ion-button expand="block" @click="ready()" class="ion-text-wrap ion-no-margin"
@@ -90,6 +90,11 @@
         </ion-grid>
         <p />
         <ion-grid :fixed="true" class="measures">
+            <ion-row v-if="measure.orientation">
+                <ion-col>
+                 <ion-toggle v-model="settingStore.errorInCm">Show error in cm</ion-toggle><p />
+                </ion-col>
+            </ion-row>
             <ion-row v-for="item, i in measure.measures" :key="item.nr">
                 <ion-col>
                     <ion-toggle @ionChange="coordToggled" v-model="item.active">Point {{ item.nr }}</ion-toggle>
@@ -101,17 +106,34 @@
                     <ion-row v-if="item.distance !== undefined">S: {{ format(item.distance, 3) }} </ion-row>
 
                 </ion-col>
-                <ion-col v-if="measure.orientation">
+                <ion-col v-if="measure.orientation && settingStore.errorInCm">
                     <ion-row v-if="item.hz !== undefined">
-                        {{ item.hz_v !== undefined ? formatWithSign(item.hz_v, 4) : '-' }}
+                        {{ measure.getHzErrorInCm(i) !== null ? formatWithSign(measure.getHzErrorInCm(i), 1) +
+                            '&nbsp;cm'
+                            : '-' }}
                     </ion-row>
                     <ion-row v-if="item.v !== undefined">
-                        {{ item.v_v !== undefined ? formatWithSign(item.v_v, 4) : '-' }}
+                        {{ measure.getVErrorInCm(i) !== null ? formatWithSign(measure.getHzErrorInCm(i), 1) + '&nbsp;cm'
+                            : '-' }}
                     </ion-row>
                     <ion-row v-if="item.distance !== undefined">
-                        {{ item.distance_v !== undefined ? formatWithSign(item.distance_v, 3) : '-' }}
+                        {{ item.distance_v !== undefined ? formatWithSign(item.distance_v * 100, 1) + '&nbsp;cm' : '-'
+                        }}
                     </ion-row>
                 </ion-col>
+
+                <ion-col v-if="measure.orientation && !settingStore.errorInCm">
+                    <ion-row v-if="item.hz !== undefined">
+                        {{ item.hz_v !== undefined ? + formatWithSign(item.hz_v, 4) + '&nbsp;g' : '-' }}
+                    </ion-row>
+                    <ion-row v-if="item.v !== undefined">
+                        {{ item.v_v !== undefined ? + formatWithSign(item.v_v, 4) + '&nbsp;g' : '-' }}
+                    </ion-row>
+                    <ion-row v-if="item.distance !== undefined">
+
+                    </ion-row>
+                </ion-col>
+
                 <ion-col size="auto">
                     <ion-button @click="removePoint(i)">
                         <ion-icon :icon="trash"></ion-icon>
@@ -119,8 +141,7 @@
                 </ion-col>
             </ion-row>
         </ion-grid>
-
-
+       
     </span>
 </template>
 
@@ -131,7 +152,7 @@ import { Point } from "@/types/Point";
 import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import GonInput from '@/components/GonInput.vue';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
-import { useMeasureStore, useStore } from '@/store';
+import { useMeasureStore, useStore, useSettingStore } from '@/store';
 import { azimuth, gonBetween0And400, gonBetweenMinus200And200 } from "@/utils";
 import { trash } from 'ionicons/icons';
 import { IonIcon } from '@ionic/vue';
@@ -154,6 +175,7 @@ addIcons({
 })
 
 const measureStore = useMeasureStore();
+const settingStore = useSettingStore();
 const store = useStore();
 let measure = ref<TheodoliteMeasure>();
 

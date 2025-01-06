@@ -6,6 +6,7 @@ import { CoordinateEntry } from './CoordinateEntry';
 
 
 export class Point {
+
     nr: string;
     description?: string;
     coordinates: CoordinateEntry[];
@@ -17,13 +18,25 @@ export class Point {
     }
 
     addCoordinate(e: CoordinateEntry) {
+        // this.coordinates = this.coordinates.filter(c => !(c.sourceId === e.sourceId && c.source === e.source));
         if (e.sourceId !== undefined) {
-            const existing = this.coordinates.find(c => c.sourceId === e.sourceId);
-            if (existing) {
-                this.coordinates.splice(this.coordinates.indexOf(existing), 1);
+            const existing = this.coordinates.findIndex(c => c.sourceId === e.sourceId && c.source === e.source);
+            if (existing != -1) {
+                this.coordinates[existing] = e;
+                return;
             }
         }
+        // sourceId == undefined oder existing == -1
         this.coordinates.push(e);
+
+    }
+
+    removeCoordinatesByFilter(filterFunction: (ce: CoordinateEntry) => boolean) {
+        for (let i = this.coordinates.length - 1; i >= 0; i--) {
+            if (filterFunction(this.coordinates[i])) {
+                this.coordinates.splice(i, 1);
+            }
+        }
     }
 
     getCoordinate(epsg?: Projection | string, filterFunction?: (ce: CoordinateEntry) => boolean): CoordinateEntry | null {
