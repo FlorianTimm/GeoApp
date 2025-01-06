@@ -1,4 +1,5 @@
 import { CoordinateEntry2D } from '@/types/CoordinateEntry';
+import { cot as mjs_cot, sin as mjs_sin, tan as mjs_tan, cos as mjs_cos } from 'mathjs';
 
 export const round = (value: number, decimals: number = 3) => {
     return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
@@ -51,23 +52,26 @@ export const gonBetweenMinus200And200 = (angle: number) => {
 }
 
 export const tan = (x: number) => {
-    const t = Math.tan(gonToRad(x));
+    return mjs_tan(gonToRad(x));
+    /*const t = Math.tan(gonToRad(x));
     if (Math.abs(t) >= 1E10) {
         return 1E10;
     } else {
         return t;
-    }
+    }*/
 }
 
 export const sin = (x: number) => {
-    return Math.sin(gonToRad(x));
+    return mjs_sin(gonToRad(x));
 }
 
 export const cos = (x: number) => {
-    return Math.cos(gonToRad(x));
+    return mjs_cos(gonToRad(x));
 }
 
 export const cot = (x: number) => {
+    return mjs_cot(gonToRad(x));
+    /*
     const c = cos(x) / sin(x);
     if (Math.abs(c) <= 1E-10) {
         return 0;
@@ -75,7 +79,7 @@ export const cot = (x: number) => {
         return 1E10;
     } else {
         return c;
-    }
+    }*/
 }
 
 export const azimuth2xy = (location: xy, distance: number, azimuth: number) => {
