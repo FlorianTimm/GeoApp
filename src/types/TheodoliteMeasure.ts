@@ -65,11 +65,11 @@ export class TheodoliteMeasure extends Measurement {
 
         this.transferHeight(measuresUsable, location);
 
-        this.calcNewPoints(measuresUsable);
-
         if (location.getCoordinate(undefined, (e) => e.sourceId == this.id) !== null) {
             this.adjust();
         }
+
+        this.calcNewPoints(measuresUsable);
     }
 
     getHzErrorInCm(id: number): number | null {
@@ -265,7 +265,7 @@ export class TheodoliteMeasure extends Measurement {
 
         let yn = yc + ((xm - xc + (ym - yc) * cot(tcd)) / (tan(tcd) + cot(tcd)));
         let xn;
-        if (tan(tcd) > cot(tcd)) {
+        if (tan(tcd) < cot(tcd)) {
             xn = xc + (yn - yc) * tan(tcd);
         } else {
             xn = xm + (yn - ym) * cot(tcd);

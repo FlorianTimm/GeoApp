@@ -52,9 +52,7 @@ export const gonBetweenMinus200And200 = (angle: number) => {
 
 export const tan = (x: number) => {
     const t = Math.tan(gonToRad(x));
-    if (Math.abs(t) < 1E-10) {
-        return 0;
-    } else if (t >= 1E10 || t <= -1E10) {
+    if (Math.abs(t) >= 1E10) {
         return 1E10;
     } else {
         return t;
