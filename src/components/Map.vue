@@ -12,7 +12,7 @@ import { LineString, Point } from "ol/geom";
 import { Snap as SnapInteraction } from 'ol/interaction';
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer";
 import { fromLonLat, transform, useGeographic } from "ol/proj";
-import { OSM, Vector as VectorSource } from "ol/source";
+import { OSM, Vector, Vector as VectorSource } from "ol/source";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style";
 import { onMounted } from "vue";
 import { createAlkisLayer } from "./MapParts/AlkisLayer";
@@ -37,7 +37,7 @@ measureStore.$subscribe(() => {
     storePoints2LayerSource();
 })
 
-const addingPoints = defineModel<boolean>({ required: true, default: false })
+const addingPoints = defineModel<boolean>({ required: false, default: false })
 
 const props = defineProps({
     initialCoordinates: {
@@ -48,6 +48,13 @@ const props = defineProps({
 
 
 onMounted(() => {
+    if (!store.view) {
+        store.view = new View({
+            center: fromLonLat(props.initialCoordinates, 'EPSG:25832'),
+            projection: 'EPSG:25832',
+            zoom: 12,
+        });
+    }
     map = new Map({
         layers: [
             new TileLayer({
@@ -57,14 +64,17 @@ onMounted(() => {
             }),
         ],
         target: "map",
-        view: new View({
-            center: fromLonLat(props.initialCoordinates, 'EPSG:25832'),
-            projection: 'EPSG:25832',
-            zoom: 12,
-        }),
+        // @ts-ignore
+        view: store.view,
     });
 
-    const alkisSources = createAlkisLayer(map);
+    if (store.alkis === undefined) {
+        store.alkis = createAlkisLayer();
+    }
+    // @ts-ignore
+    store.alkis.layer.forEach((l: VectorLayer) => {
+        map.addLayer(l);
+    });
 
     new VectorLayer({
         map: map,
@@ -163,8 +173,9 @@ onMounted(() => {
         mapBewegt = true;
     });
 
-    alkisSources.forEach((vs) => {
+    store.alkis.source.forEach((vs) => {
         let snap = new SnapInteraction({
+            // @ts-ignore
             source: vs,
             pixelTolerance: 20,
             edge: false,
@@ -211,6 +222,22 @@ function storePoints2LayerSource() {
                         return;
                     }
                     const f = new Feature(new LineString([s, e]));
+
+                    if (entry.active) {
+                        f.setStyle(new Style({
+                            stroke: new Stroke({
+                                color: '#00f',
+                                width: 1,
+                            }),
+                        }));
+                    } else {
+                        f.setStyle(new Style({
+                            stroke: new Stroke({
+                                color: '#aaa',
+                                width: 1,
+                            }),
+                        }));
+                    }
                     measureSource.addFeature(f);
                 });
 
@@ -221,12 +248,15 @@ function storePoints2LayerSource() {
                 let p = azimuth2xy({ x: c[0], y: c[1] }, 5, t.orientation)
                 let pt = [p.x, p.y];
                 const f = new Feature(new LineString([s, pt]));
+
                 f.setStyle(new Style({
                     stroke: new Stroke({
                         color: '#f00',
                         width: 2,
                     }),
                 }));
+
+
                 measureSource.addFeature(f);
 
             }

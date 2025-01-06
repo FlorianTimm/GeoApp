@@ -9,7 +9,8 @@ import { flurstueckStyle, buildingStyle } from "./Style";
 import { useSettingStore } from "@/store";
 
 
-export function createAlkisLayer(map: Map): VectorSource[] {
+export function createAlkisLayer(): { source: VectorSource[], layer: VectorLayer[] } {
+    let layer = [];
     const epsg = useSettingStore().getEpsg();
 
     const sourceNiFlurstuecke = new VectorSource({
@@ -26,12 +27,11 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         strategy: bboxStrategy,
     });
 
-    new VectorLayer({
+    layer.push(new VectorLayer({
         source: sourceNiFlurstuecke,
-        map: map,
         minZoom: 19,
         style: flurstueckStyle
-    });
+    }));
 
     const sourceNiGebaeude = new VectorSource({
         format: new WFS({
@@ -47,12 +47,11 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         strategy: bboxStrategy,
     });
 
-    new VectorLayer({
+    layer.push(new VectorLayer({
         source: sourceNiGebaeude,
-        map: map,
         minZoom: 19,
         style: buildingStyle
-    });
+    }));
 
     const sourceHhFlurstuecke = new VectorSource({
         format: new GeoJSON(
@@ -69,12 +68,11 @@ export function createAlkisLayer(map: Map): VectorSource[] {
     });
 
 
-    new VectorLayer({
+    layer.push(new VectorLayer({
         source: sourceHhFlurstuecke,
-        map: map,
         minZoom: 19,
         style: flurstueckStyle
-    });
+    }));
 
     const sourceHhGebaeude = new VectorSource({
         format: new GeoJSON(
@@ -91,12 +89,11 @@ export function createAlkisLayer(map: Map): VectorSource[] {
     });
 
 
-    new VectorLayer({
+    layer.push(new VectorLayer({
         source: sourceHhGebaeude,
-        map: map,
         minZoom: 19,
         style: buildingStyle
-    });
+    }));
 
     const sourceShFlurstuecke = new VectorSource({
         /*format: new WFS({
@@ -109,22 +106,22 @@ export function createAlkisLayer(map: Map): VectorSource[] {
                 'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
                 'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
                 'bbox=' + extent.join(',') + ',' + epsg,*//*
-        loader: (extent) => {
-            let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
-                'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
-                'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
-                'bbox=' + extent.join(',') + ',' + epsg;
-            loadSHwfs(url, sourceShFlurstuecke);
-        },
-        strategy: bboxStrategy,*/
+loader: (extent) => {
+    let url = 'https://service.gdi-sh.de/SH_INSPIREDOWNLOAD_AI_CP_ALKIS?SERVICE=WFS&' +
+        'version=2.0.0&request=GetFeature&typenames=cp:CadastralParcel&' +
+        'outputFormat=' + encodeURIComponent('application/gml+xml; version=3.2') + '&srsname=' + epsg + '&' +
+        'bbox=' + extent.join(',') + ',' + epsg;
+    loadSHwfs(url, sourceShFlurstuecke);
+},
+strategy: bboxStrategy,*/
     });
 
-    new VectorLayer({
-        source: sourceShFlurstuecke,
-        map: map,
-        minZoom: 19,
-        style: flurstueckStyle
-    });
+    layer.push(
+        new VectorLayer({
+            source: sourceShFlurstuecke,
+            minZoom: 19,
+            style: flurstueckStyle
+        }));
 
 
 
@@ -146,14 +143,17 @@ export function createAlkisLayer(map: Map): VectorSource[] {
         strategy: bboxStrategy,
     });
 
-    new VectorLayer({
-        source: sourceShGebaeude,
-        map: map,
-        minZoom: 19,
-        style: buildingStyle
-    });
+    layer.push(
+        new VectorLayer({
+            source: sourceShGebaeude,
+            minZoom: 19,
+            style: buildingStyle
+        }));
 
-    return [sourceHhFlurstuecke, sourceNiFlurstuecke, sourceShFlurstuecke, sourceHhGebaeude, sourceShGebaeude, sourceNiGebaeude];
+    return {
+        source: [sourceHhFlurstuecke, sourceNiFlurstuecke, sourceShFlurstuecke, sourceHhGebaeude, sourceShGebaeude, sourceNiGebaeude],
+        layer: layer
+    };
 }
 
 function loadSHwfs(url: string, flstSource: VectorSource, buildingSource: VectorSource) {

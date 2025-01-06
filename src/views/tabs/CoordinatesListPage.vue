@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>Coordinates</ion-title>
-        <ion-buttons slot="end">
+        <ion-buttons slot="start">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
       </ion-toolbar>

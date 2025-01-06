@@ -3,12 +3,12 @@
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="#" @click="store.setMeasureMethod('')"
-            v-if="store.getMeasureMethod() != ''"></ion-back-button>
+          <ion-menu-button></ion-menu-button>
         </ion-buttons>
         <ion-title>{{ title[store.getMeasureMethod()] }}</ion-title>
         <ion-buttons slot="end">
-          <ion-menu-button></ion-menu-button>
+          <ion-back-button default-href="#" @click="store.setMeasureMethod('')"
+            v-if="store.getMeasureMethod() != ''"></ion-back-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>

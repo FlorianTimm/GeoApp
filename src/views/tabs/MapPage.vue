@@ -1,39 +1,10 @@
 <template>
   <ion-page>
-    <ion-menu content-id="map-content" menuId="mapMenu" side="start">
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Map Menu</ion-title>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <ion-list>
-          <ion-item>
-            <ion-toggle v-model="settingStore.geolocation">Geolocation</ion-toggle>
-          </ion-item>
-          <ion-item>
-            <ion-toggle v-model="settingStore.showMeasurements">Show measurements</ion-toggle>
-          </ion-item>
-          <ion-item button @click="map.zoomToExtent();">
-            <ion-label>Zoom to extent</ion-label>
-          </ion-item>
-          <ion-item button @click="map.slideToLocation();">
-            <ion-label>to last gps position</ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-content>
-    </ion-menu>
     <ion-header>
       <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button menu="mapMenu"><ion-icon name="map-outline"></ion-icon></ion-menu-button>
-        </ion-buttons>
         <ion-title>Map</ion-title>
-        <ion-buttons slot="secondary">
-          <ion-toggle v-model="settingStore.geolocation">Geolocation</ion-toggle>
-        </ion-buttons>
         <ion-buttons slot="end">
-          <ion-menu-button></ion-menu-button>
+          <ion-toggle v-model="settingStore.geolocation">Geolocation</ion-toggle>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -50,19 +21,37 @@
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
       </ion-fab>
+      <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+        <ion-fab-button>
+          <ion-icon :icon="mapOutline"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-list side="top">
+          <ion-fab-button :color="settingStore.geolocation ? 'success' : 'light'"
+            @click="settingStore.geolocation = !settingStore.geolocation">
+            <ion-icon :icon="locate"></ion-icon>
+          </ion-fab-button>
+          <ion-fab-button :color="settingStore.showMeasurements ? 'success' : 'light'"
+            @click="settingStore.showMeasurements = !settingStore.showMeasurements">
+            <ion-icon :icon="analytics"></ion-icon>
+          </ion-fab-button>
+          <ion-fab-button @click="zoomToExtent()">
+            <ion-icon :icon="globe"></ion-icon>
+          </ion-fab-button>
+        </ion-fab-list>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonMenuButton, IonButtons, IonToggle, IonMenu, IonList, IonItem, IonIcon, IonLabel, IonFab, IonFabButton } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonToggle, IonIcon, IonFab, IonFabButton, actionSheetController, IonFabList } from '@ionic/vue';
 import Map from '@/components/Map.vue';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { useSettingStore } from '@/store';
 import { addIcons } from 'ionicons';
-import { mapOutline, add } from 'ionicons/icons';
+import { mapOutline, add, locate, analytics, globe } from 'ionicons/icons';
 import { ref } from 'vue';
 
 
@@ -83,5 +72,14 @@ const addPoint = () => {
   console.log('add point')
   addingPoints.value = !addingPoints.value;
 }
+
+const zoomToExtent = () => {
+  map.value.zoomToExtent()
+}
+
+const slideToLocation = () => {
+  map.value.slideToLocation()
+}
+
 
 </script>

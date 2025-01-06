@@ -10,6 +10,8 @@ export function createSelectInteraction(map: Map, pointLayer: VectorLayer<Vector
     const measureStore = useMeasureStore();
     const selectInteraction = new SelectInteraction({
         layers: [pointLayer],
+        hitTolerance: 5,
+
     });
     map.addInteraction(selectInteraction);
     selectInteraction.on('select', (e) => {
