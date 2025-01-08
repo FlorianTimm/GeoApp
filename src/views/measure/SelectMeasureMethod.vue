@@ -25,10 +25,10 @@
             <ion-item v-for="measure, i in measureStore.getMeasurements()" :key="i">
                 <ion-toggle aligment="start" :checked="store.getActiveMeasurement() == measure"
                     @ionChange="(d) => { d.detail.checked ? store.setActiveMeasurement(measure) : store.setActiveMeasurement() }">{{
-                        measure.getName()
-                        +
-                        ' ' +
-                        measure.getShortInfo() }}</ion-toggle>
+    measure.getName()
+    +
+    ' ' +
+    measure.getShortInfo() }}</ion-toggle>
                 <ion-button @click="reactivateMeasure(measure)"><ion-icon name="hammer-outline"></ion-icon></ion-button>
                 <ion-button @click="deleteMeasure(measure)"><ion-icon name="trash-outline"></ion-icon></ion-button>
             </ion-item>

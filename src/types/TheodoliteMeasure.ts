@@ -2,19 +2,47 @@ import { useMeasureStore } from "@/store";
 import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry, CoordinateEntry2D } from "./CoordinateEntry";
-import { azimuth, cot, tan, round, gonBetween0And400, distance, zenithDistance, azimuth2xy, vertical2height, gonBetweenMinus200And200, sin } from "@/utils";
+import { cot, round, gonBetween0And400, azimuth2xy, vertical2height, sin } from "@/utils";
+import { free_station } from "./GeoCalculations/FreeStation";
+import { resection } from "./GeoCalculations/Resection";
+import { setupOnPoint } from "./GeoCalculations/SetupOnPoint";
+import { stakeOut } from "./GeoCalculations/StakeOut";
 
 
 export class TheodoliteMeasure extends Measurement {
-    type: MeasurementType = 'theodolite';
-    pointNumber: string = '';
-    description?: string;
-    accuracy: number = 3;
-    instrumentHeight?: number;
-    orientation?: number;
-    orientationAccuracy?: number;
-    second = false;
-    measures: TheodoliteMeasureEntry[] = [];
+    readonly pointNumber: string = '';
+    readonly description?: string;
+    readonly accuracy: number = 3;
+    private _instrumentHeight?: number;
+    get instrumentHeight(): number | undefined {
+        return this._instrumentHeight;
+    }
+    set instrumentHeight(value: number | undefined) {
+        this._instrumentHeight = value;
+    }
+
+    private _orientation?: number;
+    get orientation(): number | undefined {
+        return this._orientation;
+    }
+    set orientation(value: number | undefined) {
+        this._orientation = value;
+    }
+    private _orientationAccuracy?: number;
+    get orientationAccuracy(): number | undefined {
+        return this._orientationAccuracy;
+    }
+    set orientationAccuracy(value: number | undefined) {
+        this._orientationAccuracy = value;
+    }
+
+    readonly second: boolean = false;
+    private _measures: TheodoliteMeasureEntry[] = [];
+    get measures(): TheodoliteMeasureEntry[] {
+        return this._measures;
+    }
+
+    private measureStore: ReturnType<typeof useMeasureStore>;
 
     constructor(pointNumber: string, description: string = '', second: boolean = false, accuracy: number = 3, ih?: number, id?: string) {
         super('theodolite', id);
@@ -23,19 +51,53 @@ export class TheodoliteMeasure extends Measurement {
         this.second = second;
         this.accuracy = accuracy;
         this.instrumentHeight = ih;
+        this.measureStore = useMeasureStore();
     }
 
     addMeasure(entry: TheodoliteMeasureEntry) {
         this.measures.push(entry);
-        this.calculate();
+        this.calculateSetup();
     }
 
-    calculate() {
-        const measureStore = useMeasureStore();
-        const location = measureStore.getPoint(this.pointNumber);
+    getPoint(): Point {
+        return this.measureStore.getPoint(this.pointNumber);
+    }
+
+    calculateSetup() {
+
+        const location = this.measureStore.getPoint(this.pointNumber);
         let locationCoordinate = location.getCoordinate(undefined, c => c.sourceId !== this.id);
-        let measuresUsable = this.measures.map(measure => {
-            const target = measureStore.getPoint(measure.nr);
+
+        location.removeCoordinatesByFilter(c => c.sourceId == this.id);
+
+        // filter out measures without a coordinate or without a horizontal direction
+
+        const measures = this.getMeasuresForSetup();
+        if (locationCoordinate) {
+            setupOnPoint(this);
+        } else if (measures.filter(m => m.measure.distance !== undefined).length >= 2) {
+            free_station(this);
+            setupOnPoint(this);
+        } else if (measures.length >= 3) {
+            resection(this);
+            setupOnPoint(this);
+        } else {
+            this.orientation = undefined;
+        }
+
+        const measuresUsable = this.getMeasures();
+        this.transferHeight(measuresUsable, location);
+
+        if (location.getCoordinate(undefined, (e) => e.sourceId == this.id) !== null) {
+            this.adjust();
+        }
+
+        this.calcNewPoints(measuresUsable);
+    }
+
+    getMeasures(): TheoMeasureEntryWithPoint[] {
+        return this.measures.map(measure => {
+            const target = this.measureStore.getPoint(measure.nr);
             if (!target) {
                 return null;
             }
@@ -46,143 +108,44 @@ export class TheodoliteMeasure extends Measurement {
             };
         }).filter(m => m !== null && m.measure.active) as { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[];
 
-        location.removeCoordinatesByFilter(c => c.sourceId == this.id);
-
-        // filter out measures without a coordinate or without a horizontal direction
-        const measures = measuresUsable.filter(m => m.coordinate !== undefined && m.coordinate !== null && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
-
-        if (locationCoordinate) {
-            this.setupOnPoint(location, measures);
-        } else if (measures.filter(m => m.measure.distance !== undefined).length >= 2) {
-            this.free_station(location, measures);
-            this.setupOnPoint(location, measures);
-        } else if (measures.length >= 3) {
-            this.resection(location, measures);
-            this.setupOnPoint(location, measures);
-        } else {
-            this.orientation = undefined;
-        }
-
-        this.transferHeight(measuresUsable, location);
-
-        if (location.getCoordinate(undefined, (e) => e.sourceId == this.id) !== null) {
-            this.adjust();
-        }
-
-        this.calcNewPoints(measuresUsable);
     }
 
-    getHzErrorInCm(id: number): number | null {
-        let m = this.measures[id];
-        if (m === undefined || m.hz === undefined || m.hz_v === undefined) {
-            return null;
-        }
-        let d = m.distance
-        if (d === undefined) {
-            let p = useMeasureStore().getPoint(m.nr)
-            d = this.stakeOut(p).distance;
-        }
-        if (d === undefined) {
-            return null;
-        }
-        return sin(m.hz_v) * d * 100;
+    getMeasuresForSetup(): TheoMeasureForSetup[] {
+        return this.getMeasures().filter(m => m.coordinate !== undefined && m.coordinate !== null && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
+
     }
 
-    getVErrorInCm(id: number): number | null {
-        let m = this.measures[id];
-        if (m === undefined || m.v === undefined || m.v_v === undefined) {
-            return null;
+    getErrorInCm(id: number): { hz?: number, v?: number } {
+        let measure = this.measures[id];
+
+        let distance = measure.distance
+        if (distance === undefined) {
+            let point = useMeasureStore().getPoint(measure.nr)
+            distance = stakeOut(this, point).distance;
         }
-        let d = m.distance
-        if (d === undefined) {
-            let p = useMeasureStore().getPoint(m.nr)
-            d = this.stakeOut(p).distance;
+        if (distance === undefined) {
+            return { hz: undefined, v: undefined };
         }
-        if (d === undefined) {
-            return null;
+        return {
+            hz: measure.hz_v != undefined ? sin(measure.hz_v) * distance * 100 : undefined,
+            v: measure.v_v != undefined ? sin(measure.v_v) * distance * 100 : undefined
         }
-        return sin(m.v_v) * d * 100;
     }
 
-    public free_station(location: Point, measures: { target?: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
-        console.log('free station');
-        const localCoordinates = measures.map(m => {
-            if (m.measure.distance === undefined || m.measure.hz === undefined) {
-                return null;
-            }
-
-            return {
-                local: azimuth2xy({ x: 0, y: 0 }, m.measure.distance, m.measure.hz),
-                world: m.coordinate
-            }
-        }).filter(m => m !== null)
-
-        if (localCoordinates.length < 2) {
-            return;
-        }
-
-        const epsg = localCoordinates[0].world.epsg;
-
-        const sum_local = { x: 0, y: 0 };
-        const sum_world = { x: 0, y: 0 };
-        for (let i = 0; i < localCoordinates.length; i++) {
-            sum_local.x += localCoordinates[i].local.x;
-            sum_local.y += localCoordinates[i].local.y;
-            sum_world.x += localCoordinates[i].world.x;
-            sum_world.y += localCoordinates[i].world.y;
-        }
-
-        const avg_local = { x: sum_local.x / localCoordinates.length, y: sum_local.y / localCoordinates.length };
-        const avg_world = { x: sum_world.x / localCoordinates.length, y: sum_world.y / localCoordinates.length };
-
-        let a_top = 0;
-        let ao_bottom = 0;
-        let o_top = 0;
-        for (let i = 0; i < localCoordinates.length; i++) {
-            const lx = localCoordinates[i].local.x - avg_local.x;
-            const ly = localCoordinates[i].local.y - avg_local.y;
-            const wx = localCoordinates[i].world.x - avg_world.x;
-            const wy = localCoordinates[i].world.y - avg_world.y;
-
-            o_top += ly * wx - lx * wy;
-            a_top += ly * wy + lx * wx;
-            ao_bottom += lx * lx + ly * ly;
-        }
-
-        const a = a_top / ao_bottom;
-        const o = o_top / ao_bottom;
-
-        const m = Math.sqrt(a * a + o * o);
-        console.log('m', m);
-
-        let xn = avg_world.x - a * avg_local.x - o * avg_local.y;
-        let yn = avg_world.y - a * avg_local.y + o * avg_local.x;
-
-        let s
-        if (localCoordinates.length > 2) {
-            let wsum = 0
-            for (let i = 0; i < localCoordinates.length; i++) {
-                let wx = - xn - a * localCoordinates[i].local.x - o * localCoordinates[i].local.y + localCoordinates[i].world.x;
-                let wy = - yn - a * localCoordinates[i].local.y + o * localCoordinates[i].local.x + localCoordinates[i].world.y;
-                wsum += wx * wx + wy * wy;
-            }
-            console.log('wsum', wsum);
-            s = Math.sqrt(wsum / (2 * localCoordinates.length - 4));
-        } else {
-            s = Math.max(...measures.map((m) => m.coordinate.accuracy));
-        }
-
-        location.addCoordinate({ x: xn, y: yn, accuracy: s, source: 'free_station', sourceId: this.id, epsg: epsg });
-        return { x: xn, y: yn, accuracy: s };
+    getHzErrorInCm(id: number): number | undefined {
+        return this.getErrorInCm(id).hz;
     }
 
+    getVErrorInCm(id: number): number | undefined {
+        return this.getErrorInCm(id).v;
+    }
 
     private transferHeight(measuresUsable: { target: Point; measure: TheodoliteMeasureEntry; }[], location: Point) {
         let epsg = location.getCoordinate()?.epsg;
         console.log('transfer height');
         let heights = measuresUsable.map(m => {
             const z = m.target.getCoordinateComponents('z');
-            let dist = m.measure.distance ?? this.stakeOut(m.target).distance;
+            let dist = m.measure.distance ?? stakeOut(this, m.target).distance;
             if (z === null || m.measure.v === undefined || dist === undefined) {
                 return null;
             }
@@ -223,62 +186,6 @@ export class TheodoliteMeasure extends Measurement {
         }
     }
 
-    resection(location: Point, measures: { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
-        if (measures.length < 3) {
-            return null;
-        }
-        console.log('resection');
-
-        const filtered = measures.
-            sort((a, b) => a.coordinate.accuracy - b.coordinate.accuracy).
-            slice(0, 3).
-            sort((a, b) => (a.measure.hz ?? 0) - (b.measure.hz ?? 0));
-        console.log('filtered', filtered);
-        const pa = filtered[0];
-        const pm = filtered[1];
-        const pb = filtered[2];
-
-        const xa = pa.coordinate.x;
-        const ya = pa.coordinate.y;
-        const xb = pb.coordinate.x;
-        const yb = pb.coordinate.y;
-        const xm = pm.coordinate.x;
-        const ym = pm.coordinate.y;
-
-        if (pm.measure.hz === undefined || pa.measure.hz === undefined || pb.measure.hz === undefined) {
-            return null;
-        }
-        const alpha = gonBetween0And400(pm.measure.hz - pa.measure.hz);
-        const beta = gonBetween0And400(pb.measure.hz - pm.measure.hz);
-
-        const xc = xa + (ym - ya) * cot(alpha)
-        const yc = ya - (xm - xa) * cot(alpha)
-
-        const xd = xb + (yb - ym) * cot(beta)
-        const yd = yb - (xb - xm) * cot(beta)
-
-        const tcd = azimuth({ x: xc, y: yc }, { x: xd, y: yd });
-
-        if (tcd === null) {
-            return null;
-        }
-
-        let yn = yc + ((xm - xc + (ym - yc) * cot(tcd)) / (tan(tcd) + cot(tcd)));
-        let xn;
-        if (tan(tcd) < cot(tcd)) {
-            xn = xc + (yn - yc) * tan(tcd);
-        } else {
-            xn = xm + (yn - ym) * cot(tcd);
-        }
-
-        xn = round(xn, 4);
-        yn = round(yn, 4);
-
-        let accuracy = (pa.coordinate.accuracy + pb.coordinate.accuracy + pm.coordinate.accuracy) / 3;
-        location.addCoordinate({ x: xn, y: yn, accuracy: accuracy, source: 'resection', sourceId: this.id, epsg: pa.coordinate.epsg });
-        console.log('location', { x: xn, y: yn });
-        return { x: xn, y: yn };
-    }
 
     calcNewPoints(measures: { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[]) {
         //setup?
@@ -310,56 +217,10 @@ export class TheodoliteMeasure extends Measurement {
         // Vorwärtsschnitt
     }
 
-    setupOnPoint(location: Point, measures: { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]) {
-        const locationCoordinate = location.getCoordinate();
-        if (locationCoordinate === undefined || locationCoordinate === null || locationCoordinate.x === undefined || locationCoordinate.y === undefined) {
-            return null;
-        }
-        console.log('setup on point');
-        const locationCoordinateXY = locationCoordinate as CoordinateEntry2D;
-        const angles_org = measures.map(m => {
-            let angle = azimuth(locationCoordinateXY, m.coordinate);
-            if (angle === null || m.measure.hz === undefined) {
-                return null;
-            }
-            angle -= m.measure.hz;
-            return gonBetween0And400(angle);
-        })
-        let angles = angles_org.filter(a => a !== null) as number[];
-
-        console.log('angles', angles);
-
-        let sum = 0
-        for (let i = 0; i < angles.length; i++) {
-            if (i == 0) {
-                sum = angles[i];
-            } else {
-                let tmpAvg = sum / i;
-                if (tmpAvg - angles[i] > 200) {
-                    angles[i] += 400;
-                } else if (tmpAvg - angles[i] < -200) {
-                    angles[i] -= 400;
-                }
-                sum += angles[i];
-            }
-        }
-        let avg = gonBetween0And400(sum / angles.length);
-        console.log('avg', avg);
-        this.orientation = avg;
-
-        measures.forEach((m, i) => {
-            if (angles_org[i] === null) {
-                return;
-            }
-            m.measure.hz_v = round(gonBetweenMinus200And200(angles_org[i] - avg), 4);
-            console.log('hz_v', m.measure.hz_v);
-        })
-        return avg;
-    }
 
     removeMeasure(i: number) {
         this.measures.splice(i, 1);
-        this.calculate();
+        this.calculateSetup();
     }
 
     static fromJson(json: any): TheodoliteMeasure {
@@ -370,46 +231,8 @@ export class TheodoliteMeasure extends Measurement {
         if (json.orientationAccuracy) {
             measure.orientationAccuracy = json.orientationAccuracy;
         }
-        measure.measures = json.measures;
+        measure._measures = json.measures;
         return measure;
-    }
-
-    stakeOut(point: Point, target_height: number = 0): { distance?: number, hz?: number, v?: number } {
-        const coord = point.getCoordinate() as CoordinateEntry2D;
-        if (!coord || coord.x === undefined || coord.y === undefined) {
-            return { distance: undefined, hz: undefined, v: undefined };
-        }
-        const orientation = this.orientation;
-        if (orientation === undefined) {
-            return { distance: undefined, hz: undefined, v: undefined };
-        }
-        const measureStore = useMeasureStore();
-        const location = measureStore.getPoint(this.pointNumber);
-        if (!location) {
-            return { distance: undefined, hz: undefined, v: undefined };
-        }
-        const locationCoord = location.getCoordinate() as CoordinateEntry2D;
-        if (!locationCoord || locationCoord.x === undefined || locationCoord.y === undefined) {
-            return { distance: undefined, hz: undefined, v: undefined };
-        }
-
-        const dist = distance(locationCoord, coord);
-        const angle = azimuth(locationCoord, coord);
-
-        let v: number | undefined;
-        if (locationCoord.z !== undefined && coord.z !== undefined) {
-
-            let hdiff = coord.z - locationCoord.z + target_height - (this.instrumentHeight ?? 0);
-
-            v = zenithDistance(dist, hdiff);
-
-        }
-
-        return {
-            distance: round(dist),
-            hz: round(gonBetween0And400(angle - orientation), 4),
-            v: v !== undefined ? round(v, 4) : undefined
-        }
     }
 
     getShortInfo(): string {
@@ -437,4 +260,15 @@ export type TheodoliteMeasureEntry = {
     hz_v?: number,
     distance_v?: number,
     targetHeight?: number
+}
+
+export type TheoMeasureEntryWithPoint = {
+    target: Point,
+    measure: TheodoliteMeasureEntry,
+    coordinate?: CoordinateEntry
+}
+export type TheoMeasureForSetup = {
+    target: Point,
+    measure: TheodoliteMeasureEntry,
+    coordinate: CoordinateEntry2D
 }

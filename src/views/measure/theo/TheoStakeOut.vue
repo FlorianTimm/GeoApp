@@ -27,6 +27,7 @@ import PointNumberSelect from '@/components/PointNumberSelect.vue';
 import { useStore } from '@/store';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { IonList, IonItem, IonLabel, IonInput } from '@ionic/vue';
+import { stakeOut } from '@/types/GeoCalculations/StakeOut';
 
 const point = ref<Point>();
 const target_height = ref<number>(0);
@@ -58,6 +59,6 @@ watch([point, target_height], (data) => {
         return;
     }
 
-    value.value = (<TheodoliteMeasure>store.getActiveMeasurement()).stakeOut(point, target_height);
+    value.value = stakeOut((<TheodoliteMeasure>store.getActiveMeasurement()), point, target_height);
 });
 </script>

@@ -2,7 +2,6 @@ import { Point } from "@/types/Point";
 import { Measurement, MeasurementType } from "@/types/Measurement";
 
 export class PrismMeasure extends Measurement {
-    type: MeasurementType = 'prism';
     start?: string
     end?: string
     distance?: number

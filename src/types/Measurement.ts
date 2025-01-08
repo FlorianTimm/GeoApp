@@ -3,9 +3,8 @@ import { useMeasureStore } from "@/store";
 import { v4 as uuid } from "uuid";
 
 export abstract class Measurement {
-    type: MeasurementType;
-    id: string;
-
+    readonly type: MeasurementType;
+    readonly id: string;
     constructor(type: MeasurementType, id?: string) {
         if (id)
             this.id = id;

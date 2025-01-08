@@ -24,7 +24,7 @@
         <div class="ion-padding">
             <ion-button expand="block" @click="addPoint" class="ion-text-wrap ion-no-margin"
                 v-bind:disabled="!point || !hz">{{ store.getMeasureMethod() === 'theo_setup' ?
-                    'Next' : 'Save' }}</ion-button>
+    'Next' : 'Save' }}</ion-button>
         </div>
         <div class="ion-padding" v-if="store.getMeasureMethod() === 'theo_setup'">
             <ion-button expand="block" @click="ready()" class="ion-text-wrap ion-no-margin"
@@ -92,7 +92,8 @@
         <ion-grid :fixed="true" class="measures">
             <ion-row v-if="measure.orientation">
                 <ion-col>
-                 <ion-toggle v-model="settingStore.errorInCm">Show error in cm</ion-toggle><p />
+                    <ion-toggle v-model="settingStore.errorInCm">Show error in cm</ion-toggle>
+                    <p />
                 </ion-col>
             </ion-row>
             <ion-row v-for="item, i in measure.measures" :key="item.nr">
@@ -108,12 +109,13 @@
                 </ion-col>
                 <ion-col v-if="measure.orientation && settingStore.errorInCm">
                     <ion-row v-if="item.hz !== undefined">
-                        {{ measure.getHzErrorInCm(i) !== null ? formatWithSign(measure.getHzErrorInCm(i), 1) +
+                        {{ measure.getHzErrorInCm(i) !== undefined ? formatWithSign(measure.getHzErrorInCm(i), 1) +
                             '&nbsp;cm'
                             : '-' }}
                     </ion-row>
                     <ion-row v-if="item.v !== undefined">
-                        {{ measure.getVErrorInCm(i) !== null ? formatWithSign(measure.getHzErrorInCm(i), 1) + '&nbsp;cm'
+                        {{ measure.getVErrorInCm(i) !== undefined ? formatWithSign(measure.getHzErrorInCm(i), 1) +
+                            '&nbsp;cm'
                             : '-' }}
                     </ion-row>
                     <ion-row v-if="item.distance !== undefined">
@@ -141,7 +143,7 @@
                 </ion-col>
             </ion-row>
         </ion-grid>
-       
+
     </span>
 </template>
 
@@ -159,6 +161,7 @@ import { IonIcon } from '@ionic/vue';
 import { addIcons } from 'ionicons';
 import { format, formatWithSign } from '@/utils';
 import { watch } from 'vue';
+import { stakeOut } from '@/types/GeoCalculations/StakeOut';
 
 
 const hz = ref<number>();
@@ -190,7 +193,7 @@ watch(point, (point) => {
     if (!point || !measure.value) {
         return;
     }
-    placeholder.value = measure.value.stakeOut(point, th.value);
+    placeholder.value = stakeOut(measure.value, point, th.value);
     coord.value = measureStore.getPoint(measure.value?.pointNumber)?.getCoordinate() ?? {}
 })
 
@@ -221,7 +224,7 @@ const addPoint = () => {
 
 
 const coordToggled = (e: CustomEvent) => {
-    measure.value?.calculate()
+    measure.value?.calculateSetup()
 }
 
 const removePoint = (i: number) => {

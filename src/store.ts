@@ -5,10 +5,7 @@ import { MeasurementHelper } from '@/types/MeasurementHelper';
 import { TheodoliteMeasure } from '@/types/TheodoliteMeasure';
 import { Projection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
-import { Layer } from 'ol/layer';
 import View from 'ol/View';
-import { defaults, Interaction } from 'ol/interaction';
-import { Source } from 'ol/source';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 

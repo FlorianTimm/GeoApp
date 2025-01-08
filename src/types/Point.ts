@@ -7,9 +7,15 @@ import { CoordinateEntry } from './CoordinateEntry';
 
 export class Point {
 
-    nr: string;
-    description?: string;
-    coordinates: CoordinateEntry[];
+    readonly nr: string;
+    private _description?: string;
+    get description() {
+        return this._description;
+    }
+    set description(value: string | undefined) {
+        this._description = value;
+    }
+    readonly coordinates: CoordinateEntry[];
 
     constructor(nr: string, description?: string) {
         this.nr = nr;
