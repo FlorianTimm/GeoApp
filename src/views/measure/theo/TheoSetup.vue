@@ -71,7 +71,9 @@ const start = () => {
         (typeof accuracy.value === 'string' ? parseFloat(accuracy.value) : accuracy.value) ?? (second.value ? 1 : 3),
         (typeof ih.value === 'string' ? parseFloat(ih.value) : ih.value) ?? 0
     );
+    console.log(measure.value);
     measureStore.addMeasurement(measure.value);
+    console.log(measureStore.getMeasurements());
     store.setActiveMeasurement(measure.value);
 }
 

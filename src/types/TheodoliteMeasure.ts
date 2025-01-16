@@ -7,6 +7,7 @@ import { free_station } from "./GeoCalculations/FreeStation";
 import { resection } from "./GeoCalculations/Resection";
 import { setupOnPoint } from "./GeoCalculations/SetupOnPoint";
 import { stakeOut } from "./GeoCalculations/StakeOut";
+import { forwardSection } from "./GeoCalculations/ForwardSection";
 
 
 export class TheodoliteMeasure extends Measurement {
@@ -42,8 +43,6 @@ export class TheodoliteMeasure extends Measurement {
         return this._measures;
     }
 
-    private measureStore: ReturnType<typeof useMeasureStore>;
-
     constructor(pointNumber: string, description: string = '', second: boolean = false, accuracy: number = 3, ih?: number, id?: string) {
         super('theodolite', id);
         this.pointNumber = pointNumber;
@@ -51,7 +50,6 @@ export class TheodoliteMeasure extends Measurement {
         this.second = second;
         this.accuracy = accuracy;
         this.instrumentHeight = ih;
-        this.measureStore = useMeasureStore();
     }
 
     addMeasure(entry: TheodoliteMeasureEntry) {
@@ -60,12 +58,12 @@ export class TheodoliteMeasure extends Measurement {
     }
 
     getPoint(): Point {
-        return this.measureStore.getPoint(this.pointNumber);
+        return useMeasureStore().getPoint(this.pointNumber);
     }
 
     calculateSetup() {
 
-        const location = this.measureStore.getPoint(this.pointNumber);
+        const location = useMeasureStore().getPoint(this.pointNumber);
         let locationCoordinate = location.getCoordinate(undefined, c => c.sourceId !== this.id);
 
         location.removeCoordinatesByFilter(c => c.sourceId == this.id);
@@ -97,7 +95,7 @@ export class TheodoliteMeasure extends Measurement {
 
     getMeasures(): TheoMeasureEntryWithPoint[] {
         return this.measures.map(measure => {
-            const target = this.measureStore.getPoint(measure.nr);
+            const target = useMeasureStore().getPoint(measure.nr);
             if (!target) {
                 return null;
             }
@@ -215,24 +213,13 @@ export class TheodoliteMeasure extends Measurement {
             m.target.addCoordinate({ x: coord.x, y: coord.y, accuracy: c.accuracy, source: 'theodolite', sourceId: this.id, epsg: cn.epsg });
         });
         // Vorwärtsschnitt
+        forwardSection()
     }
 
 
     removeMeasure(i: number) {
         this.measures.splice(i, 1);
         this.calculateSetup();
-    }
-
-    static fromJson(json: any): TheodoliteMeasure {
-        const measure = new TheodoliteMeasure(json.pointNumber, json.description, json.second, json.accuracy, json.instrumentHeight, json.id);
-        if (json.orientation) {
-            measure.orientation = json.orientation;
-        }
-        if (json.orientationAccuracy) {
-            measure.orientationAccuracy = json.orientationAccuracy;
-        }
-        measure._measures = json.measures;
-        return measure;
     }
 
     getShortInfo(): string {
@@ -246,8 +233,47 @@ export class TheodoliteMeasure extends Measurement {
     getName(): string {
         return 'Theodolite';
     }
+
+    toJsonObject(): TheoJSON {
+        return {
+            type: this.type,
+            id: this.id,
+            pointNumber: this.pointNumber,
+            description: this.description,
+            second: this.second,
+            accuracy: this.accuracy,
+            instrumentHeight: this.instrumentHeight,
+            orientation: this.orientation,
+            orientationAccuracy: this.orientationAccuracy,
+            measures: this.measures
+        };
+    }
+
+    static fromJsonObject(json: TheoJSON): TheodoliteMeasure {
+        const measure = new TheodoliteMeasure(json.pointNumber, json.description, json.second, json.accuracy, json.instrumentHeight, json.id);
+        if (json.orientation) {
+            measure.orientation = json.orientation;
+        }
+        if (json.orientationAccuracy) {
+            measure.orientationAccuracy = json.orientationAccuracy;
+        }
+        measure._measures = json.measures;
+        return measure;
+    }
 }
 
+export type TheoJSON = {
+    type: MeasurementType,
+    id: string,
+    pointNumber: string,
+    description?: string,
+    second: boolean,
+    accuracy: number,
+    instrumentHeight?: number,
+    orientation?: number,
+    orientationAccuracy?: number,
+    measures: TheodoliteMeasureEntry[]
+}
 
 export type TheodoliteMeasureEntry = {
     nr: string,

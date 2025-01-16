@@ -7,10 +7,10 @@ import { Measurement } from './Measurement';
 export class MeasurementHelper {
     static fromJson(json: any): Measurement {
         switch (json.type) {
-            case 'theodolite': return TheodoliteMeasure.fromJson(json);
-            case 'prism': return PrismMeasure.fromJson(json);
-            case 'level': return LevelMeasure.fromJson(json);
-            case 'tape': return TapeMeasure.fromJson(json);
+            case 'theodolite': return TheodoliteMeasure.fromJsonObject(json);
+            case 'prism': return PrismMeasure.fromJsonObject(json);
+            case 'level': return LevelMeasure.fromJsonObject(json);
+            case 'tape': return TapeMeasure.fromJsonObject(json);
             default: throw new Error(`Unknown measurement type: ${json.type}`);
         }
     }

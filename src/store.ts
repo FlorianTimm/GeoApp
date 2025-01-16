@@ -11,7 +11,10 @@ import VectorLayer from 'ol/layer/Vector';
 
 
 const serializeToJson = (data: StateTree): string => {
-    return JSON.stringify(data)
+    return JSON.stringify({
+        points: data.points,
+        measurements: (data.measurements as Measurement[]).map(measurement => measurement.toJsonObject())
+    });
 }
 
 const deserializeFromJson = (data: string): StateTree => {
@@ -81,6 +84,9 @@ export const useMeasureStore = defineStore('measure', {
         },
         addMeasurement(measurement: Measurement) {
             this.measurements.push(measurement);
+            console.log('added measurement', measurement);
+            console.log('measurements', this.measurements);
+            console.log('json', JSON.stringify(this.measurements));
         },
         removePoint(nr: string): boolean {
             console.log('remove point', nr);

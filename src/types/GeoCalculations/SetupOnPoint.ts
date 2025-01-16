@@ -49,5 +49,6 @@ export function setupOnPoint(tm: TheodoliteMeasure) {
         m.measure.hz_v = round(gonBetweenMinus200And200(angles_org[i] - avg), 4);
         console.log('hz_v', m.measure.hz_v);
     })
+    tm.orientation = avg;
     return avg;
 }

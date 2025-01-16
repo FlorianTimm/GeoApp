@@ -1,6 +1,7 @@
 import { Adjustment } from "@/services/Adjustment";
 import { useMeasureStore } from "@/store";
 import { v4 as uuid } from "uuid";
+import { TheodoliteMeasure, TheoJSON } from "./TheodoliteMeasure";
 
 export abstract class Measurement {
     readonly type: MeasurementType;
@@ -23,6 +24,7 @@ export abstract class Measurement {
     abstract getShortInfo(): string;
     abstract getLongInfo(): string;
     abstract getName(): string;
+    abstract toJsonObject(): { type: string, id: string };
 }
 
 export type MeasurementType = "theodolite" | "prism" | "level" | "tape";

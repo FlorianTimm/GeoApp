@@ -22,10 +22,21 @@ export class PrismMeasure extends Measurement {
         this.points.push({ point, ordinate, abscissa });
     }
 
-    static fromJson(json: any): PrismMeasure {
+    static fromJsonObject(json: any): PrismMeasure {
         const measure = new PrismMeasure(json.start, json.end, json.distance, json.id);
         measure.points = json.points;
         return measure;
+    }
+
+    toJsonObject() {
+        return {
+            type: this.type,
+            id: this.id,
+            start: this.start,
+            end: this.end,
+            distance: this.distance,
+            points: this.points,
+        }
     }
 
     getShortInfo(): string {

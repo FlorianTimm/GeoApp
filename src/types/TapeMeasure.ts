@@ -5,7 +5,7 @@ export class TapeMeasure extends Measurement {
         super('tape', id);
     }
 
-    static fromJson(json: any): TapeMeasure {
+    static fromJsonObject(json: any): TapeMeasure {
         const measure = new TapeMeasure(json.id);
         return measure;
     }
@@ -20,6 +20,17 @@ export class TapeMeasure extends Measurement {
 
     getName(): string {
         return 'Tape';
+    }
+
+    toJsonObject(): any {
+        return {
+            type: this.type,
+            id: this.id,
+        }
+    }
+
+    fromJsonObject(obj: any): void {
+
     }
 
 }

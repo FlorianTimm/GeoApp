@@ -5,7 +5,7 @@ export class LevelMeasure extends Measurement {
         super('level');
     }
 
-    static fromJson(json: any): LevelMeasure {
+    static fromJsonObject(json: any): LevelMeasure {
         const measure = new LevelMeasure();
         return measure;
     }
@@ -20,6 +20,13 @@ export class LevelMeasure extends Measurement {
 
     getName(): string {
         return 'Level';
+    }
+
+    toJsonObject(): any {
+        return {
+            type: this.type,
+            id: this.id,
+        }
     }
 
 }

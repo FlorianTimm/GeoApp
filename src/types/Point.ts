@@ -45,7 +45,7 @@ export class Point {
         }
     }
 
-    getCoordinate(epsg?: Projection | string, filterFunction?: (ce: CoordinateEntry) => boolean): CoordinateEntry | null {
+    getCoordinate(epsg?: Projection | string, filterFunction?: (ce: CoordinateEntry) => boolean): CoordinateEntry | undefined {
         if (!epsg) {
             epsg = useSettingStore().getEpsg();
         } else if (typeof epsg !== 'string') {
@@ -66,7 +66,7 @@ export class Point {
                 return { source: 'transform', epsg: epsg, x: nCoord[0], y: nCoord[1], z: altCoord.z, accuracy: altCoord.accuracy + 2 };
             }
         }
-        return null;
+        return;
     }
 
     get2DCoordinate(epsg?: Projection | string): Coordinate | null {
