@@ -1,6 +1,6 @@
 export interface CoordinateEntry {
     source: CoordinateSource;
-    sourceId?: string;
+    sourceId?: string[];
     epsg: string;
     x?: number;
     y?: number;

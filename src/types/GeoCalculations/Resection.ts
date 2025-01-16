@@ -55,7 +55,7 @@ export function resection(tm: TheodoliteMeasure) {
     yn = round(yn, 4);
 
     let accuracy = (pa.coordinate.accuracy + pb.coordinate.accuracy + pm.coordinate.accuracy) / 3;
-    tm.getPoint().addCoordinate({ x: xn, y: yn, accuracy: accuracy, source: 'resection', sourceId: tm.id, epsg: pa.coordinate.epsg });
+    tm.getPoint().addCoordinate({ x: xn, y: yn, accuracy: accuracy, source: 'resection', sourceId: [tm.id], epsg: pa.coordinate.epsg });
     console.log('location', { x: xn, y: yn });
     return { x: xn, y: yn };
 }

@@ -46,6 +46,7 @@ export function forwardSection() {
         let x: number = 0
         let y: number = 0
         let n: number = 0
+        let sources = new Set<string>()
 
         for (let i = 0; i < p.length; i++) {
             const m1 = p[i]
@@ -67,7 +68,6 @@ export function forwardSection() {
                 const hz1 = m1.measure.measure.hz + m1.setup.orientation
                 const hz2 = m2.measure.measure.hz + m2.setup.orientation
 
-                console.log('hz1', hz1, 'hz2', hz2);
 
                 let x1 = a.x
                 let y1 = a.y
@@ -78,13 +78,20 @@ export function forwardSection() {
                     continue;
                 }
 
-                let yn = y2 + ((x2 - x1) - (y2 - y1) * tan(hz2)) / (tan(hz1) - tan(hz2))
-                let xn = x1 + (yn - y1) * tan(hz1)
+                console.log('x1', x1, 'y1', y1, 'x2', x2, 'y2', y2);
+
+                console.log('hz1', hz1, 'hz2', hz2);
+
+                let yn = y1 + ((x2 - x1) - (y2 - y1) * tan(hz2)) / (tan(hz1) - tan(hz2))
+                let xn = x1 + (yn - y1) * tan
+                    (hz1)
 
                 x += xn
                 y += yn
+                console.log('xn', xn, 'yn', yn);
                 n++
-
+                sources.add(m1.setup.id)
+                sources.add(m2.setup.id)
             }
         }
 
@@ -95,8 +102,12 @@ export function forwardSection() {
 
         console.log('forward section', x, y);
 
+
+
         if (n > 0) {
-            useMeasureStore().getPoint(nr).addCoordinate({ x: x, y: y, accuracy: 0, epsg: 'EPSG:25832', source: 'intersection' });
+            let point = useMeasureStore().getPoint(nr);
+            point.removeCoordinatesByFilter((c) => c.source === 'intersection');
+            point.addCoordinate({ x: x, y: y, accuracy: 0, epsg: 'EPSG:25832', source: 'intersection', sourceId: Array.from(sources) });
         }
 
     }

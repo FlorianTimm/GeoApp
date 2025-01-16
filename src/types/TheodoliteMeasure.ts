@@ -64,9 +64,9 @@ export class TheodoliteMeasure extends Measurement {
     calculateSetup() {
 
         const location = useMeasureStore().getPoint(this.pointNumber);
-        let locationCoordinate = location.getCoordinate(undefined, c => c.sourceId !== this.id);
+        let locationCoordinate = location.getCoordinate(undefined, c => !(c.sourceId?.includes(this.id) ?? false));
 
-        location.removeCoordinatesByFilter(c => c.sourceId == this.id);
+        location.removeCoordinatesByFilter(c => c.sourceId?.includes(this.id) ?? false);
 
         // filter out measures without a coordinate or without a horizontal direction
 
@@ -86,7 +86,7 @@ export class TheodoliteMeasure extends Measurement {
         const measuresUsable = this.getMeasures();
         this.transferHeight(measuresUsable, location);
 
-        if (location.getCoordinate(undefined, (e) => e.sourceId == this.id) !== null) {
+        if (location.getCoordinate(undefined, (e) => e.sourceId?.includes(this.id) ?? false) !== null) {
             this.adjust();
         }
 
@@ -101,7 +101,7 @@ export class TheodoliteMeasure extends Measurement {
             }
             return {
                 target: target,
-                coordinate: target.getCoordinate(undefined, c => c.sourceId !== this.id),
+                coordinate: target.getCoordinate(undefined, c => !(c.sourceId?.includes(this.id) ?? false)),
                 measure: measure
             };
         }).filter(m => m !== null && m.measure.active) as { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[];
@@ -175,11 +175,11 @@ export class TheodoliteMeasure extends Measurement {
         if (heights.length > 0) {
             const avgHeight = heights.reduce((sum, height) => sum + (height ?? 0), 0) / heights.length;
 
-            let locationCoordinate = location.getCoordinate(undefined, c => c.sourceId == this.id);
+            let locationCoordinate = location.getCoordinate(undefined, c => c.sourceId?.includes(this.id) ?? false);
             if (locationCoordinate) {
                 locationCoordinate.z = avgHeight;
             } else {
-                location.addCoordinate({ epsg: epsg, z: round(avgHeight, 4), accuracy: this.accuracy, source: 'theodolite', sourceId: this.id });
+                location.addCoordinate({ epsg: epsg, z: round(avgHeight, 4), accuracy: this.accuracy, source: 'theodolite', sourceId: [this.id] });
             }
         }
     }
@@ -210,7 +210,7 @@ export class TheodoliteMeasure extends Measurement {
             // TODO: calculate height
 
             console.log('coord', coord);
-            m.target.addCoordinate({ x: coord.x, y: coord.y, accuracy: c.accuracy, source: 'theodolite', sourceId: this.id, epsg: cn.epsg });
+            m.target.addCoordinate({ x: coord.x, y: coord.y, accuracy: c.accuracy, source: 'theodolite', sourceId: [this.id], epsg: cn.epsg });
         });
         // Vorwärtsschnitt
         forwardSection()

@@ -72,6 +72,6 @@ export function free_station(tm: TheodoliteMeasure) {
         s = Math.max(...measures.map((m) => m.coordinate.accuracy));
     }
 
-    tm.getPoint().addCoordinate({ x: xn, y: yn, accuracy: s, source: 'free_station', sourceId: tm.id, epsg: epsg });
+    tm.getPoint().addCoordinate({ x: xn, y: yn, accuracy: s, source: 'free_station', sourceId: [tm.id], epsg: epsg });
     return { x: xn, y: yn, accuracy: s };
 }

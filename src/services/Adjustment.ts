@@ -141,7 +141,7 @@ export class Adjustment {
 
                 m.measures.forEach((measure, n) => {
                     if (measure.active === false) return;
-                    if (this.points[measure.nr].getCoordinate()?.sourceId == m.id) return;
+                    if (this.points[measure.nr].getCoordinate()?.sourceId?.includes(m.id)) return;
                     let subentry = { v: measure.v, hz: measure.hz, dist: measure.distance };
                     const t = this.x_points[measure.nr];
                     const tx = t.x;
@@ -472,11 +472,11 @@ export class Adjustment {
             let entry = this.points[nr]
                 .getCoordinate(epsg, (ce: CoordinateEntry) => ['adjustment', 'resection'].includes(ce.source) && ce.sourceId == sourceId && ce.epsg == epsg);
             if (entry === undefined || entry === null) {
-                entry = { source: 'adjustment', sourceId: sourceId, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
+                entry = { source: 'adjustment', sourceId: sourceId ? [sourceId] : undefined, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
                 this.points[nr].addCoordinate(entry);
             }
             entry.source = 'adjustment';
-            entry.sourceId = sourceId;
+            entry.sourceId = sourceId ? [sourceId] : undefined;
             entry.accuracy = this.Sx[this.x_filter2org.findIndex((x) => x === p.x)];
             if (entry.accuracy > 1E10) {
                 entry.accuracy = -99999;
