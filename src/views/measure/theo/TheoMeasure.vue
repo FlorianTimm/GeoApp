@@ -25,7 +25,7 @@
         <div class="ion-padding">
             <ion-button expand="block" @click="addPoint" class="ion-text-wrap ion-no-margin"
                 v-bind:disabled="!point || !hz">{{ store.getMeasureMethod() === 'theo_setup' ?
-                    'Next' : 'Save' }}</ion-button>
+                'Next' : 'Save' }}</ion-button>
         </div>
         <div class="ion-padding" v-if="store.getMeasureMethod() === 'theo_setup'">
             <ion-button expand="block" @click="ready()" class="ion-text-wrap ion-no-margin"
@@ -42,11 +42,11 @@
                 </ion-col>
                 <ion-col>
                     {{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId ==
-                        measure?.id)?.x, 3) }}
+                    measure?.id)?.x, 3) }}
                 </ion-col>
                 <ion-col>
                     &pm;{{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) =>
-                        v.sourceId == measure?.id)?.x_s, 3) }}
+                    v.sourceId == measure?.id)?.x_s, 3) }}
                 </ion-col>
             </ion-row>
             <ion-row
@@ -56,11 +56,11 @@
                 </ion-col>
                 <ion-col>
                     {{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId ==
-                        measure?.id)?.y, 3) }}
+                    measure?.id)?.y, 3) }}
                 </ion-col>
                 <ion-col>
                     &pm;{{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) =>
-                        v.sourceId == measure?.id)?.y_s, 3) }}
+                    v.sourceId == measure?.id)?.y_s, 3) }}
                 </ion-col>
             </ion-row>
             <ion-row
@@ -70,11 +70,11 @@
                 </ion-col>
                 <ion-col>
                     {{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) => v.sourceId ==
-                        measure?.id)?.z, 3) }}
+                    measure?.id)?.z, 3) }}
                 </ion-col>
                 <ion-col>
                     &pm;{{ format(measureStore.getPoint(measure.pointNumber)?.getCoordinate(undefined, (v) =>
-                        v.sourceId == measure?.id)?.z_s, 3) }}
+                    v.sourceId == measure?.id)?.z_s, 3) }}
                 </ion-col>
             </ion-row>
             <ion-row v-if="measure.orientation">
@@ -99,7 +99,10 @@
             </ion-row>
             <ion-row v-for="item, i in measure.measures" :key="item.nr">
                 <ion-col>
-                    <ion-toggle @ionChange="coordToggled" v-model="item.active">Point {{ item.nr }}</ion-toggle>
+                    <ion-toggle @ionChange="coordToggled" v-model="item.usedForSetup"
+                        v-if="store.getMeasureMethod() === 'theo_setup'">Point {{ item.nr }}</ion-toggle>
+                    <ion-toggle @ionChange="coordToggled" v-model="item.active"
+                        v-if="store.getMeasureMethod() !== 'theo_setup'">Point {{ item.nr }}</ion-toggle>
                 </ion-col>
                 <ion-col>
 
@@ -111,13 +114,13 @@
                 <ion-col v-if="measure.orientation && settingStore.errorInCm">
                     <ion-row v-if="item.hz !== undefined">
                         {{ measure.getHzErrorInCm(i) !== undefined ? formatWithSign(measure.getHzErrorInCm(i), 1) +
-                            '&nbsp;cm'
-                            : '-' }}
+                        '&nbsp;cm'
+                        : '-' }}
                     </ion-row>
                     <ion-row v-if="item.v !== undefined">
                         {{ measure.getVErrorInCm(i) !== undefined ? formatWithSign(measure.getHzErrorInCm(i), 1) +
-                            '&nbsp;cm'
-                            : '-' }}
+                        '&nbsp;cm'
+                        : '-' }}
                     </ion-row>
                     <ion-row v-if="item.distance !== undefined">
                         {{ item.distance_v !== undefined ? formatWithSign(item.distance_v * 100, 1) + '&nbsp;cm' : '-'

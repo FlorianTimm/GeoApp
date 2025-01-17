@@ -107,7 +107,7 @@ export class TheodoliteMeasure extends Measurement {
     }
 
     getMeasuresForSetup(): TheoMeasureForSetup[] {
-        return this.getMeasures().filter(m => m.coordinate !== undefined && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
+        return this.getMeasures().filter(m => m.coordinate !== undefined && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined && m.measure.usedForSetup) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
 
     }
 
