@@ -51,7 +51,7 @@ const deserializeFromJson = (data: string): StateTree => {
         n.points[p.nr] = point;
     }
     for (let m of json.measurements) {
-        let measure: Measurement | null = MeasurementHelper.fromJson(m);
+        let measure: Measurement | undefined = MeasurementHelper.fromJson(m);
         if (measure) {
             n.measurements.push(measure);
         }
@@ -158,10 +158,10 @@ export type OrderByPointType = 'no_order' | 'nr' | 'distance' | 'direction' | 'a
 
 export const useStore = defineStore('store', {
     state: () => ({
-        activeMeasurement: null as Measurement | null,
+        activeMeasurement: undefined as Measurement | undefined,
         measureMethod: '' as MeasureMethodType,
-        position: null as Coordinate | null,
-        accuracy: null as number | null,
+        position: undefined as Coordinate | undefined,
+        accuracy: undefined as number | undefined,
         sideMap: false as boolean,
         alkis: undefined as { source: VectorSource[], layer: VectorLayer[] } | undefined,
         view: undefined as View | undefined,
@@ -174,16 +174,16 @@ export const useStore = defineStore('store', {
         getAccuracy: (state) => () => state.accuracy
     },
     actions: {
-        setActiveMeasurement(measurement: Measurement | null = null) {
+        setActiveMeasurement(measurement: Measurement | undefined = undefined) {
             this.activeMeasurement = measurement;
         },
         setMeasureMethod(method: MeasureMethodType) {
             this.measureMethod = method;
         },
-        setPosition(position: Coordinate | null) {
+        setPosition(position: Coordinate | undefined) {
             this.position = position;
         },
-        setAccuracy(accuracy: number | null) {
+        setAccuracy(accuracy: number | undefined) {
             this.accuracy = accuracy;
         }
     },

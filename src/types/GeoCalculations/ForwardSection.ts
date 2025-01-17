@@ -12,9 +12,9 @@ export function forwardSection() {
         .map((tm) => tm as TheodoliteMeasure)
         .filter((tm) => tm.orientation !== undefined)
         .map((tm) => ({ tm: tm, measures: tm.getMeasures() }))
-        .filter((m) => m.measures !== null && m.measures !== undefined && m.measures.length > 0);
+        .filter((m) => m.measures !== undefined && m.measures.length > 0);
     if (measures.length < 2) {
-        return null;
+        return;
     }
     let points: {
         [nr: string]: {
@@ -22,7 +22,6 @@ export function forwardSection() {
             measure: TheoMeasureEntryWithPoint,
         }[]
     } = {};
-    console.log('measures', measures);
 
     measures.forEach((m, i) => {
         m.measures.forEach((me, j) => {
@@ -35,7 +34,6 @@ export function forwardSection() {
             });
         });
     });
-    console.log('points', points);
 
     for (const nr in points) {
         const p = points[nr]
@@ -54,11 +52,10 @@ export function forwardSection() {
             if (a === undefined) {
                 continue;
             }
-            console.log('a', a);
             for (let j = i + 1; j < p.length; j++) {
                 const m2 = p[j]
                 let b = m2.setup.getPoint().getCoordinate()
-                if (b === undefined) {
+                if (b === undefined || m1.setup.pointNumber == m2.setup.pointNumber) {
                     continue;
                 }
 
@@ -78,17 +75,12 @@ export function forwardSection() {
                     continue;
                 }
 
-                console.log('x1', x1, 'y1', y1, 'x2', x2, 'y2', y2);
-
-                console.log('hz1', hz1, 'hz2', hz2);
-
                 let yn = y1 + ((x2 - x1) - (y2 - y1) * tan(hz2)) / (tan(hz1) - tan(hz2))
                 let xn = x1 + (yn - y1) * tan
                     (hz1)
 
                 x += xn
                 y += yn
-                console.log('xn', xn, 'yn', yn);
                 n++
                 sources.add(m1.setup.id)
                 sources.add(m2.setup.id)
@@ -98,16 +90,12 @@ export function forwardSection() {
         if (n > 0) {
             x /= n
             y /= n
-        }
 
-        console.log('forward section', x, y);
-
-
-
-        if (n > 0) {
             let point = useMeasureStore().getPoint(nr);
             point.removeCoordinatesByFilter((c) => c.source === 'intersection');
             point.addCoordinate({ x: x, y: y, accuracy: 0, epsg: 'EPSG:25832', source: 'intersection', sourceId: Array.from(sources) });
+
+
         }
 
     }

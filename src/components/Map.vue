@@ -106,7 +106,7 @@ onMounted(() => {
         if (geom) {
             accuracyFeature.setGeometry(geom);
         }
-        store.setAccuracy(geolocation.getAccuracy() ?? null);
+        store.setAccuracy(geolocation.getAccuracy() ?? undefined);
     });
 
     const positionFeature = new Feature();

@@ -6,7 +6,7 @@
         </ion-item>
         <ion-item>
             <ion-input label-placement='stacked' label='Target Height' v-model="target_height"
-                :readonly="point?.getHeight() == null"></ion-input>
+                :readonly="point?.getHeight() === undefined"></ion-input>
         </ion-item>
         <ion-item>
             <ion-input label-placement='stacked' label='Distance' v-model="value.distance" readonly></ion-input>

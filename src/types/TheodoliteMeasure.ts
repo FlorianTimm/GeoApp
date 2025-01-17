@@ -2,7 +2,7 @@ import { useMeasureStore } from "@/store";
 import { Measurement, MeasurementType } from "./Measurement";
 import { Point } from "./Point";
 import { CoordinateEntry, CoordinateEntry2D } from "./CoordinateEntry";
-import { cot, round, gonBetween0And400, azimuth2xy, vertical2height, sin } from "@/utils";
+import { cot, round, gonBetween0And400, azimuth2xy, vertical2height, sin, distance } from "@/utils";
 import { free_station } from "./GeoCalculations/FreeStation";
 import { resection } from "./GeoCalculations/Resection";
 import { setupOnPoint } from "./GeoCalculations/SetupOnPoint";
@@ -86,7 +86,7 @@ export class TheodoliteMeasure extends Measurement {
         const measuresUsable = this.getMeasures();
         this.transferHeight(measuresUsable, location);
 
-        if (location.getCoordinate(undefined, (e) => e.sourceId?.includes(this.id) ?? false) !== null) {
+        if (location.getCoordinate(undefined, (e) => e.sourceId?.includes(this.id) ?? false) !== undefined) {
             this.adjust();
         }
 
@@ -97,19 +97,19 @@ export class TheodoliteMeasure extends Measurement {
         return this.measures.map(measure => {
             const target = useMeasureStore().getPoint(measure.nr);
             if (!target) {
-                return null;
+                return;
             }
             return {
                 target: target,
                 coordinate: target.getCoordinate(undefined, c => !(c.sourceId?.includes(this.id) ?? false)),
                 measure: measure
             };
-        }).filter(m => m !== null && m.measure.active) as { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[];
+        }).filter(m => m !== undefined && m.measure.active) as { target: Point, coordinate?: CoordinateEntry, measure: TheodoliteMeasureEntry }[];
 
     }
 
     getMeasuresForSetup(): TheoMeasureForSetup[] {
-        return this.getMeasures().filter(m => m.coordinate !== undefined && m.coordinate !== null && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
+        return this.getMeasures().filter(m => m.coordinate !== undefined && m.coordinate.x !== undefined && m.coordinate.y !== undefined && m.measure.hz !== undefined) as { target: Point, coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[];
 
     }
 
@@ -144,8 +144,8 @@ export class TheodoliteMeasure extends Measurement {
         let heights = measuresUsable.map(m => {
             const z = m.target.getCoordinateComponents('z');
             let dist = m.measure.distance ?? stakeOut(this, m.target).distance;
-            if (z === null || m.measure.v === undefined || dist === undefined) {
-                return null;
+            if (z === undefined || m.measure.v === undefined || dist === undefined) {
+                return;
             }
             if (epsg === undefined) {
                 epsg = m.target.getCoordinate()?.epsg;
@@ -166,7 +166,7 @@ export class TheodoliteMeasure extends Measurement {
     
             ziel + th - diff - ih = theo
             */
-        }).filter(m => m !== null);
+        }).filter(m => m !== undefined);
 
         if (epsg === undefined) {
             return;
@@ -191,15 +191,15 @@ export class TheodoliteMeasure extends Measurement {
             return;
         }
         let c = useMeasureStore().getPoint(this.pointNumber).getCoordinate()
-        if (c === undefined || c === null || c.x === undefined || c.y === undefined) {
+        if (c === undefined || c.x === undefined || c.y === undefined) {
             return;
         }
 
         // TODO: calculate new points
 
         // polares Anhängen
-        measures.filter(m => m.measure.distance !== undefined && m.measure.hz !== undefined && (m.coordinate === undefined || m.coordinate === null)).forEach(m => {
-            if (this.orientation === undefined || m.measure.distance === undefined || m.measure.hz === undefined || c === null || c.x === undefined || c.y === undefined) {
+        measures.filter(m => m.measure.distance !== undefined && m.measure.hz !== undefined && (m.coordinate === undefined || m.coordinate === undefined)).forEach(m => {
+            if (this.orientation === undefined || m.measure.distance === undefined || m.measure.hz === undefined || c === undefined || c.x === undefined || c.y === undefined) {
                 return;
             }
             console.log('polares Anhängen');
@@ -214,6 +214,49 @@ export class TheodoliteMeasure extends Measurement {
         });
         // Vorwärtsschnitt
         forwardSection()
+        // Heights for new points
+        this.heightsForNewPoints();
+    }
+
+    heightsForNewPoints() {
+        // calculate heights for new points
+        let measures = useMeasureStore().getMeasurements().filter(m => m instanceof TheodoliteMeasure && m.instrumentHeight !== undefined && m.getPoint().getHeight() !== undefined)
+            .map(m => m as TheodoliteMeasure)
+
+        measures.forEach(m => {
+            let p1 = m.getPoint()
+            let c1 = p1.get2DCoordinate()
+
+            m.getMeasures().filter(me => me.measure.v !== undefined).forEach(me => {
+                let hdiff = 0
+
+                if (me.target.getHeight() !== undefined) {
+                    return;
+                }
+
+                if (me.measure.v != 100 && me.measure.v != 300) {
+                    let dist = me.measure.distance
+                    if (dist === undefined) {
+                        let c2 = me.target.get2DCoordinate()
+                        if (c1 === undefined || c1 === undefined || c2 === undefined || c2 === undefined) {
+                            return;
+                        }
+                        dist = distance({ x: c1[0], y: c1[1] }, { x: c2[0], y: c2[1] })
+                    }
+                    if (dist === undefined || me.measure.v === undefined) {
+                        return;
+                    }
+                    hdiff = vertical2height(me.measure.v, dist)
+
+                } else {
+                    hdiff = 0
+                }
+                me.target.removeCoordinatesByFilter(c => (c.sourceId?.includes(m.id) ?? false) && c.x === undefined && c.y === undefined);
+                me.target.addCoordinate({ z: (m.getPoint().getHeight() ?? 0) + (m.instrumentHeight ?? 0) + hdiff - (me.measure.targetHeight ?? 0), accuracy: m.accuracy, source: 'theodolite', sourceId: [m.id], epsg: m.getPoint().getCoordinate()?.epsg ?? '' });
+            })
+        })
+
+
     }
 
 

@@ -69,32 +69,32 @@ export class Point {
         return;
     }
 
-    get2DCoordinate(epsg?: Projection | string): Coordinate | null {
+    get2DCoordinate(epsg?: Projection | string): Coordinate | undefined {
         const coord = this.getCoordinate(epsg, c => c.x !== undefined && c.y !== undefined);
         if (!coord || !coord.x || !coord.y) {
-            return null;
+            return;
         }
         return [coord.x, coord.y];
     }
 
-    get1DCoordinate(epsg?: Projection | string): Coordinate | null {
+    get1DCoordinate(epsg?: Projection | string): Coordinate | undefined {
         const coord = this.getCoordinate(epsg, c => c.z !== undefined);
         if (!coord || !coord.z) {
-            return null;
+            return;
         }
         return [coord.z];
     }
 
-    get3DCoordinate(epsg?: Projection | string): Coordinate | null {
+    get3DCoordinate(epsg?: Projection | string): Coordinate | undefined {
         const coord = this.getCoordinate(epsg, c => c.x !== undefined && c.y !== undefined && c.z !== undefined);
         if (!coord || !coord.x || !coord.y || !coord.z) {
-            return null;
+            return;
         }
         return [coord.x, coord.y, coord.z];
     }
 
-    getCoordinateComponents(c: 'x' | 'y' | 'z', epsg?: Projection | string): number | null {
-        let coord: Coordinate | null;
+    getCoordinateComponents(c: 'x' | 'y' | 'z', epsg?: Projection | string): number | undefined {
+        let coord: Coordinate | undefined;
         let n = 0;
 
         if (c === 'x') {
@@ -107,28 +107,28 @@ export class Point {
         }
 
         if (!coord || !coord[n]) {
-            return null;
+            return;
         }
         return coord[n];
     }
 
 
-    getLatLon(): Coordinate | null {
+    getLatLon(): Coordinate | undefined {
         return this.get2DCoordinate('EPSG:3857');
     }
 
-    getHeight(): number | null {
+    getHeight(): number | undefined {
         return this.getCoordinateComponents('z');
     }
 
-    getLat(): number | null {
+    getLat(): number | undefined {
         const coord = this.getLatLon();
-        return coord ? coord[1] : null;
+        return coord ? coord[1] : undefined;
     }
 
-    getLon(): number | null {
+    getLon(): number | undefined {
         const coord = this.getLatLon();
-        return coord ? coord[0] : null;
+        return coord ? coord[0] : undefined;
     }
 }
 

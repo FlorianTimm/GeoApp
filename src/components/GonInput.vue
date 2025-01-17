@@ -10,7 +10,7 @@ import { watch } from 'vue';
 const model = defineModel<string | number>();
 /*
 watch(model, (value) => {
-    if (value === undefined || value === null || value === '') {
+    if (value === undefined  || value === '') {
         return
     }
     if (typeof value === 'string') {

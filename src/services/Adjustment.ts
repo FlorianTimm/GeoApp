@@ -347,6 +347,10 @@ export class Adjustment {
         for (let i = 0; i < 15; i++) {
             try {
                 this.createA_l0_dl_l();
+                if (this.dl.length === 0) {
+                    console.log('keine Messungen');
+                    return false;
+                }
                 this.P = inv(diag(this.p.map((x) => x * x))) as unknown as number[][];
                 //console.log("A: ", this.A);
                 if (this.l0.length < this.x0_filtered.length) {
@@ -471,7 +475,7 @@ export class Adjustment {
 
             let entry = this.points[nr]
                 .getCoordinate(epsg, (ce: CoordinateEntry) => ['adjustment', 'resection'].includes(ce.source) && ce.sourceId == sourceId && ce.epsg == epsg);
-            if (entry === undefined || entry === null) {
+            if (entry === undefined) {
                 entry = { source: 'adjustment', sourceId: sourceId ? [sourceId] : undefined, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
                 this.points[nr].addCoordinate(entry);
             }

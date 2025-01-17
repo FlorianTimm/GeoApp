@@ -8,14 +8,14 @@ export function free_station(tm: TheodoliteMeasure) {
     const measures = tm.getMeasuresForSetup();
     const localCoordinates = measures.map(m => {
         if (m.measure.distance === undefined || m.measure.hz === undefined) {
-            return null;
+            return;
         }
 
         return {
             local: azimuth2xy({ x: 0, y: 0 }, m.measure.distance, m.measure.hz),
             world: m.coordinate
         }
-    }).filter(m => m !== null)
+    }).filter(m => m !== undefined)
 
     if (localCoordinates.length < 2) {
         return;

@@ -5,7 +5,7 @@ import { TheodoliteMeasure } from "../TheodoliteMeasure";
 export function resection(tm: TheodoliteMeasure) {
     const measures = tm.getMeasuresForSetup();
     if (measures.length < 3) {
-        return null;
+        return;
     }
     console.log('resection');
 
@@ -26,7 +26,7 @@ export function resection(tm: TheodoliteMeasure) {
     const ym = pm.coordinate.y;
 
     if (pm.measure.hz === undefined || pa.measure.hz === undefined || pb.measure.hz === undefined) {
-        return null;
+        return;
     }
     const alpha = gonBetween0And400(pm.measure.hz - pa.measure.hz);
     const beta = gonBetween0And400(pb.measure.hz - pm.measure.hz);
@@ -39,8 +39,8 @@ export function resection(tm: TheodoliteMeasure) {
 
     const tcd = azimuth({ x: xc, y: yc }, { x: xd, y: yd });
 
-    if (tcd === null) {
-        return null;
+    if (tcd === undefined) {
+        return;
     }
 
     let yn = yc + ((xm - xc + (ym - yc) * cot(tcd)) / (tan(tcd) + cot(tcd)));

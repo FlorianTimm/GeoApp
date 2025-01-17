@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { azimuth, radToGon, gonBetween0And400, round, zenithDistance, cot } from "../../src/utils";
+import { azimuth, radToGon, gonBetween0And400, round, zenithDistance, cot, vertical2height } from "../../src/utils";
 
 
 describe('utils.ts', () => {
@@ -36,8 +36,14 @@ describe('utils.ts', () => {
       expect(zenithDistance(10, -10)).toBe(150)
       expect(zenithDistance(30, -40)).toBeCloseTo(159, 0)
     }),
+    test('vertical2height', () => {
+      expect(vertical2height(50, 10)).toBeCloseTo(10, 5)
+      expect(vertical2height(50, 0)).toBeCloseTo(0, 5)
+      expect(vertical2height(350, 10)).toBeCloseTo(10, 5)
+      expect(vertical2height(150, 10)).toBeCloseTo(-10, 5)
+    }),
     test('cot', () => {
-      expect(cot(100)).toBe(0)
+      expect(cot(100)).toBeCloseTo(0, 5)
       expect(cot(0)).toBeGreaterThan(1E9)
       expect(cot(120)).toBeCloseTo(-0.3, 1)
       expect(cot(80)).toBeCloseTo(0.3, 1)

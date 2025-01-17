@@ -3,6 +3,10 @@ import { TheodoliteMeasure, TheodoliteMeasureEntry } from "../../src/types/Theod
 import { Point } from '../../src/types/Point';
 import { setActivePinia, createPinia } from 'pinia'
 import { CoordinateEntry2D, CoordinateSource } from '../../src/types/CoordinateEntry';
+import { resection } from '../../src/types/GeoCalculations/Resection';
+import { setupOnPoint } from '../../src/types/GeoCalculations/SetupOnPoint';
+import { free_station } from '../../src/types/GeoCalculations/FreeStation';
+import { useMeasureStore } from '../../src/store';
 
 describe('TheodoliteMeasure.ts', () => {
   beforeEach(() => {
@@ -11,13 +15,19 @@ describe('TheodoliteMeasure.ts', () => {
     test('resection_fake', () => {
       let tm = new TheodoliteMeasure('test');
       let location = new Point('test');
-      let measures = [
+      useMeasureStore().addPoint(location);
+      [
         { coordinate: { epsg: 'EPSG:25832', x: 2, y: 0, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '2', lage: 1, hz: 100 } as TheodoliteMeasureEntry },
         { coordinate: { epsg: 'EPSG:25832', x: 0, y: 2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '1', lage: 1, hz: 0 } as TheodoliteMeasureEntry },
         { coordinate: { epsg: 'EPSG:25832', x: 0, y: -2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '3', lage: 1, hz: 200 } as TheodoliteMeasureEntry },
-      ]
-      const r = tm.resection(location, measures)
-      expect(r).not.toBeNull()
+      ].forEach(m => {
+        let p = new Point(m.measure.nr)
+        p.addCoordinate(m.coordinate)
+        useMeasureStore().addPoint(p)
+        tm.addMeasure(m.measure)
+      });
+      const r = resection(tm)
+      expect(r).not.toBeUndefined()
       expect(r.x).toBe(0)
       expect(r.y).toBe(0)
     }),
@@ -69,8 +79,8 @@ describe('TheodoliteMeasure.ts', () => {
           }
         }
       ] as { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
-      const r = tm.resection(location, measures)
-      expect(r).not.toBeNull()
+      const r = resection(tm)
+      expect(r).not.toBeUndefined()
       expect(r.x).toBeCloseTo(527632.555, 2)
       expect(r.y).toBeCloseTo(6005544.248, 2)
     }),
@@ -83,8 +93,8 @@ describe('TheodoliteMeasure.ts', () => {
         { coordinate: { epsg: 'EPSG:25832', x: 0, y: 2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '1', lage: 1, hz: 0 } as TheodoliteMeasureEntry },
         { coordinate: { epsg: 'EPSG:25832', x: 0, y: -2, accuracy: 0.1, source: 'manual' as CoordinateSource }, measure: { nr: '3', lage: 1, hz: 200 } as TheodoliteMeasureEntry },
       ]
-      const r = tm.setupOnPoint(location, measures)
-      expect(r).not.toBeNull()
+      const r = setupOnPoint(tm)
+      expect(r).not.toBeUndefined()
       expect(r).toBe(0)
     })
   test('setupOnPoint_real', () => {
@@ -136,8 +146,8 @@ describe('TheodoliteMeasure.ts', () => {
         }
       }
     ] as { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
-    const r = tm.setupOnPoint(location, measures)
-    expect(r).not.toBeNull()
+    const r = setupOnPoint(tm)
+    expect(r).not.toBeUndefined()
     expect(r).toBeCloseTo(125.1587, 3)
   }),
     test('free_station_niemeier', () => {
@@ -177,9 +187,9 @@ describe('TheodoliteMeasure.ts', () => {
         }
 
       ] as { coordinate: CoordinateEntry2D, measure: TheodoliteMeasureEntry }[]
-      const r = tm.free_station(location, measures)
+      const r = free_station(tm)
       console.log(r)
-      expect(r).not.toBeNull()
+      expect(r).not.toBeUndefined()
       expect(r.x).toBeCloseTo(40759.4, 1)
       expect(r.y).toBeCloseTo(27816.1, 1)
       expect(r.accuracy).toBeCloseTo(0.05, 1)

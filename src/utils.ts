@@ -86,8 +86,8 @@ export const azimuth2xy = (location: xy, distance: number, azimuth: number) => {
     return { x: location.x + distance * sin(azimuth), y: location.y + distance * cos(azimuth) };
 }
 
-export const format = (value: number | null | undefined, decimals: number = 3): string => {
-    if (value === null || value === undefined) {
+export const format = (value: number | undefined, decimals: number = 3): string => {
+    if (value === undefined) {
         return '';
     }
     if (typeof value === 'string') {
@@ -96,8 +96,8 @@ export const format = (value: number | null | undefined, decimals: number = 3): 
     return value.toFixed(decimals);
 }
 
-export const formatWithSign = (value: number | null | undefined, decimals: number = 3): string => {
-    if (value === null || value === undefined) {
+export const formatWithSign = (value: number | undefined, decimals: number = 3): string => {
+    if (value === undefined) {
         return '';
     }
     if (typeof value === 'string') {
@@ -115,6 +115,9 @@ export const formatWithSign = (value: number | null | undefined, decimals: numbe
 }
 
 export const vertical2height = (v: number, dist: number): number => {
+    if (v > 200) {
+        v = 400 - v;
+    }
     return cot(v) * dist
 }
 

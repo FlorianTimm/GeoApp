@@ -7,21 +7,21 @@ import { TheodoliteMeasure } from "../TheodoliteMeasure";
 export function setupOnPoint(tm: TheodoliteMeasure) {
     const measures = tm.getMeasuresForSetup();
     const locationCoordinate = tm.getPoint().getCoordinate();
-    if (locationCoordinate === undefined || locationCoordinate === null || locationCoordinate.x === undefined || locationCoordinate.y === undefined) {
-        return null;
+    if (locationCoordinate === undefined || locationCoordinate.x === undefined || locationCoordinate.y === undefined) {
+        return undefined;
     }
 
     console.log('setup on point');
     const locationCoordinateXY = locationCoordinate as CoordinateEntry2D;
     const angles_org = measures.map(m => {
         let angle = azimuth(locationCoordinateXY, m.coordinate);
-        if (angle === null || m.measure.hz === undefined) {
-            return null;
+        if (angle === undefined || m.measure.hz === undefined) {
+            return undefined;
         }
         angle -= m.measure.hz;
         return gonBetween0And400(angle);
     })
-    let angles = angles_org.filter(a => a !== null) as number[];
+    let angles = angles_org.filter(a => a !== undefined) as number[];
 
     console.log('angles', angles);
 
@@ -43,7 +43,7 @@ export function setupOnPoint(tm: TheodoliteMeasure) {
     console.log('avg', avg);
 
     measures.forEach((m, i) => {
-        if (angles_org[i] === null) {
+        if (angles_org[i] === undefined) {
             return;
         }
         m.measure.hz_v = round(gonBetweenMinus200And200(angles_org[i] - avg), 4);
