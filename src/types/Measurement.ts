@@ -14,12 +14,14 @@ export abstract class Measurement {
         this.type = type;
     }
 
-    adjust() {
+    adjust(theoSetupMode: boolean = false) {
         console.log("Adjusting measurement " + this.id);
         let adj = new Adjustment([this], useMeasureStore().points)
-        adj.adjust();
+        adj.adjust(theoSetupMode);
         adj.writeResults();
     }
+
+
 
     abstract getShortInfo(): string;
     abstract getLongInfo(): string;

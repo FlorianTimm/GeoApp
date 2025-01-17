@@ -101,7 +101,7 @@
                 <ion-col>
                     <ion-toggle @ionChange="coordToggled" v-model="item.usedForSetup"
                         v-if="store.getMeasureMethod() === 'theo_setup'">Point {{ item.nr }}</ion-toggle>
-                    <ion-toggle @ionChange="coordToggled" v-model="item.active"
+                    <ion-toggle @ionChange="coordToggled" v-model="item.active" :disabled="item.usedForSetup"
                         v-if="store.getMeasureMethod() !== 'theo_setup'">Point {{ item.nr }}</ion-toggle>
                 </ion-col>
                 <ion-col>
@@ -211,7 +211,7 @@ const addPoint = () => {
     }
     measure.value.addMeasure({
         nr: point.value.nr,
-        active: true,
+        active: store.getMeasureMethod() !== 'theo_setup', 
         usedForSetup: store.getMeasureMethod() === 'theo_setup',
         lage: 1,
         hz: typeof hz.value === 'string' ? parseFloat(hz.value) : v.value,

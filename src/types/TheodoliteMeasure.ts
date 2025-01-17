@@ -85,7 +85,7 @@ export class TheodoliteMeasure extends Measurement {
         this.transferHeight(measuresUsable, location);
 
         if (location.getCoordinate(undefined, (e) => e.sourceId?.includes(this.id) ?? false) !== undefined) {
-            this.adjust();
+            this.adjust(true);
         }
 
         this.calculate();

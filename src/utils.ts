@@ -87,7 +87,7 @@ export const azimuth2xy = (location: xy, distance: number, azimuth: number) => {
 }
 
 export const format = (value: number | undefined, decimals: number = 3): string => {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return '';
     }
     if (typeof value === 'string') {

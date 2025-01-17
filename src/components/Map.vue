@@ -223,10 +223,17 @@ function storePoints2LayerSource() {
                     }
                     const f = new Feature(new LineString([s, e]));
 
-                    if (entry.active) {
+                    if (entry.usedForSetup) {
                         f.setStyle(new Style({
                             stroke: new Stroke({
                                 color: '#00f',
+                                width: 2,
+                            }),
+                        }));
+                    } else if (entry.active) {
+                        f.setStyle(new Style({
+                            stroke: new Stroke({
+                                color: '#00e',
                                 width: 1,
                             }),
                         }));

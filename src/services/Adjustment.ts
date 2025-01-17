@@ -7,6 +7,7 @@ import { azimuth, gonBetween0And400, gonBetweenMinus200And200, gonToRad, zenithD
 import { inv, transpose, multiply, subtract, diag, add, norm, size, sqrt, divide } from 'mathjs';
 
 export class Adjustment {
+    private theoSetupMode = false;
     private measurements: Measurement[];
     private points: { [nr: string]: Point }
 
@@ -51,7 +52,8 @@ export class Adjustment {
         this.points = points;
     }
 
-    public adjust(nurNeupunkte = true) {
+    public adjust(theoSetupMode = false) {
+        this.theoSetupMode = theoSetupMode;
         this.createX0Vector();
         return this.calculate();
     }
@@ -140,7 +142,7 @@ export class Adjustment {
                 }
 
                 m.measures.forEach((measure, n) => {
-                    if (measure.active === false) return;
+                    if ((this.theoSetupMode && measure.usedForSetup === false) || (measure.active === false)) return;
                     if (this.points[measure.nr].getCoordinate()?.sourceId?.includes(m.id)) return;
                     let subentry = { v: measure.v, hz: measure.hz, dist: measure.distance };
                     const t = this.x_points[measure.nr];
