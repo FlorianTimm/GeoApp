@@ -4,7 +4,8 @@
         <ion-icon :icon="add"></ion-icon>
     </ion-button>
     <PointDialog v-if="newPoint" ref="newPointDialog" trigger="new_point" @confirm="addPointClose" />
-    <PointSelectDialog trigger='select_point' v-model="model" :newPoint @new="newPointOpen" />
+    <PointSelectDialog trigger='select_point' v-model="model" :filterPoints :newPoint :points-without-coordinates
+        @new="newPointOpen" />
 </template>
 
 <script setup lang="ts">
@@ -27,6 +28,14 @@ const newPointDialog = ref<InstanceType<typeof PointDialog>>();
 
 defineProps({
     newPoint: Boolean,
+    filterPoints: {
+        type: Array<string>,
+        default: []
+    },
+    pointsWithoutCoordinates: {
+        type: Boolean,
+        default: true
+    },
     placeholder: {
         type: String,
         default: 'select point'

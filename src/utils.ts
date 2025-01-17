@@ -114,11 +114,16 @@ export const formatWithSign = (value: number | undefined, decimals: number = 3):
 
 }
 
-export const vertical2height = (v: number, dist: number): number => {
+export const vertical2height = (v: number, dist: number, h: number = 0): number => {
     if (v > 200) {
         v = 400 - v;
     }
-    return cot(v) * dist
+
+    let hd = cot(v) * dist
+    if (dist > 250) {
+        hd = (1 + h / 6380000) * hd + dist * dist / (6380000 + h + dist * cos(v) * (0.87));
+    }
+    return hd
 }
 
 type xy = { x: number, y: number } | CoordinateEntry2D;

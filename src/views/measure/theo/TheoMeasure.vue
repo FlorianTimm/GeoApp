@@ -5,26 +5,27 @@
                 <ion-label>Point {{ measure.measures.length + 1 }}</ion-label>
             </ion-item>
             <ion-item>
-                <PointNumberSelect v-model="point" :newPoint="store.getMeasureMethod() !== 'theo_setup'" />
+                <PointNumberSelect v-model="point" :filterPoints :points-without-coordinates
+                    :newPoint="store.getMeasureMethod() !== 'theo_setup'" />
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Horizontal direction</ion-label>
-                <GonInput v-model="hz" :placeholder="format(placeholder.hz)" />
+                <GonInput v-model="hz" :placeholder="format(placeholder.hz, 4)" />
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Vertical angle</ion-label>
-                <GonInput v-model="v" :placeholder="format(placeholder.v)" />
+                <GonInput v-model="v" :placeholder="format(placeholder.v, 4)" />
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Distance</ion-label>
-                <IonInput v-model="s" type="number" :placeholder="format(placeholder.distance)" />
+                <IonInput v-model="s" type="number" :placeholder="format(placeholder.distance, 3)" />
             </ion-item>
         </ion-list>
 
         <div class="ion-padding">
             <ion-button expand="block" @click="addPoint" class="ion-text-wrap ion-no-margin"
                 v-bind:disabled="!point || !hz">{{ store.getMeasureMethod() === 'theo_setup' ?
-    'Next' : 'Save' }}</ion-button>
+                    'Next' : 'Save' }}</ion-button>
         </div>
         <div class="ion-padding" v-if="store.getMeasureMethod() === 'theo_setup'">
             <ion-button expand="block" @click="ready()" class="ion-text-wrap ion-no-margin"
@@ -171,7 +172,8 @@ const s = ref<number>();
 const point = ref<Point>();
 const placeholder = ref<{ v?: number, hz?: number, distance?: number }>({});
 const coord = ref<{}>({});
-
+const filterPoints = ref<string[]>([]);
+const pointsWithoutCoordinates = ref<boolean>(true);
 
 addIcons({
     'trash': trash
@@ -186,6 +188,9 @@ const actMeasure = store.getActiveMeasurement()
 if (actMeasure && actMeasure.type === 'theodolite') {
     measure.value = actMeasure as TheodoliteMeasure;
     console.log(measure.value);
+    //filterPoints.value = measure.value.measures.map(m => m.nr);
+    filterPoints.value = [measure.value.pointNumber]
+    pointsWithoutCoordinates.value = store.getMeasureMethod() !== 'theo_setup';
 }
 
 
@@ -204,6 +209,7 @@ const addPoint = () => {
     measure.value.addMeasure({
         nr: point.value.nr,
         active: true,
+        usedForSetup: store.getMeasureMethod() === 'theo_setup',
         lage: 1,
         hz: typeof hz.value === 'string' ? parseFloat(hz.value) : v.value,
         v: typeof v.value === 'string' ? parseFloat(v.value) : v.value,
@@ -217,14 +223,20 @@ const addPoint = () => {
     placeholder.value = {};
 
     if (store.getMeasureMethod() === 'theo_setup') {
-        // adjust
-
+        measure.value?.calculateSetup()
+    } else {
+        measure.value?.calculate()
     }
 }
 
 
 const coordToggled = (e: CustomEvent) => {
-    measure.value?.calculateSetup()
+    if (store.getMeasureMethod() === 'theo_setup') {
+        measure.value?.calculateSetup()
+    } else {
+        measure.value?.calculate()
+    }
+
 }
 
 const removePoint = (i: number) => {

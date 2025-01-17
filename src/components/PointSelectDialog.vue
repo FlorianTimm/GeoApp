@@ -67,12 +67,20 @@ let test = computed(() => orderBy(points.value));
 
 const emit = defineEmits(['confirm', 'cancel', 'new']);
 
-defineProps({
+const props = defineProps({
     trigger: {
         type: String,
         default: false,
     },
-    newPoint: Boolean
+    newPoint: Boolean,
+    filterPoints: {
+        type: Array<string>,
+        default: []
+    },
+    pointsWithoutCoordinates: {
+        type: Boolean,
+        default: true
+    }
 });
 
 const selectPoint = (point: Point) => {
@@ -108,7 +116,12 @@ const onWillDismiss = (ev: CustomEvent<OverlayEventDetail>) => {
 };
 
 const orderBy = (points: Record<string, Point>) => {
-    return Object.values(points).sort((a, b) => {
+    return Object.values(points)
+        .filter((e) => (
+            !props.filterPoints.includes(e.nr)) &&
+            (props.pointsWithoutCoordinates ||
+                e.get2DCoordinate() !== undefined))
+        .sort((a, b) => {
         if (settingStore.orderPointsBy == 'no_order')
             return 0;
         switch (settingStore.orderPointsBy) {
