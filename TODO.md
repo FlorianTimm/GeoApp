@@ -4,14 +4,15 @@
 * [ ] Geolocation erst nach einmaligen Öffnen der Karte
 * [X] SH: ID der Häuser mit einlesen (doppelte Vermeiden)
 * [X] Freie Stationierung
-* [ ] Vergleich tan<cot bei Rückwärtsschnitt prüfen, ggf. Tangens/Cotangens prüfen
+* [X] Vergleich tan<cot bei Rückwärtsschnitt prüfen, ggf. Tangens/Cotangens prüfen
 
 ### **Fehlende Funktionen**
 
-* [ ] Vorwärtsschnitt
+* [X] Vorwärtsschnitt
 * [ ] Bogenschlag
 * [X] Theo-Messung
 * [X] Ausgleichung
+* [ ] Gesamtausgleichung
 
 ### Ideen
 
@@ -25,6 +26,9 @@
 * [ ] Grob-Orientierung mit Kompass
 * [ ] Lokale Messung
 * [ ] Display anlassen Im Messmodus
+* [ ] PDF-/Excel-Export
+* [ ] Winkelprisma auch mit %
+* [ ] Photogrammetrie
 * [X] WFS mit Snap-Funktion
 * [X] Punktanlege-Fenster
 
