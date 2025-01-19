@@ -18,7 +18,7 @@
             </ion-item>
             <ion-item>
                 <ion-label position="stacked">Distance</ion-label>
-                <IonInput v-model="s" type="number" :placeholder="format(placeholder.distance, 3)" />
+                <ion-input v-model="s" type="number" :placeholder="format(placeholder.distance, 3)" />
             </ion-item>
         </ion-list>
 

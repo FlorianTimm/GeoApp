@@ -22,6 +22,7 @@ import { createSelectInteraction } from "./MapParts/SelectInteracion";
 import { pointStyle } from "./MapParts/Style";
 
 import "ol/ol.css";
+import { PrismMeasure } from "@/types/PrismMeasure";
 
 const measureStore = useMeasureStore();
 const settingStore = useSettingStore();
@@ -266,6 +267,33 @@ function storePoints2LayerSource() {
 
                 measureSource.addFeature(f);
 
+            } else if (m.type == 'prism') {
+                const p = m as PrismMeasure;
+                if (!p.start || !p.end) {
+                    return;
+                }
+                let s = measureStore.getPoint(p.start).get2DCoordinate();
+                let e = measureStore.getPoint(p.end).get2DCoordinate();
+                if (!s || !e) {
+                    return;
+                }
+                const f = new Feature(new LineString([s, e]));
+                measureSource.addFeature(f);
+
+                p.points.forEach((entry) => {
+                    const zp = measureStore.getPoint(entry.point).get2DCoordinate();
+                    if (!zp) {
+                        console.log('no zp', entry.point);
+                        return;
+                    }
+                    let fp = p.coordinates4point(entry.ordinate, 0)
+                    if (!fp) {
+                        console.log('no fp', entry.ordinate);
+                        return;
+                    }
+                    const f = new Feature(new LineString([zp, [fp.x, fp.y]]));
+                    measureSource.addFeature(f);
+                });
             }
         });
     }

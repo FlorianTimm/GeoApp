@@ -25,8 +25,9 @@ export class Point {
 
     addCoordinate(e: CoordinateEntry) {
         // this.coordinates = this.coordinates.filter(c => !(c.sourceId === e.sourceId && c.source === e.source));
-        if (e.sourceId !== undefined) {
-            const existing = this.coordinates.findIndex(c => c.sourceId === e.sourceId && c.source === e.source);
+        if (e.sourceId !== undefined && e.sourceId.length > 0) {
+            // @ts-ignore
+            const existing = this.coordinates.findIndex(c => e.sourceId !== undefined && c.sourceId !== undefined && e.sourceId.every(item => c.sourceId.includes(item)) && c.sourceId.every(item => e.sourceId.includes(item)) && c.source === e.source);
             if (existing != -1) {
                 this.coordinates[existing] = e;
                 return;

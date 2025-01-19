@@ -1,11 +1,12 @@
 <template>
-    <ion-input :label :labelPlacement id="select_point" :value=model?.nr :placeholder readonly></ion-input>
-    <ion-button id="new_point" slot="end" v-if="newPoint">
+    <ion-input :label :labelPlacement :id="'select_point' + uuid" :value=model?.nr :placeholder readonly />
+    <ion-button :id="'new_point' + uuid" slot="end" v-if="newPoint">
         <ion-icon :icon="add"></ion-icon>
     </ion-button>
-    <PointDialog v-if="newPoint" ref="newPointDialog" trigger="new_point" @confirm="addPointClose" />
-    <PointSelectDialog trigger='select_point' v-model="model" :filterPoints :newPoint :points-without-coordinates
-        @new="newPointOpen" />
+
+    <PointDialog v-if="newPoint" ref="newPointDialog" :trigger="'new_point' + uuid" @confirm="addPointClose" />
+    <PointSelectDialog :trigger="'select_point' + uuid" v-model="model" :filterPoints :newPoint
+        :points-without-coordinates @new="newPointOpen" />
 </template>
 
 <script setup lang="ts">
@@ -25,6 +26,8 @@ addIcons({
 const model = defineModel<Point>();
 
 const newPointDialog = ref<InstanceType<typeof PointDialog>>();
+
+const uuid = Math.random().toString(36).substring(7);
 
 defineProps({
     newPoint: Boolean,
