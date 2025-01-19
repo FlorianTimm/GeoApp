@@ -84,9 +84,6 @@ export const useMeasureStore = defineStore('measure', {
         },
         addMeasurement(measurement: Measurement) {
             this.measurements.push(measurement);
-            console.log('added measurement', measurement);
-            console.log('measurements', this.measurements);
-            console.log('json', JSON.stringify(this.measurements));
         },
         removePoint(nr: string): boolean {
             console.log('remove point', nr);

@@ -53,7 +53,8 @@ export class PrismMeasure extends Measurement {
 
     calculate() {
         console.log('calculate prism');
-        if (this._start === undefined || this._end === undefined || this.points.length == 0) {
+        if (this._start === undefined || this._end === undefined) {
+            console.log('no start or end or points');
             return;
         }
 
@@ -61,6 +62,7 @@ export class PrismMeasure extends Measurement {
         const pe = useMeasureStore().getPoint(this._end);
 
         if (pa === undefined || pe === undefined || pa.getCoordinate()?.epsg === undefined) {
+            console.log('no start or end');
             return;
         }
 
@@ -71,6 +73,7 @@ export class PrismMeasure extends Measurement {
         const ye = pe.getCoordinateComponents('y')
 
         if (xe === undefined || ye === undefined || this._ya === undefined || this._xa === undefined) {
+
             return;
         }
 
@@ -108,8 +111,17 @@ export class PrismMeasure extends Measurement {
     }
 
     stakeOut(point: string) {
+        console.log('stakeout prism');
         let p = useMeasureStore().getPoint(point).get2DCoordinate();
-        if (p === undefined || this._xa === undefined || this._ya === undefined || this._o === undefined || this._a === undefined) {
+        if (p === undefined) {
+            console.log('no point');
+            return;
+        }
+        if (this._xa === undefined || this._ya === undefined || this._o === undefined || this._a === undefined) {
+            this.calculate();
+        }
+        if (this._xa === undefined || this._ya === undefined || this._o === undefined || this._a === undefined) {
+            console.log('no start or end');
             return;
         }
 

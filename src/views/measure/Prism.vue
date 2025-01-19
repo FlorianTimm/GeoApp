@@ -8,7 +8,7 @@
         </ion-item>
         <ion-item>
             <ion-input label-placement="stacked" v-model="distanceNew" label="Distance" type="number"
-                :placeholder="(point1 && point2) ? lengthP(point1, point2).toString() : ''"></ion-input>
+                :placeholder="(point1 && point2) ? format(lengthP(point1, point2)) : ''"></ion-input>
         </ion-item>
 
     </ion-list>
@@ -116,7 +116,11 @@ watch(distanceNew, (m) => {
         return;
     }
     console.log('distance', distanceNew.value);
-    measure.value.distance = distanceNew.value;
+    let n: number | undefined = parseFloat('' + distanceNew.value);
+    if (isNaN(n)) {
+        n = undefined;
+    }
+    measure.value.distance = n
 })
 watch(measure, (m) => {
     if (!measure.value) {
