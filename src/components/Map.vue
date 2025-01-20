@@ -65,15 +65,13 @@ onMounted(() => {
             }),
         ],
         target: "map",
-        // @ts-ignore
-        view: store.view,
+        view: store.view as View,
     });
 
     if (store.alkis === undefined) {
         store.alkis = createAlkisLayer();
     }
-    // @ts-ignore
-    store.alkis.layer.forEach((l: VectorLayer) => {
+    (store.alkis.layer as VectorLayer[]).forEach((l: VectorLayer) => {
         map.addLayer(l);
     });
 
@@ -176,8 +174,7 @@ onMounted(() => {
 
     store.alkis.source.forEach((vs) => {
         let snap = new SnapInteraction({
-            // @ts-ignore
-            source: vs,
+            source: vs as VectorSource,
             pixelTolerance: 20,
             edge: false,
             vertex: true
