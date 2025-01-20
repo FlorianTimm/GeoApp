@@ -109,6 +109,9 @@ export const useMeasureStore = defineStore('measure', {
         },
         removeMeasurement(measurement: Measurement) {
             this.measurements = this.measurements.filter(m => m !== measurement);
+            for (let point of Object.values(this.points)) {
+                point.removeCoordinatesByFilter(ce => ce.sourceId !== undefined && ce.sourceId.includes(measurement.id));
+            }
         },
     },
 

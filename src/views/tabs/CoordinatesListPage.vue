@@ -22,17 +22,22 @@
               <ion-row>
                 <ion-col size="2">{{ item.nr }}</ion-col>
                 <ion-col>
-                  <ion-row v-if="item.getCoordinateComponents('x') !== undefined">
-                    <ion-col>Y:</ion-col>
-                    <ion-col class="right">{{ format(item.getCoordinateComponents('x')) }}</ion-col>
-                  </ion-row>
-                  <ion-row v-if="item.getCoordinateComponents('y') !== undefined">
-                    <ion-col>X:</ion-col>
-                    <ion-col class="right">{{ format(item.getCoordinateComponents('y')) }}</ion-col>
-                  </ion-row>
-                  <ion-row v-if="item.getCoordinateComponents('z') !== undefined">
-                    <ion-col>Z:</ion-col>
-                    <ion-col class="right">{{ format(item.getCoordinateComponents('z')) }}</ion-col>
+                  <ion-row v-for="c, i in item.coordinates" :key="i">
+                    <ion-col>{{ c.source }}:</ion-col>
+                    <ion-col>
+                      <ion-row v-if="c.x !== undefined">
+                        <ion-col>Y:</ion-col>
+                        <ion-col class="right">{{ format(c.x) }}</ion-col>
+                      </ion-row>
+                      <ion-row v-if="c.y !== undefined">
+                        <ion-col>X:</ion-col>
+                        <ion-col class="right">{{ format(c.y) }}</ion-col>
+                      </ion-row>
+                      <ion-row v-if="c.z !== undefined">
+                        <ion-col>Z:</ion-col>
+                        <ion-col class="right">{{ format(c.z) }}</ion-col>
+                      </ion-row>
+                    </ion-col>
                   </ion-row>
                 </ion-col>
                 <ion-col size="auto">

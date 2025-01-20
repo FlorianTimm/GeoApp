@@ -52,8 +52,9 @@ export class Adjustment {
         this.points = points;
     }
 
-    public adjust(theoSetupMode = false) {
+    public adjust(theoSetupMode = false, nurNeupunkte = true) {
         this.theoSetupMode = theoSetupMode;
+        this.nurNeupunkte = nurNeupunkte;
         this.createX0Vector();
         return this.calculate();
     }
@@ -142,7 +143,7 @@ export class Adjustment {
                 }
 
                 m.measures.forEach((measure, n) => {
-                    if ((this.theoSetupMode && measure.usedForSetup === false) || (measure.active === false)) return;
+                    if ((this.theoSetupMode && measure.usedForSetup === false) || (!this.theoSetupMode && measure.active === false)) return;
                     if (this.points[measure.nr].getCoordinate()?.sourceId?.includes(m.id)) return;
                     let subentry = { v: measure.v, hz: measure.hz, dist: measure.distance };
                     const t = this.x_points[measure.nr];
@@ -255,12 +256,12 @@ export class Adjustment {
             }
         });
         this.l_filter2org = this.l0.map((_, i) => i)
-        this.filterImpossibleMeasurements();
+        this.filterMeasurements();
         return this.A;
     }
 
 
-    private filterImpossibleMeasurements() {
+    private filterMeasurements() {
         let row_entries = this.A[0].map(() => 0);
         let col_entries = this.A.map(() => 0);
 
@@ -275,6 +276,8 @@ export class Adjustment {
         });
         this.l_filter = col_entries.map((x) => x == 0)
         this.x_filter = row_entries.map((x) => x == 0)
+
+        console.log('A', this.A)
 
         if (this.nurNeupunkte) {
             let neupunkte: string[] = []
@@ -310,10 +313,10 @@ export class Adjustment {
         let lfilter = <T>(__: T, index: number) => !this.l_filter[index]
 
         this.A = this.A.filter(lfilter).map((row) => row.filter(xfilter));
-        //console.log(size(this.A))
+        console.log(size(this.A))
 
         let zs = size(this.A) as number[];
-        let s = zs[1];
+        let s = zs[1] ?? 0;
         let z = zs[0];
 
         console.log('Unbekannte: ', s)
@@ -464,10 +467,10 @@ export class Adjustment {
             return false
         }
         let epsg = useSettingStore().epsg
-        let sourceId = undefined;
-        if (this.measurements.length === 1) {
-            sourceId = this.measurements[0].id;
-        }
+        let sourceId: string[] | undefined = undefined;
+
+        sourceId = this.measurements.map((m) => m.id);
+
 
         for (let nr in this.points) {
             let p = this.x_points[nr];
@@ -478,11 +481,11 @@ export class Adjustment {
             let entry = this.points[nr]
                 .getCoordinate(epsg, (ce: CoordinateEntry) => ['adjustment', 'resection'].includes(ce.source) && ce.sourceId == sourceId && ce.epsg == epsg);
             if (entry === undefined) {
-                entry = { source: 'adjustment', sourceId: sourceId ? [sourceId] : undefined, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
+                entry = { source: 'adjustment', sourceId: sourceId, accuracy: this.Sx[p.x ?? 0], epsg: epsg };
                 this.points[nr].addCoordinate(entry);
             }
             entry.source = 'adjustment';
-            entry.sourceId = sourceId ? [sourceId] : undefined;
+            entry.sourceId = sourceId;
             entry.accuracy = this.Sx[this.x_filter2org.findIndex((x) => x === p.x)];
             if (entry.accuracy > 1E10) {
                 entry.accuracy = -99999;
@@ -537,7 +540,7 @@ export class Adjustment {
                 if (m.type == 'theodolite' && m instanceof TheodoliteMeasure) {
                     const entry = this.l_measurements[i].measure[n];
                     const measure = m.measures[n];
-                    if (measure.active === false || entry == undefined) {
+                    if ((!this.theoSetupMode && measure.active === false) || (this.theoSetupMode && measure.usedForSetup === false) || entry == undefined) {
                         measure.hz_v = undefined;
                         measure.v_v = undefined;
                         measure.distance_v = undefined;
