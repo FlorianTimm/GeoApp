@@ -6,11 +6,12 @@ import { TheodoliteMeasure } from "../TheodoliteMeasure";
 export function free_station(tm: TheodoliteMeasure) {
     console.log('free station');
     const measures = tm.getMeasuresForSetup();
+    let sourceId = new Set([tm.id])
     const localCoordinates = measures.map(m => {
         if (m.measure.distance === undefined || m.measure.hz === undefined) {
             return;
         }
-
+        if (m.coordinate.sourceId !== undefined) m.coordinate.sourceId.forEach(e => sourceId.add(e));
         return {
             local: azimuth2xy({ x: 0, y: 0 }, m.measure.distance, m.measure.hz),
             world: m.coordinate
@@ -72,6 +73,6 @@ export function free_station(tm: TheodoliteMeasure) {
         s = Math.max(...measures.map((m) => m.coordinate.accuracy));
     }
 
-    tm.getPoint().addCoordinate({ x: xn, y: yn, accuracy: s, source: 'free_station', sourceId: [tm.id], epsg: epsg });
+    tm.getPoint().addCoordinate({ x: xn, y: yn, accuracy: s, source: 'free_station', sourceId: [...sourceId], epsg: epsg });
     return { x: xn, y: yn, accuracy: s };
 }

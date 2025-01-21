@@ -19,16 +19,20 @@ export function resection(tm: TheodoliteMeasure) {
     let n = 0
     let accuracy = 0
 
+    let sourcesId = new Set<string>([tm.id])
+
 
     for (let i = 0; i < filtered.length - 2; i++) {
         const pa = filtered[i];
         const ya = pa.coordinate.y;
         const xa = pa.coordinate.x;
+        pa.coordinate.sourceId?.forEach(e => sourcesId.add(e));
 
         for (let j = i + 1; j < filtered.length - 1; j++) {
             const pm = filtered[j];
             const xm = pm.coordinate.x;
             const ym = pm.coordinate.y;
+            pm.coordinate.sourceId?.forEach(e => sourcesId.add(e));
 
             const alpha = gonBetween0And400((pm.measure.hz ?? 0) - (pa.measure.hz ?? 0));
 
@@ -36,6 +40,7 @@ export function resection(tm: TheodoliteMeasure) {
                 const pb = filtered[k];
                 const xb = pb.coordinate.x;
                 const yb = pb.coordinate.y;
+                pb.coordinate.sourceId?.forEach(e => sourcesId.add(e));
 
                 if (pb.measure.hz === undefined) {
                     continue;
@@ -83,7 +88,7 @@ export function resection(tm: TheodoliteMeasure) {
         x = round(x, 4);
         y = round(y, 4);
 
-        tm.getPoint().addCoordinate({ x: x, y: y, accuracy: accuracy, source: 'resection', sourceId: [tm.id], epsg: filtered[0].coordinate.epsg });
+        tm.getPoint().addCoordinate({ x: x, y: y, accuracy: accuracy, source: 'resection', sourceId: [...sourcesId], epsg: filtered[0].coordinate.epsg });
         console.log('location', { x: x, y: y });
         return { x: x, y: y };
     }
